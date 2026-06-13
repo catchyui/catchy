@@ -1,7 +1,7 @@
 /**
  * Hamzi/Catchy - Alpine.js SPA Plugin
  *
- * Premium HTML-over-the-wire navigation utilizing @alpinejs/morph,
+ * HTML-over-the-wire navigation utilizing @alpinejs/morph,
  * built-in viewport loaders, intelligent prefetching, and asset version protection.
  */
 (function (root, factory) {
@@ -57,7 +57,7 @@
         let currentVersion = '';
         let hoverTimeout = null;
 
-        // Built-in Premium top loading bar
+        // Built-in top loading bar
         let loaderElement = null;
         let loaderTimer = null;
         let progressInterval = null;

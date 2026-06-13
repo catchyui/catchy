@@ -1,7 +1,7 @@
 {
   "name": "hamzi-catchy",
   "version": "1.0.0",
-  "description": "Premium Alpine.js SPA plugin for Hamzi/Catchy Laravel package.",
+  "description": "Alpine.js SPA plugin for the Laravel Catchy package.",
   "main": "resources/js/catchy.js",
   "author": "Hamzi",
   "license": "MIT",

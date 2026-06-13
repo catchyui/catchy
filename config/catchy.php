@@ -75,7 +75,7 @@ return [
     | Built-in CSS Viewport Progress Loader
     |--------------------------------------------------------------------------
     |
-    | Configure the built-in, premium viewport loading progress bar.
+    | Configure the built-in viewport loading progress bar.
     |
     */
 

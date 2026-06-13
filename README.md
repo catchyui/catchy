@@ -1,7 +1,7 @@
 <h1 align="center">Laravel Catchy</h1>
 
 <p align="center">
-  <strong>A premium, featherweight Single Page Application (SPA) adapter for Laravel 11, 12 & 13</strong>
+  <strong>A featherweight Single Page Application (SPA) adapter for Laravel 11, 12 & 13</strong>
 </p>
 
 <p align="center">
