@@ -322,8 +322,13 @@
                 cancelable: true,
                 detail: { url, options, trigger }
             });
+            const startEventHyphen = new CustomEvent('catchy-start', {
+                bubbles: true,
+                cancelable: true,
+                detail: { url, options, trigger }
+            });
 
-            if (!trigger.dispatchEvent(startEvent)) {
+            if (!trigger.dispatchEvent(startEvent) || !trigger.dispatchEvent(startEventHyphen)) {
                 return;
             }
 
@@ -485,6 +490,10 @@
                             bubbles: true,
                             detail: { url: finalUrl, trigger }
                         }));
+                        trigger.dispatchEvent(new CustomEvent('catchy-end', {
+                            bubbles: true,
+                            detail: { url: finalUrl, trigger }
+                        }));
                         return;
                     }
                 }
@@ -514,6 +523,10 @@
                             bubbles: true,
                             detail: { url: finalUrl, html, element: mainContainer, trigger }
                         }));
+                        trigger.dispatchEvent(new CustomEvent('catchy-morphing', {
+                            bubbles: true,
+                            detail: { url: finalUrl, html, element: mainContainer, trigger }
+                        }));
 
                         if (!Alpine.morph) {
                             console.error('Catchy: Alpine.morph is not defined. Ensure @alpinejs/morph is loaded and registered.');
@@ -539,6 +552,10 @@
                     if (doc.title) document.title = doc.title;
 
                     trigger.dispatchEvent(new CustomEvent('catchy:morphing', {
+                        bubbles: true,
+                        detail: { url: finalUrl, html, element: appContainer, trigger }
+                    }));
+                    trigger.dispatchEvent(new CustomEvent('catchy-morphing', {
                         bubbles: true,
                         detail: { url: finalUrl, html, element: appContainer, trigger }
                     }));
@@ -590,6 +607,10 @@
                     bubbles: true,
                     detail: { url: finalUrl, trigger }
                 }));
+                trigger.dispatchEvent(new CustomEvent('catchy-end', {
+                    bubbles: true,
+                    detail: { url: finalUrl, trigger }
+                }));
 
             } catch (error) {
                 resetLoading();
@@ -598,6 +619,10 @@
                 executeCallback(trigger, 'data-catchy-error', { url, error, trigger });
 
                 trigger.dispatchEvent(new CustomEvent('catchy:error', {
+                    bubbles: true,
+                    detail: { url, error, trigger }
+                }));
+                trigger.dispatchEvent(new CustomEvent('catchy-error', {
                     bubbles: true,
                     detail: { url, error, trigger }
                 }));
