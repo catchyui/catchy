@@ -221,6 +221,21 @@ Allows you to load heavy elements (e.g. dynamic cards, charts, dashboards) async
 </x-catchy-lazy>
 ```
 
+### 9. Off-Canvas Drawer (`<x-catchy-offcanvas />`)
+A slide-in sidebar panel that enters from viewport edges (left, right, start, end, top, bottom), styled with modern Tailwind CSS:
+```html
+<!-- Place once in your layout -->
+<x-catchy-offcanvas id="my-drawer" title="Filters" direction="right" />
+
+<!-- Trigger via SPA link -->
+<a href="/filters" data-catchy-offcanvas="my-drawer">Open Filters Drawer</a>
+```
+Options:
+- `id` (string): The DOM element ID. Defaults to `catchy-offcanvas`.
+- `title` (string): Header text.
+- `direction` (`left` | `right` | `start` | `end` | `top` | `bottom`): Viewport entry direction (RTL/LTR logical property safe).
+- `closeOnOutsideClick` (boolean): Closes when clicking the backdrop. Defaults to `true`.
+
 ---
 
 ## Advanced Options & APIs

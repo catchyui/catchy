@@ -84,6 +84,9 @@ class CatchyServiceProvider extends ServiceProvider
             'error'    => 'catchy-error',
             'lazy'     => 'catchy-lazy',
             'offcanvas' => 'catchy-offcanvas',
+            'button'   => 'catchy-button',
+            'card'     => 'catchy-card',
+            'alert'    => 'catchy-alert',
         ];
 
         foreach ($components as $view => $alias) {
