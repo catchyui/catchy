@@ -468,6 +468,25 @@
         }
 
         /**
+         * Resolves the target offcanvas element based on the trigger or default selectors.
+         *
+         * @param {HTMLElement} triggerElement
+         * @returns {HTMLElement|null}
+         */
+        function resolveOffcanvas(triggerElement) {
+            const offcanvasAttr = triggerElement && typeof triggerElement.getAttribute === 'function' ? triggerElement.getAttribute('data-catchy-offcanvas') : null;
+            if (offcanvasAttr && offcanvasAttr !== '' && offcanvasAttr !== 'true') {
+                const specificOffcanvas = document.getElementById(offcanvasAttr);
+                if (specificOffcanvas) return specificOffcanvas;
+            }
+            if (triggerElement && typeof triggerElement.closest === 'function') {
+                const closestOffcanvas = triggerElement.closest('[catchy-offcanvas]') || triggerElement.closest('#catchy-offcanvas');
+                if (closestOffcanvas) return closestOffcanvas;
+            }
+            return document.querySelector('[catchy-offcanvas]') || document.getElementById('catchy-offcanvas');
+        }
+
+        /**
          * Fetch a page and update the DOM container.
          *
          * @param {string} url
@@ -729,6 +748,44 @@
                     mergeHead(doc.head);
                 }
 
+                // Check for offcanvas routing
+                const isOffcanvasTarget = options.offcanvas || (trigger && typeof trigger.hasAttribute === 'function' && trigger.hasAttribute('data-catchy-offcanvas'));
+
+                if (isOffcanvasTarget) {
+                    const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
+                    const offcanvas = resolveOffcanvas(trigger);
+                    if (offcanvas) {
+                        offcanvas.dispatchEvent(new CustomEvent('catchy:offcanvas-load', {
+                            bubbles: true,
+                            detail: {
+                                html: incomingContent.innerHTML,
+                                title: doc.title || ''
+                            }
+                        }));
+                        offcanvas.dispatchEvent(new CustomEvent('catchy-offcanvas-load', {
+                            bubbles: true,
+                            detail: {
+                                html: incomingContent.innerHTML,
+                                title: doc.title || ''
+                            }
+                        }));
+                        stopLoading();
+
+                        executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
+                        restoreSubmitButton();
+
+                        trigger.dispatchEvent(new CustomEvent('catchy:end', {
+                            bubbles: true,
+                            detail: { url: finalUrl, trigger }
+                        }));
+                        trigger.dispatchEvent(new CustomEvent('catchy-end', {
+                            bubbles: true,
+                            detail: { url: finalUrl, trigger }
+                        }));
+                        return;
+                    }
+                }
+
                 // Check for modal routing
                 const isModalTarget = options.modal || (trigger && typeof trigger.hasAttribute === 'function' && trigger.hasAttribute('data-catchy-modal'));
 
@@ -764,6 +821,18 @@
                             detail: { url: finalUrl, trigger }
                         }));
                         return;
+                    }
+                }
+
+                // Check if trigger itself was inside an active offcanvas
+                const isTriggerInOffcanvas = trigger && typeof trigger.closest === 'function' && (trigger.closest('[catchy-offcanvas]') || trigger.closest('#catchy-offcanvas'));
+
+                if (isTriggerInOffcanvas && options.method && options.method.toUpperCase() !== 'GET') {
+                    // Form inside offcanvas submitted successfully -> close offcanvas
+                    const offcanvas = resolveOffcanvas(trigger);
+                    if (offcanvas) {
+                        offcanvas.dispatchEvent(new CustomEvent('catchy:offcanvas-close', { bubbles: true }));
+                        offcanvas.dispatchEvent(new CustomEvent('catchy-offcanvas-close', { bubbles: true }));
                     }
                 }
 
@@ -845,7 +914,7 @@
                 const shouldUpdateHistory = updateHistory &&
                     (isGet || (response && response.redirected)) &&
                     (!trigger || typeof trigger.getAttribute !== 'function' || trigger.getAttribute('data-catchy-history') !== 'false') &&
-                    (!trigger || typeof trigger.hasAttribute !== 'function' || !trigger.hasAttribute('data-catchy-modal'));
+                    (!trigger || typeof trigger.hasAttribute !== 'function' || (!trigger.hasAttribute('data-catchy-modal') && !trigger.hasAttribute('data-catchy-offcanvas')));
 
                 if (shouldUpdateHistory) {
                     window.history.pushState({ catchy: true, url: finalUrl }, '', finalUrl);

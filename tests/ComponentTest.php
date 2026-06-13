@@ -204,5 +204,21 @@ class ComponentTest extends TestCase
         $this->assertStringContainsString('IntersectionObserver', $html);
         $this->assertStringContainsString('animate-pulse', $html);
     }
+
+    /**
+     * Verify that the offcanvas component compiles and renders correct structure, direction classes, and listeners.
+     */
+    public function test_offcanvas_component_renders(): void
+    {
+        $html = Blade::render('<x-catchy-offcanvas id="my-test-offcanvas" title="Filters Drawer" direction="left">Drawer Content</x-catchy-offcanvas>');
+
+        $this->assertStringContainsString('id="my-test-offcanvas"', $html);
+        $this->assertStringContainsString('catchy-offcanvas', $html);
+        $this->assertStringContainsString('Filters Drawer', $html);
+        $this->assertStringContainsString('Drawer Content', $html);
+        $this->assertStringContainsString('-translate-x-full', $html); // left direction start class
+        $this->assertStringContainsString('@catchy:offcanvas-load', $html);
+        $this->assertStringContainsString('@catchy:offcanvas-close', $html);
+    }
 }
 
