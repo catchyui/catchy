@@ -367,6 +367,37 @@ Example:
 </x-catchy-form>
 ```
 
+#### 3. Advanced Form & Lazy Reload Actions
+Catchy provides additional helper triggers to reset forms, display custom alerts/toasts, and reload lazy components reactively upon request outcomes:
+
+- `data-catchy-success-reset`: Automatically resets all form fields upon successful form submission (ideal for message/comment forms).
+- `data-catchy-success-toast="message"`: Triggers a success toast notification directly.
+- `data-catchy-error-toast="message"`: Triggers an error toast notification directly on failure.
+- `data-catchy-success-reload="lazy-id"`: Automatically reloads/refreshes the `<x-catchy-lazy>` component with the corresponding ID (ideal for updating dashboards, statistics, or comment sections reactively).
+- `data-catchy-error-reload="lazy-id"`: Reloads the specified lazy component on failure.
+
+Example:
+```html
+<!-- Submitting this comment form will:
+     1. Post the data asynchronously.
+     2. Reset/clear the input fields on success.
+     3. Pop up a success toast notification.
+     4. Refresh the lazy comment list component (id="comment-list"). -->
+<x-catchy-form 
+    action="/comments" 
+    method="POST" 
+    data-catchy-success-reset 
+    data-catchy-success-toast="Comment posted successfully!"
+    data-catchy-success-reload="comment-list"
+>
+    <textarea name="comment" required></textarea>
+    <button type="submit">Submit</button>
+</x-catchy-form>
+
+<!-- Lazy component observing and listing comments -->
+<x-catchy-lazy id="comment-list" src="/comments/list" />
+```
+
 ### Scroll Position Control
 By default, Catchy scrolls the viewport to top on page transition. You can keep the current scroll position by adding `data-catchy-scroll="keep"` to links or form elements:
 ```html

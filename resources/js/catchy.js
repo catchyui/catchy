@@ -412,6 +412,25 @@
                 const oc = document.getElementById(closeOffcanvas);
                 if (oc) oc.dispatchEvent(new CustomEvent('catchy:offcanvas-close', { bubbles: true }));
             }
+
+            // Auto-reset form inputs on success
+            if (type === 'success' && trigger.tagName === 'FORM' && trigger.hasAttribute('data-catchy-success-reset')) {
+                trigger.reset();
+            }
+
+            // Trigger dynamic toasts
+            const toastMsg = trigger.getAttribute(`data-catchy-${type}-toast`);
+            if (toastMsg) {
+                window.dispatchEvent(new CustomEvent('catchy:flash', { detail: { message: toastMsg, type: type } }));
+                window.dispatchEvent(new CustomEvent('catchy-flash', { detail: { message: toastMsg, type: type } }));
+            }
+
+            // Trigger dynamic lazy reloading
+            const reloadId = trigger.getAttribute(`data-catchy-${type}-reload`);
+            if (reloadId) {
+                window.dispatchEvent(new CustomEvent('catchy:lazy-reload', { detail: { id: reloadId } }));
+                window.dispatchEvent(new CustomEvent('catchy-lazy-reload', { detail: { id: reloadId } }));
+            }
         }
 
         /**

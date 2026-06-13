@@ -8,6 +8,10 @@
     x-data="{ 
         loaded: false,
         error: false,
+        reload() {
+            this.loaded = false;
+            this.load();
+        },
         load() {
             if (this.loaded) return;
             
@@ -75,6 +79,8 @@
             }
         }
     }"
+    @catchy:lazy-reload.window="if (!$event.detail || !$event.detail.id || $event.detail.id === $el.id) reload()"
+    @catchy-lazy-reload.window="if (!$event.detail || !$event.detail.id || $event.detail.id === $el.id) reload()"
     {{ $attributes }}
 >
     <template x-if="!loaded && !error">
