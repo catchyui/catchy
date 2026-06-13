@@ -384,6 +384,7 @@
          * @param {boolean} updateHistory
          */
         async function visit(url, options = {}, updateHistory = true) {
+            const oldPathname = window.location.pathname;
             // Save current scroll coordinates in history state before navigating away
             try {
                 window.history.replaceState({
@@ -769,7 +770,9 @@
                         }
                     } else {
                         // Scroll to top only for GET visits that target the main container (new page view)
-                        if (isGet && targetId === config.containerId) {
+                        // Skip scrolling if the visit was triggered by a form submission (keep focus on form context) unless the path changed
+                        const isFormSubmit = trigger && typeof trigger.tagName === 'string' && trigger.tagName.toUpperCase() === 'FORM';
+                        if (isGet && targetId === config.containerId && (!isFormSubmit || finalURLObj.pathname !== oldPathname)) {
                             window.scrollTo({ top: 0, behavior: 'instant' });
                         }
                     }
