@@ -1,6 +1,22 @@
-# Catchy: HTML-over-the-wire SPA for Laravel
+<h1 align="center">Laravel Catchy</h1>
 
-`Hamzi/Catchy` is a premium, featherweight Single Page Application (SPA) adapter for Laravel, powered strictly by **Alpine.js** and the **`@alpinejs/morph`** plugin. It intercepts link clicks and form submissions, fetches HTML updates via AJAX, and dynamically morphs your DOM—bringing the lightning-fast feel of an SPA to standard Blade layouts without the complexity or weight of heavy JavaScript frameworks.
+<p align="center">
+  <strong>A premium, featherweight Single Page Application (SPA) adapter for Laravel 11, 12 & 13</strong>
+</p>
+
+<p align="center">
+  <a href="https://packagist.org/packages/hamzi/catchy"><img src="https://img.shields.io/packagist/v/hamzi/catchy.svg?style=flat-square" alt="Latest Version on Packagist"></a>
+  <a href="https://github.com/hamdyelbatal122/catchy/actions/workflows/run-tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamdyelbatal122/catchy/run-tests.yml?branch=main&style=flat-square&label=tests" alt="GitHub Tests Action Status"></a>
+  <a href="https://packagist.org/packages/hamzi/catchy"><img src="https://img.shields.io/packagist/dt/hamzi/catchy.svg?style=flat-square" alt="Total Downloads"></a>
+  <a href="https://packagist.org/packages/hamzi/catchy"><img src="https://img.shields.io/packagist/php-v/hamzi/catchy.svg?style=flat-square" alt="PHP Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/packagist/l/hamzi/catchy.svg?style=flat-square" alt="License"></a>
+</p>
+
+---
+
+**Laravel Catchy** empowers you to convert standard Laravel applications into SPAs using **Alpine.js** and the **`@alpinejs/morph`** plugin.
+
+No complex JavaScript builds. No routing overhead. **100% SEO-friendly. Zero external JavaScript dependencies.**
 
 ---
 
