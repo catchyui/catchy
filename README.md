@@ -236,6 +236,98 @@ Options:
 - `direction` (`left` | `right` | `start` | `end` | `top` | `bottom`): Viewport entry direction (RTL/LTR logical property safe).
 - `closeOnOutsideClick` (boolean): Closes when clicking the backdrop. Defaults to `true`.
 
+### 10. Button (`<x-catchy-button />`)
+A highly customizable button featuring color variants, size variants, hover transitions, and automatic loading spinner integration:
+```html
+<x-catchy-button variant="primary" size="md">Save Changes</x-catchy-button>
+<x-catchy-button variant="danger" size="sm" :loading="false">Delete</x-catchy-button>
+```
+Options:
+- `type` (`button` | `submit`): HTML button type. Defaults to `button`.
+- `variant` (`primary` | `secondary` | `success` | `danger` | `outline` | `ghost`): Defaults to `primary`.
+- `size` (`sm` | `md` | `lg`): Defaults to `md`.
+- `loading` (boolean): If `true`, the button inherits loading state from the parent intercepting form and automatically shows a spinner during SPA submission transitions. Defaults to `true`.
+
+### 11. Card (`<x-catchy-card />`)
+A structured content container featuring optional hover scaling and transitions, fully dark-mode friendly:
+```html
+<x-catchy-card hoverable>
+    <x-slot:header>
+        <h3 class="font-semibold text-slate-900 dark:text-white">Card Title</h3>
+    </x-slot:header>
+    
+    <p class="text-slate-600 dark:text-slate-400">This is the main card body content.</p>
+    
+    <x-slot:footer>
+        <span class="text-xs text-slate-400">Last updated 5m ago</span>
+    </x-slot:footer>
+</x-catchy-card>
+```
+Options:
+- `hoverable` (boolean): Adds scale-up hover animation and card border highlight. Defaults to `false`.
+
+### 12. Alert Banner (`<x-catchy-alert />`)
+A dismissible feedback banner for success, warning, or error information with Alpine-based fade transitions:
+```html
+<x-catchy-alert type="success" :dismissible="true">
+    Your profile has been updated successfully!
+</x-catchy-alert>
+```
+Options:
+- `type` (`success` | `danger` | `warning` | `info`): Defaults to `info`.
+- `dismissible` (boolean): Shows a close button to fade out the alert. Defaults to `true`.
+
+### 13. Badge (`<x-catchy-badge />`)
+A small tag component for status indicators and metadata labels:
+```html
+<x-catchy-badge variant="success" rounded>Active</x-catchy-badge>
+<x-catchy-badge variant="danger" size="sm">Failed</x-catchy-badge>
+```
+Options:
+- `variant` (`primary` | `secondary` | `success` | `danger` | `warning` | `info`): Defaults to `primary`.
+- `size` (`sm` | `md`): Defaults to `md`.
+- `rounded` (boolean): Uses fully rounded (pill) border-radius if set to `true`. Defaults to `false`.
+
+### 14. Dropdown Menu (`<x-catchy-dropdown />`)
+An Alpine.js-powered dropdown wrapper that handles toggling, outside clicks, and logical direction configurations:
+```html
+<x-catchy-dropdown align="end" width="w-48">
+    <x-slot:trigger>
+        <button class="px-4 py-2 bg-slate-100 rounded-lg">Options</button>
+    </x-slot:trigger>
+    
+    <x-slot:content>
+        <a href="/profile" class="block px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">Profile</a>
+        <a href="/settings" class="block px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">Settings</a>
+    </x-slot:content>
+</x-catchy-dropdown>
+```
+Options:
+- `align` (`left` | `right` | `start` | `end`): Position of dropdown menu relative to the trigger. Defaults to `start` (RTL/LTR direction logical property friendly).
+- `width` (string): Tailwind width class. Defaults to `w-48`.
+
+### 15. Input Field (`<x-catchy-input />`)
+A standard form text input component equipped with modern styling, labels, and automatic inline validation error messages:
+```html
+<x-catchy-input 
+    name="email" 
+    type="email" 
+    label="Email Address" 
+    placeholder="you@example.com" 
+    required 
+    helper="We'll never share your email." 
+/>
+```
+Options:
+- `name` (string, required): The input field name and ID.
+- `label` (string): Text for the field label. Shows a red `*` symbol if `required` is true.
+- `type` (string): The input type (e.g. `text`, `email`, `password`, `number`). Defaults to `text`.
+- `placeholder` (string): Placeholder text.
+- `value` (string): Initial field value.
+- `required` (boolean): Marks input field as required. Defaults to `false`.
+- `helper` (string): Additional helper text printed underneath the input field.
+- **Note**: This component automatically embeds the `<x-catchy-error :field="$name" />` inline warning tag, meaning any Laravel validation failure on this field will display the error instantly.
+
 ---
 
 ## Advanced Options & APIs

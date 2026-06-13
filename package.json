@@ -8,5 +8,8 @@
   "dependencies": {
     "alpinejs": "^3.0.0",
     "@alpinejs/morph": "^3.0.0"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^3.0.0 || ^4.0.0"
   }
 }

@@ -220,5 +220,97 @@ class ComponentTest extends TestCase
         $this->assertStringContainsString('@catchy:offcanvas-load', $html);
         $this->assertStringContainsString('@catchy:offcanvas-close', $html);
     }
+
+    /**
+     * Verify that the button component compiles and renders correct structure, variant, and sizes.
+     */
+    public function test_button_component_renders(): void
+    {
+        $html = Blade::render('<x-catchy-button variant="success" size="lg" class="test-btn">Click Me</x-catchy-button>');
+
+        $this->assertStringContainsString('bg-emerald-600', $html);
+        $this->assertStringContainsString('px-5 py-2.5', $html);
+        $this->assertStringContainsString('test-btn', $html);
+        $this->assertStringContainsString('Click Me', $html);
+    }
+
+    /**
+     * Verify that the card component compiles and renders header, slot, and footer.
+     */
+    public function test_card_component_renders(): void
+    {
+        $obLevel = ob_get_level();
+        try {
+            $html = Blade::render('<x-catchy-card hoverable><x-slot:header>My Header</x-slot:header>My Body<x-slot:footer>My Footer</x-slot:footer></x-catchy-card>');
+        } finally {
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
+            }
+        }
+
+        $this->assertStringContainsString('My Header', $html);
+        $this->assertStringContainsString('My Body', $html);
+        $this->assertStringContainsString('My Footer', $html);
+        $this->assertStringContainsString('hover:scale-', $html);
+    }
+
+    /**
+     * Verify that the alert component compiles and renders alert variant and dismiss options.
+     */
+    public function test_alert_component_renders(): void
+    {
+        $html = Blade::render('<x-catchy-alert type="danger" :dismissible="true">An Error Happened</x-catchy-alert>');
+
+        $this->assertStringContainsString('bg-rose-50', $html);
+        $this->assertStringContainsString('An Error Happened', $html);
+        $this->assertStringContainsString('Dismiss', $html); // has dismiss button
+    }
+
+    /**
+     * Verify that the badge component compiles and renders correct text, size, and variants.
+     */
+    public function test_badge_component_renders(): void
+    {
+        $html = Blade::render('<x-catchy-badge variant="success" size="sm" rounded>Active</x-catchy-badge>');
+
+        $this->assertStringContainsString('bg-emerald-50', $html);
+        $this->assertStringContainsString('px-1.5', $html);
+        $this->assertStringContainsString('rounded-full', $html);
+        $this->assertStringContainsString('Active', $html);
+    }
+
+    /**
+     * Verify that the dropdown component compiles and renders trigger and content slots.
+     */
+    public function test_dropdown_component_renders(): void
+    {
+        $obLevel = ob_get_level();
+        try {
+            $html = Blade::render('<x-catchy-dropdown align="end"><x-slot:trigger>Click Me</x-slot:trigger><x-slot:content>Dropdown Menu Item</x-slot:content></x-catchy-dropdown>');
+        } finally {
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
+            }
+        }
+
+        $this->assertStringContainsString('Click Me', $html);
+        $this->assertStringContainsString('Dropdown Menu Item', $html);
+        $this->assertStringContainsString('origin-top-end', $html);
+    }
+
+    /**
+     * Verify that the input component compiles and renders label, helper text, and error indicators.
+     */
+    public function test_input_component_renders(): void
+    {
+        $html = Blade::render('<x-catchy-input name="username" label="Your Username" placeholder="Enter username" helper="Choose wisely" required />');
+
+        $this->assertStringContainsString('name="username"', $html);
+        $this->assertStringContainsString('Your Username', $html);
+        $this->assertStringContainsString('placeholder="Enter username"', $html);
+        $this->assertStringContainsString('Choose wisely', $html);
+        $this->assertStringContainsString('*', $html);
+        $this->assertStringContainsString('catchy-validation-errors.window', $html); // from x-catchy-error nested component
+    }
 }
 
