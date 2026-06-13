@@ -2,9 +2,14 @@
     'name' => 'file',
     'multiple' => false,
     'accept' => '*/*',
-    'label' => 'اسحب الملفات هنا أو انقر للاختيار',
-    'helpText' => 'أي صيغة ملف مقبولة',
+    'label' => null,
+    'helpText' => null,
 ])
+
+@php
+    $label = $label ?? __('catchy::messages.drag_drop_label');
+    $helpText = $helpText ?? __('catchy::messages.help_text');
+@endphp
 
 <div 
     {{ $attributes->merge([
@@ -110,7 +115,7 @@
         <div class="mt-4 space-y-2">
             <template x-for="(file, index) in files" :key="index">
                 <div class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm transition-all duration-200 hover:shadow">
-                    <div class="flex items-center space-x-3 space-x-reverse min-w-0">
+                    <div class="flex items-center gap-3 min-w-0">
                         <!-- Thumbnail Preview -->
                         <template x-if="isImage(file)">
                             <img :src="getPreviewUrl(file)" class="h-10 w-10 object-cover rounded-md border border-gray-100 dark:border-gray-800 flex-shrink-0" />
@@ -135,7 +140,7 @@
                         type="button" 
                         x-on:click.stop="removeFile(index)" 
                         class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                        title="حذف الملف"
+                        title="{{ __('catchy::messages.delete_file') }}"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

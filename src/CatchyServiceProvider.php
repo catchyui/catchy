@@ -43,6 +43,7 @@ class CatchyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerMiddleware();
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'catchy');
         $this->registerViewsAndComponents();
         $this->registerDirectives();
         $this->registerPublishing();
@@ -119,6 +120,14 @@ class CatchyServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../resources/views' => resource_path('views/vendor/catchy'),
             ], 'catchy-views');
+
+            $this->publishes([
+                __DIR__ . '/../resources/lang' => lang_path('vendor/catchy'),
+            ], 'catchy-translations');
+
+            $this->publishes([
+                __DIR__ . '/../resources/js/catchy.js' => public_path('vendor/catchy/catchy.js'),
+            ], 'catchy-assets');
         }
     }
 }

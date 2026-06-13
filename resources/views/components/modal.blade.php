@@ -80,7 +80,7 @@
             x-transition:leave="ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-left shadow-2xl transition-all w-full {{ $sizeClass }} flex flex-col max-h-[90vh]"
+            class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-start shadow-2xl transition-all w-full {{ $sizeClass }} flex flex-col max-h-[90vh]"
         >
             <!-- Header -->
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4">

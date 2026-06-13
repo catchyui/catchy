@@ -5,10 +5,10 @@
 
 @php
     $positions = [
-        'top-right' => 'top-5 right-5',
-        'top-left' => 'top-5 left-5',
-        'bottom-right' => 'bottom-5 right-5',
-        'bottom-left' => 'bottom-5 left-5',
+        'top-right' => 'top-5 end-5',
+        'top-left' => 'top-5 start-5',
+        'bottom-right' => 'bottom-5 end-5',
+        'bottom-left' => 'bottom-5 start-5',
     ];
     $positionClass = $positions[$position] ?? $positions['top-right'];
 @endphp

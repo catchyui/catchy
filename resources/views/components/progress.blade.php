@@ -2,10 +2,11 @@
     'color' => 'primary', // primary, accent, success, warning, danger, gradient
     'height' => 'h-2.5', // Tailwind height class
     'showPercent' => true,
-    'label' => 'جاري تحميل الملفات...',
+    'label' => null,
 ])
 
 @php
+    $label = $label ?? __('catchy::messages.loading');
     $colors = [
         'primary' => 'bg-indigo-600 dark:bg-indigo-500',
         'accent' => 'bg-cyan-500 dark:bg-cyan-400',
@@ -74,7 +75,7 @@
 >
     @if ($showPercent)
         <div class="flex justify-between items-center text-xs font-semibold text-gray-700 dark:text-gray-300">
-            <span x-text="progress === 100 ? 'اكتمل التحميل' : '{{ $label }}'">{{ $label }}</span>
+            <span x-text="progress === 100 ? '{{ __('catchy::messages.completed') }}' : '{{ $label }}'">{{ $label }}</span>
             <span x-text="progress + '%'">0%</span>
         </div>
     @endif
