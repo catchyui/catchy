@@ -333,6 +333,7 @@
                 let html = '';
                 let finalUrl = url;
                 let version = '';
+                let response = null;
 
                 // 1. Try to resolve from cache (only for GET requests)
                 const isGet = !options.method || options.method.toUpperCase() === 'GET';
@@ -368,7 +369,7 @@
                             headers: fetchHeaders
                         };
 
-                        const response = await fetch(url, fetchOptions);
+                        response = await fetch(url, fetchOptions);
 
                         // If version mismatch (409 Conflict), force immediate hard reload of target URL
                         if (response.status === 409) {
