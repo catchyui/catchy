@@ -16,6 +16,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed morphing redirect target behavior: redirects now target the main container (`#catchy-app`) instead of form-specific target containers.
 - Excluded validation errors from displaying as `[object Object]` toast notifications.
 
+
+## [1.1.4] - 2026-06-13
+
+### Added
+- Extracted and dispatched validation errors from Laravel session or JSON responses to components.
+- Handled validation errors inside the upload component to display error messages.
+
+## [1.1.3] - 2026-06-13
+
+### Fixed
+- Disabled submit button pointers and preserved scroll position on morph container visits.
+
+## [1.1.2] - 2026-06-13
+
+### Fixed
+- Prevented recursive file input changes by adding an updating state lock to the upload component.
+
+## [1.1.1] - 2026-06-13
+
+### Added
+- Integrated custom progress loader and file upload UI components.
+- Optimized existing blade components to use Blade attributes merge.
+
+## [1.1.0] - 2026-06-13
+
+### Added
+- Automatic submit button loading and disabling state during form submissions.
+
+## [1.0.9] - 2026-06-13
+
+### Fixed
+- Output `data-catchy` attributes in the form component.
+- Added hyphenated events to `CatchyDirective`.
+- Triggered hard reload on 429 status codes.
+- Standardized whitespace formatting.
+
+## [1.0.8] - 2026-06-13
+
+### Fixed
+- Added dual support for colon-less and colon-based form lifecycle events.
+
+## [1.0.7] - 2026-06-13
+
+### Fixed
+- Resolved scoping issue for the response variable in `catchy.js`.
+
+## [1.0.6] - 2026-06-13
+
+### Fixed
+- Resolved modal event bubbling issues.
+- Handled same-origin redirects with headers.
+- Supported colon-less custom events.
+- Allowed history updates for redirected responses in `catchy.js`.
+
 ## [1.0.5] - 2026-06-13
 
 ### Fixed
