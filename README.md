@@ -106,9 +106,11 @@ If you want to bundle Catchy inside your JavaScript build:
 'include_morph' => false,
 ```
 
-2. Install the frontend asset repository using NPM:
+2. Install Alpine.js, the morph plugin, and Catchy via NPM:
 ```bash
-npm install ../catchy
+npm install alpinejs @alpinejs/morph
+npm install hamzi-catchy
+# (Or npm install ../catchy if using a local path during development)
 ```
 
 3. Import and register the plugins in your `resources/js/app.js`:
