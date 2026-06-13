@@ -548,7 +548,7 @@
                                 }
                             }
 
-                            visit(redirectUrl, { trigger }, updateHistory);
+                            visit(redirectUrl, { trigger, targetId: config.containerId }, updateHistory);
                             return;
                         }
 

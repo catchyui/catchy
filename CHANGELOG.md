@@ -5,6 +5,12 @@ All notable changes to `Laravel Catchy` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-06-13
+
+### Fixed
+- Fixed morphing redirect target behavior: redirects now target the main container (`#catchy-app`) instead of form-specific target containers.
+- Excluded validation errors from displaying as `[object Object]` toast notifications.
+
 ## [1.0.5] - 2026-06-13
 
 ### Fixed

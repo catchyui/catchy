@@ -39,10 +39,14 @@
         }
     }"
     @catchy:flash.window="
-        Object.entries($event.detail).forEach(([type, msg]) => add(msg, type))
+        Object.entries($event.detail).forEach(([type, msg]) => {
+            if (type !== 'validation_errors') add(msg, type);
+        })
     "
     @catchy-flash.window="
-        Object.entries($event.detail).forEach(([type, msg]) => add(msg, type))
+        Object.entries($event.detail).forEach(([type, msg]) => {
+            if (type !== 'validation_errors') add(msg, type);
+        })
     "
     x-init="
         @if(session()->has('success')) add(@js(session('success')), 'success'); @endif
