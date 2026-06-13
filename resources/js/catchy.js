@@ -332,6 +332,26 @@
                 return;
             }
 
+            // Find and disable submit button, showing an inline SVG spinner loader
+            let submitBtn = null;
+            if (trigger && (trigger.tagName === 'FORM' || trigger instanceof HTMLFormElement) && !trigger.hasAttribute('data-catchy-no-loader')) {
+                submitBtn = trigger.querySelector('[type="submit"]') || trigger.querySelector('button:not([type="button"])');
+                if (submitBtn && !submitBtn.dataset.originalHtml) {
+                    submitBtn.dataset.originalHtml = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    const spinnerHtml = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-current inline-block align-text-bottom" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="vertical-align: middle;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> `;
+                    submitBtn.innerHTML = spinnerHtml + submitBtn.innerHTML;
+                }
+            }
+
+            function restoreSubmitButton() {
+                if (submitBtn && submitBtn.dataset.originalHtml) {
+                    submitBtn.innerHTML = submitBtn.dataset.originalHtml;
+                    submitBtn.disabled = false;
+                    delete submitBtn.dataset.originalHtml;
+                }
+            }
+
             startLoading();
 
             try {
@@ -406,7 +426,7 @@
                                 }
                             }
 
-                            visit(redirectUrl, {}, updateHistory);
+                            visit(redirectUrl, { trigger }, updateHistory);
                             return;
                         }
 
@@ -485,6 +505,7 @@
                         stopLoading();
 
                         executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
+                        restoreSubmitButton();
 
                         trigger.dispatchEvent(new CustomEvent('catchy:end', {
                             bubbles: true,
@@ -602,6 +623,7 @@
                 stopLoading();
 
                 executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
+                restoreSubmitButton();
 
                 trigger.dispatchEvent(new CustomEvent('catchy:end', {
                     bubbles: true,
@@ -617,6 +639,7 @@
                 console.error('Catchy: AJAX request error, falling back to full load.', error);
 
                 executeCallback(trigger, 'data-catchy-error', { url, error, trigger });
+                restoreSubmitButton();
 
                 trigger.dispatchEvent(new CustomEvent('catchy:error', {
                     bubbles: true,
