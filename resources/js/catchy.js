@@ -498,6 +498,23 @@
                         }
 
                         if (!response.ok) {
+                            if (response.status === 422 || response.status === 400) {
+                                const contentType = response.headers.get('content-type');
+                                if (contentType && contentType.includes('application/json')) {
+                                    try {
+                                        const json = JSON.parse(await response.text());
+                                        if (json.errors) {
+                                            const errDetail = json.errors;
+                                            window.dispatchEvent(new CustomEvent('catchy:validation-errors', { detail: errDetail }));
+                                            window.dispatchEvent(new CustomEvent('catchy-validation-errors', { detail: errDetail }));
+                                            if (trigger) {
+                                                trigger.dispatchEvent(new CustomEvent('catchy:validation-errors', { bubbles: true, detail: errDetail }));
+                                                trigger.dispatchEvent(new CustomEvent('catchy-validation-errors', { bubbles: true, detail: errDetail }));
+                                            }
+                                        }
+                                    } catch (e) {}
+                                }
+                            }
                             throw new Error(`Catchy: Request failed with status ${response.status}`);
                         }
 
@@ -516,6 +533,16 @@
                                     const flash = JSON.parse(flashJson);
                                     window.dispatchEvent(new CustomEvent('catchy:flash', { detail: flash }));
                                     window.dispatchEvent(new CustomEvent('catchy-flash', { detail: flash }));
+
+                                    if (flash.validation_errors) {
+                                        const errDetail = flash.validation_errors;
+                                        window.dispatchEvent(new CustomEvent('catchy:validation-errors', { detail: errDetail }));
+                                        window.dispatchEvent(new CustomEvent('catchy-validation-errors', { detail: errDetail }));
+                                        if (trigger) {
+                                            trigger.dispatchEvent(new CustomEvent('catchy:validation-errors', { bubbles: true, detail: errDetail }));
+                                            trigger.dispatchEvent(new CustomEvent('catchy-validation-errors', { bubbles: true, detail: errDetail }));
+                                        }
+                                    }
                                 } catch (e) {
                                     console.error('Catchy: Failed to decode X-Catchy-Flash header', e);
                                 }
@@ -548,6 +575,16 @@
                                 const flash = JSON.parse(flashJson);
                                 window.dispatchEvent(new CustomEvent('catchy:flash', { detail: flash }));
                                 window.dispatchEvent(new CustomEvent('catchy-flash', { detail: flash }));
+
+                                if (flash.validation_errors) {
+                                    const errDetail = flash.validation_errors;
+                                    window.dispatchEvent(new CustomEvent('catchy:validation-errors', { detail: errDetail }));
+                                    window.dispatchEvent(new CustomEvent('catchy-validation-errors', { detail: errDetail }));
+                                    if (trigger) {
+                                        trigger.dispatchEvent(new CustomEvent('catchy:validation-errors', { bubbles: true, detail: errDetail }));
+                                        trigger.dispatchEvent(new CustomEvent('catchy-validation-errors', { bubbles: true, detail: errDetail }));
+                                    }
+                                }
                             } catch (e) {
                                 console.error('Catchy: Failed to decode X-Catchy-Flash header', e);
                             }

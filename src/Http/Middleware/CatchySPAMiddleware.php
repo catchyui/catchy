@@ -86,6 +86,16 @@ class CatchySPAMiddleware
                         $flash[$key] = $request->session()->get($key);
                     }
                 }
+
+                // Extract validation errors from session
+                if ($request->session()->has('errors')) {
+                    $errorBag = $request->session()->get('errors');
+                    if (method_exists($errorBag, 'getBag')) {
+                        $flash['validation_errors'] = $errorBag->getBag('default')->toArray();
+                    } elseif (method_exists($errorBag, 'toArray')) {
+                        $flash['validation_errors'] = $errorBag->toArray();
+                    }
+                }
             }
 
             $headers = [
@@ -117,6 +127,17 @@ class CatchySPAMiddleware
                     $flash[$key] = $request->session()->get($key);
                 }
             }
+
+            // Extract validation errors from session
+            if ($request->session()->has('errors')) {
+                $errorBag = $request->session()->get('errors');
+                if (method_exists($errorBag, 'getBag')) {
+                    $flash['validation_errors'] = $errorBag->getBag('default')->toArray();
+                } elseif (method_exists($errorBag, 'toArray')) {
+                    $flash['validation_errors'] = $errorBag->toArray();
+                }
+            }
+
             if (!empty($flash)) {
                 $response->headers->set('X-Catchy-Flash', base64_encode(json_encode($flash)));
             }

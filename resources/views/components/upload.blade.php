@@ -14,8 +14,10 @@
         dragover: false,
         files: [],
         updating: false,
+        error: '',
         addFiles(fileList) {
             if (this.updating) return;
+            this.error = '';
             const newFiles = Array.from(fileList);
             if ({{ $multiple ? 'true' : 'false' }}) {
                 this.files = [...this.files, ...newFiles];
@@ -51,8 +53,16 @@
         },
         getPreviewUrl(file) {
             return URL.createObjectURL(file);
+        },
+        handleValidationErrors(event) {
+            const key = '{{ $name }}'.replace(/\[\]/g, '').replace(/\[/g, '.').replace(/\]/g, '');
+            if (event.detail && event.detail[key]) {
+                this.error = event.detail[key][0];
+            }
         }
     }"
+    x-on:catchy-validation-errors.window="handleValidationErrors($event)"
+    x-on:catchy:validation-errors.window="handleValidationErrors($event)"
 >
     <!-- Hidden input -->
     <input 
@@ -135,4 +145,6 @@
             </template>
         </div>
     </template>
+
+    <p x-show="error" x-text="error" class="mt-2 text-sm text-red-600 dark:text-red-400 font-semibold" style="display: none;"></p>
 </div>
