@@ -398,6 +398,42 @@ Example:
 <x-catchy-lazy id="comment-list" src="/comments/list" />
 ```
 
+### Real-Time Data Syncing (`x-catchy-sync`)
+Catchy provides an Alpine.js directive called `x-catchy-sync` to sync form or input data with the Laravel backend in real-time, making it extremely easy to build auto-saving inputs, dynamically filtered lists, and live search forms (similar to Livewire's `wire:model` or HTMX).
+
+#### Directive Syntax & Modifiers
+- `x-catchy-sync="url"`: Posts input value to the specified URL when it changes.
+- `.input`: Triggers syncing on every keystroke (`input` event) instead of on lose focus (`change` event).
+- `.debounce.Xms`: Delays submission of the input event by `X` milliseconds.
+- `.form`: Serializes and posts the entire parent form instead of just the single input.
+- `.target.container-id`: Morphs the returned HTML into the target element with ID `container-id`.
+
+#### Example 1: Real-time Live Search
+Submits search query on every keystroke (debounced by 300ms) and updates the search results list dynamically:
+```html
+<input 
+    type="text" 
+    name="query" 
+    placeholder="Search products..." 
+    x-catchy-sync.input.debounce.300ms.target.search-results="/products/search"
+>
+
+<!-- Container that will be morphed with the response from /products/search -->
+<div id="search-results">
+    <!-- Search results list -->
+</div>
+```
+
+#### Example 2: Form Auto-Saving
+Submits the entire form state in the background whenever a change is detected:
+```html
+<form action="/profile/autosave" method="POST">
+    @csrf
+    <input type="text" name="bio" x-catchy-sync.form="/profile/autosave">
+    <input type="checkbox" name="notifications" x-catchy-sync.form="/profile/autosave">
+</form>
+```
+
 ### Scroll Position Control
 By default, Catchy scrolls the viewport to top on page transition. You can keep the current scroll position by adding `data-catchy-scroll="keep"` to links or form elements:
 ```html
