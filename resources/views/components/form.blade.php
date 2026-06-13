@@ -16,9 +16,9 @@
     action="{{ $action }}" 
     method="{{ $formMethod }}"
     x-data
-    @if($beforesend) @catchy:start="{{ $beforesend }}" @catchy-start="{{ $beforesend }}" @endif
-    @if($success) @catchy:end="{{ $success }}" @catchy-end="{{ $success }}" @endif
-    @if($error) @catchy:error="{{ $error }}" @catchy-error="{{ $error }}" @endif
+    @if($beforesend) @catchy:start="{{ $beforesend }}" @catchy-start="{{ $beforesend }}" data-catchy-beforesend="{{ $beforesend }}" @endif
+    @if($success) @catchy:end="{{ $success }}" @catchy-end="{{ $success }}" data-catchy-success="{{ $success }}" @endif
+    @if($error) @catchy:error="{{ $error }}" @catchy-error="{{ $error }}" data-catchy-error="{{ $error }}" @endif
     {{ $attributes }}
 >
     @if($formMethod === 'POST')

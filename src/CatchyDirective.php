@@ -23,16 +23,19 @@ class CatchyDirective
 
         if (isset($options['beforesend'])) {
             $attributes[] = '@catchy:start="' . e($options['beforesend']) . '"';
+            $attributes[] = '@catchy-start="' . e($options['beforesend']) . '"';
             $attributes[] = 'data-catchy-beforesend="' . e($options['beforesend']) . '"';
         }
         
         if (isset($options['success'])) {
             $attributes[] = '@catchy:end="' . e($options['success']) . '"';
+            $attributes[] = '@catchy-end="' . e($options['success']) . '"';
             $attributes[] = 'data-catchy-success="' . e($options['success']) . '"';
         }
         
         if (isset($options['error'])) {
             $attributes[] = '@catchy:error="' . e($options['error']) . '"';
+            $attributes[] = '@catchy-error="' . e($options['error']) . '"';
             $attributes[] = 'data-catchy-error="' . e($options['error']) . '"';
         }
 
