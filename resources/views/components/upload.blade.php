@@ -13,7 +13,9 @@
     x-data="{
         dragover: false,
         files: [],
+        updating: false,
         addFiles(fileList) {
+            if (this.updating) return;
             const newFiles = Array.from(fileList);
             if ({{ $multiple ? 'true' : 'false' }}) {
                 this.files = [...this.files, ...newFiles];
@@ -27,12 +29,17 @@
             this.updateInput();
         },
         updateInput() {
-            const dt = new DataTransfer();
-            this.files.forEach(file => dt.items.add(file));
-            this.$refs.fileInput.files = dt.files;
-            
-            // Trigger change event to notify form or other validation
-            this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            this.updating = true;
+            try {
+                const dt = new DataTransfer();
+                this.files.forEach(file => dt.items.add(file));
+                this.$refs.fileInput.files = dt.files;
+                
+                // Trigger change event to notify form or other validation
+                this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            } finally {
+                this.updating = false;
+            }
         },
         getFileSize(size) {
             if (size < 1024) return size + ' B';
@@ -56,7 +63,7 @@
         class="hidden" 
         accept="{{ $accept }}"
         @if($multiple) multiple @endif
-        x-on:change="addFiles($event.target.files)"
+        x-on:change="if (!updating) addFiles($event.target.files)"
     />
 
     <!-- Drag & Drop Container -->
