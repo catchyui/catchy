@@ -19,6 +19,7 @@
     ]) }}
     x-data="{
         toasts: [],
+        duration: {{ $duration }},
         add(message, type = 'success') {
             const id = Date.now();
             this.toasts.push({ id, message, type, timer: null });
@@ -26,7 +27,7 @@
             this.$nextTick(() => {
                 const toast = this.toasts.find(t => t.id === id);
                 if (toast) {
-                    toast.timer = setTimeout(() => this.remove(id), {{ $duration }});
+                    toast.timer = setTimeout(() => this.remove(id), this.duration);
                 }
             });
         },
@@ -138,7 +139,7 @@
                         'bg-amber-500': toast.type === 'warning',
                         'bg-blue-500': toast.type === 'info' || toast.type === 'status'
                     }"
-                    :style="`width: 100%; transition: width ${ {{ $duration }} }ms linear;`"
+                    :style="'width: 100%; transition: width ' + duration + 'ms linear;'"
                     x-init="setTimeout(() => $el.style.width = '0%', 50)"
                 ></div>
             </div>

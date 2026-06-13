@@ -3,6 +3,7 @@
     'height' => 'h-2.5', // Tailwind height class
     'showPercent' => true,
     'label' => null,
+    'for' => null,
 ])
 
 @php
@@ -23,15 +24,31 @@
         show: false, 
         progress: 0,
         init() {
-            const form = this.$el.closest('form');
-            const target = form || window;
+            const forId = '{{ $for }}';
+            let target = null;
             
-            const handleStart = () => {
+            if (forId) {
+                target = document.getElementById(forId);
+            } else {
+                target = this.$el.closest('form') || window;
+            }
+            
+            if (!target) return;
+            
+            const handleStart = (e) => {
+                // If listening on window, ignore form uploads so the global bar doesn't animate on inline uploads
+                if (target === window && e.detail && e.detail.trigger && e.detail.trigger.tagName === 'FORM') {
+                    return;
+                }
                 this.show = true;
                 this.progress = 0;
             };
             
             const handleProgress = (e) => {
+                // If scoped to a target, only react if this progress matches the target
+                if (target !== window && e.detail && e.detail.trigger !== target) {
+                    return;
+                }
                 this.show = true;
                 this.progress = e.detail.percent;
             };

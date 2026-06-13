@@ -449,6 +449,25 @@
         }
 
         /**
+         * Resolves the target modal element based on the trigger or default selectors.
+         *
+         * @param {HTMLElement} triggerElement
+         * @returns {HTMLElement|null}
+         */
+        function resolveModal(triggerElement) {
+            const modalAttr = triggerElement && typeof triggerElement.getAttribute === 'function' ? triggerElement.getAttribute('data-catchy-modal') : null;
+            if (modalAttr && modalAttr !== '' && modalAttr !== 'true') {
+                const specificModal = document.getElementById(modalAttr);
+                if (specificModal) return specificModal;
+            }
+            if (triggerElement && typeof triggerElement.closest === 'function') {
+                const closestModal = triggerElement.closest('[catchy-modal]') || triggerElement.closest('#catchy-modal');
+                if (closestModal) return closestModal;
+            }
+            return document.querySelector('[catchy-modal]') || document.getElementById('catchy-modal');
+        }
+
+        /**
          * Fetch a page and update the DOM container.
          *
          * @param {string} url
@@ -715,7 +734,7 @@
 
                 if (isModalTarget) {
                     const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
-                    const modal = document.querySelector('[catchy-modal]') || document.getElementById('catchy-modal');
+                    const modal = resolveModal(trigger);
                     if (modal) {
                         modal.dispatchEvent(new CustomEvent('catchy:modal-load', {
                             bubbles: true,
@@ -753,7 +772,7 @@
 
                 if (isTriggerInModal && options.method && options.method.toUpperCase() !== 'GET') {
                     // Form inside modal submitted successfully -> close modal & morph the main layout container
-                    const modal = document.querySelector('[catchy-modal]') || document.getElementById('catchy-modal');
+                    const modal = resolveModal(trigger);
                     if (modal) {
                         modal.dispatchEvent(new CustomEvent('catchy:modal-close', {
                             bubbles: true

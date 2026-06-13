@@ -97,8 +97,8 @@ class ComponentTest extends TestCase
         $this->assertStringContainsString('catchy-modal', $html);
         $this->assertStringContainsString('Hello Title', $html);
         $this->assertStringContainsString('Modal Content', $html);
-        $this->assertStringContainsString('@catchy:modal-load.window', $html);
-        $this->assertStringContainsString('@catchy:modal-close.window', $html);
+        $this->assertStringContainsString('@catchy:modal-load', $html);
+        $this->assertStringContainsString('@catchy:modal-close', $html);
     }
 
     /**
@@ -112,17 +112,14 @@ class ComponentTest extends TestCase
         $this->assertStringContainsString('bottom-5 end-5', $html);
     }
 
-    /**
-     * Verify that the progress component compiles and renders correct structure.
-     */
     public function test_progress_component_renders(): void
     {
-        $html = Blade::render('<x-catchy-progress color="success" height="h-4" label="تنزيل الملفات" />');
+        $html = Blade::render('<x-catchy-progress color="success" height="h-4" label="تنزيل الملفات" for="my-upload-form" />');
 
         $this->assertStringContainsString('bg-emerald-500', $html);
         $this->assertStringContainsString('h-4', $html);
         $this->assertStringContainsString('تنزيل الملفات', $html);
-        $this->assertStringContainsString('catchy-progress', $html);
+        $this->assertStringContainsString('my-upload-form', $html);
     }
 
     /**

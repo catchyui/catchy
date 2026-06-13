@@ -49,12 +49,12 @@
         }
     }"
     x-show="isOpen"
-    @catchy:modal-load.window="open($event.detail.html, $event.detail.title)"
-    @catchy:modal-close.window="close()"
-    @catchy:modal-open.window="open($event.detail.html || '', $event.detail.title || '')"
-    @catchy-modal-load.window="open($event.detail.html, $event.detail.title)"
-    @catchy-modal-close.window="close()"
-    @catchy-modal-open.window="open($event.detail.html || '', $event.detail.title || '')"
+    @catchy:modal-load="open($event.detail.html, $event.detail.title)"
+    @catchy:modal-close="close()"
+    @catchy:modal-open="open($event.detail.html || '', $event.detail.title || '')"
+    @catchy-modal-load="open($event.detail.html, $event.detail.title)"
+    @catchy-modal-close="close()"
+    @catchy-modal-open="open($event.detail.html || '', $event.detail.title || '')"
     @keydown.escape.window="close()"
 >
     <!-- Backdrop -->
