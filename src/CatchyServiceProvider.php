@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hamzi\Catchy;
 
 use Illuminate\Support\ServiceProvider;

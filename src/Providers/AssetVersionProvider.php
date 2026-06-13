@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hamzi\Catchy\Providers;
 
 use Hamzi\Catchy\Contracts\VersionProviderInterface;
