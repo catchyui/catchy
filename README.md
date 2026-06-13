@@ -28,6 +28,10 @@ No complex JavaScript builds. No routing overhead. **100% SEO-friendly. Dynamic 
 - **Script Tag Execution**: Intercepts and executes dynamic `<script>` elements found inside the morphed content automatically.
 - **Form submission interception**: Intercepts `GET` and `POST` forms natively (including CSRF tokens and Laravel `_method` spoofing).
 - **Logical LTR/RTL Layouts**: UI Components are designed using Tailwind logical properties (`start`, `end`, `ms-`, `me-`, `text-start`) to support both LTR and RTL directions seamlessly out-of-the-box.
+- **Deferred / Lazy Component Loading**: Lazy load heavy components (`<x-catchy-lazy>`) when they enter the viewport using `IntersectionObserver`.
+- **Intelligent Viewport Prefetching**: Prefetch links dynamically in the background as they enter the viewport using `data-catchy-prefetch="viewport"`.
+- **Scroll Retention Control**: Easily bypass the default scroll-to-top behavior on transitions using `data-catchy-scroll="keep"`.
+- **Inline Validation Error Management**: Render dynamic field error elements (`<x-catchy-error>`) that display Laravel validation messages on the fly.
 - **Localization Integration**: Translatable component strings, fully customizable via standard Laravel language publishing.
 - **Optimized Caching & CDN**: Offers in-memory directive caching and asset publishing to let the browser cache the script file, saving ~40KB of HTML payload per page load.
 - **Graceful degradation**: Seamlessly falls back to regular page loads on server errors, external redirects, or slow connections.
@@ -189,6 +193,58 @@ Displays session flash messages and dynamic SPA notifications with support for l
 ```html
 <!-- Place once in your layout -->
 <x-catchy-toast position="top-right" duration="4000" />
+```
+
+### 7. Validation Error Indicator (`<x-catchy-error />`)
+Automatically shows dynamic validation messages inline when validation fails on a form submit without full page reloads:
+```html
+<label for="email">Email Address</label>
+<input type="email" name="email" id="email">
+<!-- Displays error message for the 'email' input on form validation failure -->
+<x-catchy-error field="email" class="text-rose-500 text-xs mt-1" />
+```
+
+### 8. Lazy Component Loader (`<x-catchy-lazy />`)
+Allows you to load heavy elements (e.g. dynamic cards, charts, dashboards) asynchronously.
+```html
+<!-- Renders placeholder, then immediately loads contents from /widgets/activity -->
+<x-catchy-lazy src="/widgets/activity" />
+
+<!-- Lazy loads content only when the element is scrolled into view (using IntersectionObserver) -->
+<x-catchy-lazy src="/widgets/recent-stats" trigger="intersect" />
+
+<!-- With custom placeholder -->
+<x-catchy-lazy src="/widgets/orders" trigger="intersect">
+    <x-slot:placeholder>
+        <div class="p-4 bg-gray-100 rounded-lg text-center animate-pulse">Loading orders...</div>
+    </x-slot:placeholder>
+</x-catchy-lazy>
+```
+
+---
+
+## Advanced Options & APIs
+
+### Scroll Position Control
+By default, Catchy scrolls the viewport to top on page transition. You can keep the current scroll position by adding `data-catchy-scroll="keep"` to links or form elements:
+```html
+<a href="/tab/2" data-catchy-scroll="keep">Open Tab 2</a>
+```
+
+### Viewport Prefetching
+Catchy can prefetch pages dynamically when links enter the viewport (similar to modern static-site generators). Add `data-catchy-prefetch="viewport"` to enable viewport-level prefetching on an anchor:
+```html
+<a href="/heavy-page" data-catchy-prefetch="viewport">Heavy Dashboard</a>
+```
+
+### Programmatic Loader Controls
+You can programmatically trigger the global loading progress bar using Alpine's exposed global space:
+```javascript
+// Start the loader
+Alpine.catchy.startLoading();
+
+// Stop/finish the loader
+Alpine.catchy.stopLoading();
 ```
 
 ---

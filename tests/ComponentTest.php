@@ -180,5 +180,30 @@ class ComponentTest extends TestCase
 
         unlink($tempFile);
     }
+
+    /**
+     * Verify that the error component compiles and renders correct structure and event listeners.
+     */
+    public function test_error_component_renders(): void
+    {
+        $html = Blade::render('<x-catchy-error field="email" class="my-error-class" />');
+
+        $this->assertStringContainsString('catchy-validation-errors.window', $html);
+        $this->assertStringContainsString('normalizeKey(\'email\')', $html);
+        $this->assertStringContainsString('my-error-class', $html);
+    }
+
+    /**
+     * Verify that the lazy component compiles and renders correct trigger and placeholder.
+     */
+    public function test_lazy_component_renders(): void
+    {
+        $html = Blade::render('<x-catchy-lazy src="/widgets/comments" trigger="intersect" />');
+
+        $this->assertStringContainsString('/widgets/comments', $html);
+        $this->assertStringContainsString('intersect', $html);
+        $this->assertStringContainsString('IntersectionObserver', $html);
+        $this->assertStringContainsString('animate-pulse', $html);
+    }
 }
 
