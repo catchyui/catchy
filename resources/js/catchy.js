@@ -97,7 +97,7 @@
             loaderTimer = setTimeout(() => {
                 loaderElement.style.width = '0%';
                 loaderElement.style.opacity = '1';
-                
+
                 let width = 0;
                 progressInterval = setInterval(() => {
                     if (width < 88) {
@@ -117,7 +117,7 @@
             clearInterval(progressInterval);
 
             loaderElement.style.width = '100%';
-            
+
             setTimeout(() => {
                 loaderElement.style.opacity = '0';
                 setTimeout(() => {
@@ -231,9 +231,9 @@
                     }
 
                     const response = await fetch(url, { headers });
-                    
+
                     // Handle 409 conflict due to version change: trigger hard reload immediately
-                    if (response.status === 409) {
+                    if (response.status === 409 || response.status === 429) {
                         window.location.href = url;
                         return null;
                     }
@@ -308,7 +308,7 @@
                     scrollX: window.scrollX,
                     scrollY: window.scrollY
                 }, '');
-            } catch (e) {}
+            } catch (e) { }
 
             const trigger = options.trigger || document;
 
@@ -419,7 +419,7 @@
                         html = await response.text();
                         finalUrl = response.url || url;
                         version = response.headers.get('X-Catchy-Version') || '';
-                        
+
                         // Extract dynamic flash messages from the header
                         const flashHeader = response.headers.get('X-Catchy-Flash');
                         if (flashHeader) {
@@ -571,7 +571,7 @@
                 }
 
                 // Manage History Updates
-                const shouldUpdateHistory = updateHistory && 
+                const shouldUpdateHistory = updateHistory &&
                     (isGet || (response && response.redirected)) &&
                     (!trigger || typeof trigger.getAttribute !== 'function' || trigger.getAttribute('data-catchy-history') !== 'false') &&
                     (!trigger || typeof trigger.hasAttribute !== 'function' || !trigger.hasAttribute('data-catchy-modal'));
