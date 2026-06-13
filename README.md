@@ -5,11 +5,11 @@
 </p>
 
 <p align="center">
-  <a href="https://packagist.org/packages/hamzi/catchy"><img src="https://img.shields.io/packagist/v/hamzi/catchy.svg?style=flat-square" alt="Latest Version on Packagist"></a>
+  <a href="https://github.com/hamdyelbatal122/catchy/releases"><img src="https://img.shields.io/github/v/release/hamdyelbatal122/catchy?style=flat-square&color=blue" alt="Latest Version"></a>
   <a href="https://github.com/hamdyelbatal122/catchy/actions/workflows/run-tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamdyelbatal122/catchy/run-tests.yml?branch=main&style=flat-square&label=tests" alt="GitHub Tests Action Status"></a>
-  <a href="https://packagist.org/packages/hamzi/catchy"><img src="https://img.shields.io/packagist/dt/hamzi/catchy.svg?style=flat-square" alt="Total Downloads"></a>
-  <a href="https://packagist.org/packages/hamzi/catchy"><img src="https://img.shields.io/packagist/php-v/hamzi/catchy.svg?style=flat-square" alt="PHP Version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/packagist/l/hamzi/catchy.svg?style=flat-square" alt="License"></a>
+  <a href="https://github.com/hamdyelbatal122/catchy/releases"><img src="https://img.shields.io/github/downloads/hamdyelbatal122/catchy/total?style=flat-square&color=goldenrod" alt="Total Downloads"></a>
+  <img src="https://img.shields.io/badge/php-%5E8.2%20%7C%20%5E8.3%20%7C%20%5E8.4-blue?style=flat-square" alt="PHP Version">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License"></a>
 </p>
 
 ---
