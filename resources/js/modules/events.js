@@ -6,7 +6,6 @@
 
 import { shouldIgnoreLink, shouldIgnoreForm, emit } from './utils.js';
 import { submitForm } from './forms.js';
-import { resolveModal } from './components.js';
 
 let pendingAction = null;
 
