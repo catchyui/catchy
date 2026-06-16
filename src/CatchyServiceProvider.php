@@ -90,6 +90,8 @@ class CatchyServiceProvider extends ServiceProvider
             'badge'    => 'catchy-badge',
             'dropdown' => 'catchy-dropdown',
             'input'    => 'catchy-input',
+            'textarea' => 'catchy-textarea',
+            'select'   => 'catchy-select',
         ];
 
         foreach ($components as $view => $alias) {

@@ -41,7 +41,8 @@
     x-transition:leave-start="opacity-100 scale-100"
     x-transition:leave-end="opacity-0 scale-95"
     {{ $attributes->merge([
-        'class' => "flex p-4 rounded-xl border {$cfg['bg']} {$cfg['border']} {$cfg['text']}"
+        'class' => "flex p-4 rounded-xl border {$cfg['bg']} {$cfg['border']} {$cfg['text']}",
+        'role' => 'alert',
     ]) }}
 >
     <!-- Icon -->
@@ -64,6 +65,7 @@
                     type="button" 
                     @click="show = false"
                     class="inline-flex rounded-lg p-1.5 hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none transition-colors"
+                    aria-label="Dismiss alert"
                 >
                     <span class="sr-only">Dismiss</span>
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

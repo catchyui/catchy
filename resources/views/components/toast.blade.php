@@ -1,5 +1,5 @@
 @props([
-    'position' => 'top-right', // top-right, top-left, bottom-right, bottom-left
+    'position' => 'top-right',
     'duration' => 4000,
 ])
 
@@ -9,140 +9,113 @@
         'top-left' => 'top-5 start-5',
         'bottom-right' => 'bottom-5 end-5',
         'bottom-left' => 'bottom-5 start-5',
+        'top-center' => 'top-5 start-1/2 -translate-x-1/2',
+        'bottom-center' => 'bottom-5 start-1/2 -translate-x-1/2',
     ];
     $positionClass = $positions[$position] ?? $positions['top-right'];
+
+    // Retrieve initial flash messages from session
+    $initialFlash = [];
+    $flashKeys = ['success', 'error', 'warning', 'info', 'status'];
+    foreach ($flashKeys as $key) {
+        if (session()->has($key)) {
+            $initialFlash[] = ['message' => session($key), 'type' => $key];
+        }
+    }
 @endphp
 
 <div
     {{ $attributes->merge([
-        'class' => "fixed {$positionClass} z-50 flex flex-col gap-3 w-full max-w-sm pointer-events-none"
+        'class' => 'fixed z-[99998] flex flex-col gap-3 min-w-80 max-w-md ' . $positionClass,
     ]) }}
-    x-data="{
-        toasts: [],
-        duration: {{ $duration }},
-        add(message, type = 'success') {
-            const id = Date.now();
-            this.toasts.push({ id, message, type, timer: null });
-            
-            this.$nextTick(() => {
-                const toast = this.toasts.find(t => t.id === id);
-                if (toast) {
-                    toast.timer = setTimeout(() => this.remove(id), this.duration);
+    x-data="catchyToast({ duration: {{ $duration }} })"
+    role="region"
+    aria-label="Notifications"
+    @catchy:flash.window="
+        if ($event.detail && typeof $event.detail.message === 'string') {
+            add($event.detail.message, $event.detail.type || 'info');
+        } else if ($event.detail) {
+            Object.entries($event.detail).forEach(([key, val]) => {
+                if (typeof val === 'string' && key !== 'validation_errors') {
+                    add(val, key);
                 }
             });
-        },
-        remove(id) {
-            const index = this.toasts.findIndex(t => t.id === id);
-            if (index !== -1) {
-                clearTimeout(this.toasts[index].timer);
-                this.toasts.splice(index, 1);
-            }
         }
-    }"
-    @catchy:flash.window="
-        Object.entries($event.detail).forEach(([type, msg]) => {
-            if (type !== 'validation_errors') add(msg, type);
-        })
     "
     @catchy-flash.window="
-        Object.entries($event.detail).forEach(([type, msg]) => {
-            if (type !== 'validation_errors') add(msg, type);
-        })
+        if ($event.detail && typeof $event.detail.message === 'string') {
+            add($event.detail.message, $event.detail.type || 'info');
+        } else if ($event.detail) {
+            Object.entries($event.detail).forEach(([key, val]) => {
+                if (typeof val === 'string' && key !== 'validation_errors') {
+                    add(val, key);
+                }
+            });
+        }
     "
     x-init="
-        @if(session()->has('success')) add(@js(session('success')), 'success'); @endif
-        @if(session()->has('error')) add(@js(session('error')), 'error'); @endif
-        @if(session()->has('warning')) add(@js(session('warning')), 'warning'); @endif
-        @if(session()->has('info')) add(@js(session('info')), 'info'); @endif
-        @if(session()->has('status')) add(@js(session('status')), 'info'); @endif
+        @foreach($initialFlash as $flash)
+            add(@js($flash['message']), @js($flash['type']));
+        @endforeach
     "
 >
     <template x-for="toast in toasts" :key="toast.id">
         <div
             x-show="true"
             x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-2 sm:translate-y-0 sm:translate-x-4"
-            x-transition:enter-end="opacity-100 translate-y-0 sm:translate-x-0"
+            x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
             x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-xl border bg-white dark:bg-slate-900 shadow-xl transition-all duration-300"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+            class="flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl backdrop-blur-lg border transition-all duration-300"
+            role="alert"
+            aria-live="polite"
             :class="{
-                'border-emerald-100 dark:border-emerald-900/40': toast.type === 'success',
-                'border-rose-100 dark:border-rose-900/40': toast.type === 'error',
-                'border-amber-100 dark:border-amber-900/40': toast.type === 'warning',
-                'border-blue-100 dark:border-blue-900/40': toast.type === 'info' || toast.type === 'status'
+                'bg-emerald-50/95 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200': toast.type === 'success',
+                'bg-rose-50/95 dark:bg-rose-950/90 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200': toast.type === 'error' || toast.type === 'danger',
+                'bg-amber-50/95 dark:bg-amber-950/90 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200': toast.type === 'warning',
+                'bg-sky-50/95 dark:bg-sky-950/90 border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-200': toast.type === 'info' || toast.type === 'status',
             }"
         >
-            <div class="p-4 flex items-start gap-3">
-                <!-- Icon -->
-                <div class="flex-shrink-0">
-                    <!-- Success Icon -->
-                    <template x-if="toast.type === 'success'">
-                        <span class="inline-flex rounded-full bg-emerald-50 dark:bg-emerald-950/50 p-1.5 text-emerald-500">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                            </svg>
-                        </span>
-                    </template>
-                    <!-- Error Icon -->
-                    <template x-if="toast.type === 'error'">
-                        <span class="inline-flex rounded-full bg-rose-50 dark:bg-rose-950/50 p-1.5 text-rose-500">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                            </svg>
-                        </span>
-                    </template>
-                    <!-- Warning Icon -->
-                    <template x-if="toast.type === 'warning'">
-                        <span class="inline-flex rounded-full bg-amber-50 dark:bg-amber-950/50 p-1.5 text-amber-500">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                            </svg>
-                        </span>
-                    </template>
-                    <!-- Info Icon -->
-                    <template x-if="toast.type === 'info' || toast.type === 'status'">
-                        <span class="inline-flex rounded-full bg-blue-50 dark:bg-blue-950/50 p-1.5 text-blue-500">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.083.985l-.04.025m-.006-1.043l-.015 2.87-.04.025m1.235-2.883a.75.75 0 00-1.08 0l-1.2 1.2a.75.75 0 101.06 1.06l.825-.824m0 .004v.003h.008v-.008h-.008v.005zm0-.005L12 15.75m0-11.25a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </span>
-                    </template>
-                </div>
-
-                <!-- Content -->
-                <div class="flex-1 pt-0.5">
-                    <p class="text-sm font-medium text-slate-900 dark:text-slate-100" x-text="toast.message"></p>
-                </div>
-
-                <!-- Close Button -->
-                <div class="flex-shrink-0 flex">
-                    <button
-                        type="button"
-                        @click="remove(toast.id)"
-                        class="inline-flex rounded-lg p-1 text-slate-400 hover:text-slate-500 focus:outline-none"
-                    >
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+            <!-- Icon -->
+            <div class="shrink-0 pt-0.5">
+                <template x-if="toast.type === 'success'">
+                    <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </template>
+                <template x-if="toast.type === 'error' || toast.type === 'danger'">
+                    <svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                </template>
+                <template x-if="toast.type === 'warning'">
+                    <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </template>
+                <template x-if="toast.type === 'info' || toast.type === 'status'">
+                    <svg class="w-5 h-5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
+                </template>
             </div>
-            <!-- Progress Bar -->
-            <div class="h-1 bg-slate-100 dark:bg-slate-800">
-                <div 
-                    class="h-full transition-all linear" 
-                    :class="{
-                        'bg-emerald-500': toast.type === 'success',
-                        'bg-rose-500': toast.type === 'error',
-                        'bg-amber-500': toast.type === 'warning',
-                        'bg-blue-500': toast.type === 'info' || toast.type === 'status'
-                    }"
-                    :style="'width: 100%; transition: width ' + duration + 'ms linear;'"
-                    x-init="setTimeout(() => $el.style.width = '0%', 50)"
-                ></div>
-            </div>
+
+            <!-- Message -->
+            <p class="flex-1 text-sm font-medium leading-snug" x-text="toast.message"></p>
+
+            <!-- Dismiss -->
+            <button
+                type="button"
+                class="shrink-0 rounded-lg p-1 opacity-60 hover:opacity-100 transition-opacity focus:outline-none"
+                @click="remove(toast.id)"
+                aria-label="Dismiss"
+            >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
     </template>
 </div>

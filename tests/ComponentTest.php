@@ -188,7 +188,7 @@ class ComponentTest extends TestCase
         $html = Blade::render('<x-catchy-error field="email" class="my-error-class" />');
 
         $this->assertStringContainsString('catchy-validation-errors.window', $html);
-        $this->assertStringContainsString('normalizeKey(\'email\')', $html);
+        $this->assertStringContainsString('catchyError({ field: \'email\' })', $html);
         $this->assertStringContainsString('my-error-class', $html);
     }
 
@@ -201,7 +201,7 @@ class ComponentTest extends TestCase
 
         $this->assertStringContainsString('/widgets/comments', $html);
         $this->assertStringContainsString('intersect', $html);
-        $this->assertStringContainsString('IntersectionObserver', $html);
+        $this->assertStringContainsString('catchyLazy', $html);
         $this->assertStringContainsString('animate-pulse', $html);
     }
 
@@ -311,6 +311,44 @@ class ComponentTest extends TestCase
         $this->assertStringContainsString('Choose wisely', $html);
         $this->assertStringContainsString('*', $html);
         $this->assertStringContainsString('catchy-validation-errors.window', $html); // from x-catchy-error nested component
+    }
+
+    /**
+     * Verify that the textarea component compiles and renders correctly.
+     */
+    public function test_textarea_component_renders(): void
+    {
+        $html = Blade::render('<x-catchy-textarea name="bio" label="Your Biography" placeholder="Tell us about yourself" rows="5" helper="Be brief" required auto-grow />');
+
+        $this->assertStringContainsString('name="bio"', $html);
+        $this->assertStringContainsString('Your Biography', $html);
+        $this->assertStringContainsString('placeholder="Tell us about yourself"', $html);
+        $this->assertStringContainsString('rows="5"', $html);
+        $this->assertStringContainsString('Be brief', $html);
+        $this->assertStringContainsString('*', $html);
+        $this->assertStringContainsString('catchy-validation-errors.window', $html);
+        $this->assertStringContainsString('catchyError({ field: \'bio\' })', $html);
+        $this->assertStringContainsString('x-data="{', $html); // For the autoGrow x-data
+    }
+
+    /**
+     * Verify that the select component compiles and renders correctly.
+     */
+    public function test_select_component_renders(): void
+    {
+        $options = ['eg' => 'Egypt', 'us' => 'United States'];
+        $html = Blade::render('<x-catchy-select name="country" label="Your Country" :options="$options" selected="eg" helper="Pick one" required />', ['options' => $options]);
+
+        $this->assertStringContainsString('name="country"', $html);
+        $this->assertStringContainsString('Your Country', $html);
+        $this->assertStringContainsString('value="eg"', $html);
+        $this->assertStringContainsString('selected', $html);
+        $this->assertStringContainsString('Egypt', $html);
+        $this->assertStringContainsString('United States', $html);
+        $this->assertStringContainsString('Pick one', $html);
+        $this->assertStringContainsString('*', $html);
+        $this->assertStringContainsString('catchy-validation-errors.window', $html);
+        $this->assertStringContainsString('catchyError({ field: \'country\' })', $html);
     }
 }
 

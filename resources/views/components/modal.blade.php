@@ -26,28 +26,11 @@
         'class' => 'fixed inset-0 z-50 overflow-y-auto',
         'style' => 'display: none;',
         'role' => 'dialog',
-        'aria-modal' => 'true'
+        'aria-modal' => 'true',
+        'aria-labelledby' => $id . '-title',
     ]) }}
     catchy-modal
-    x-data="{ 
-        isOpen: false, 
-        title: @js($title), 
-        content: '',
-        open(content = '', title = '') {
-            if (content) this.content = content;
-            if (title) this.title = title;
-            this.isOpen = true;
-            document.body.classList.add('overflow-hidden');
-            this.$dispatch('catchy:modal-opened');
-        },
-        close() {
-            this.isOpen = false;
-            document.body.classList.remove('overflow-hidden');
-            this.$dispatch('catchy:modal-closed');
-            // Clear content after animation
-            setTimeout(() => { if (!this.isOpen) this.content = ''; }, 300);
-        }
-    }"
+    x-data="catchyModal({ title: @js($title) })"
     x-show="isOpen"
     @catchy:modal-load="open($event.detail.html, $event.detail.title)"
     @catchy:modal-close="close()"
@@ -68,6 +51,7 @@
         x-transition:leave-end="opacity-0"
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         @if($closeOnOutsideClick) @click="close()" @endif
+        aria-hidden="true"
     ></div>
 
     <!-- Modal Wrapper -->
@@ -81,15 +65,16 @@
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-start shadow-2xl transition-all w-full {{ $sizeClass }} flex flex-col max-h-[90vh]"
+            role="document"
         >
             <!-- Header -->
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4">
-                <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100" x-text="title"></h3>
+                <h3 id="{{ $id }}-title" class="text-lg font-semibold text-slate-900 dark:text-slate-100" x-text="title"></h3>
                 <button
                     type="button"
                     @click="close()"
-                    class="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none"
-                    aria-label="Close modal"
+                    class="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    aria-label="{{ __('catchy::messages.close') }}"
                 >
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

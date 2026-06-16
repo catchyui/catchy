@@ -328,6 +328,84 @@ Options:
 - `helper` (string): Additional helper text printed underneath the input field.
 - **Note**: This component automatically embeds the `<x-catchy-error :field="$name" />` inline warning tag, meaning any Laravel validation failure on this field will display the error instantly.
 
+### 16. Textarea Field (`<x-catchy-textarea />`)
+A standard form textarea component equipped with modern styling, labels, auto-grow support, and automatic inline validation error messages:
+```html
+<x-catchy-textarea 
+    name="bio" 
+    label="Biography" 
+    placeholder="Tell us about yourself..." 
+    rows="4"
+    required 
+    auto-grow
+    helper="Supports automatic growth as you type." 
+/>
+```
+Options:
+- `name` (string, required): The textarea field name and ID.
+- `label` (string): Text for the field label. Shows a red `*` symbol if `required` is true.
+- `placeholder` (string): Placeholder text.
+- `value` (string): Initial textarea content.
+- `rows` (integer): Number of visible text lines. Defaults to `3`.
+- `required` (boolean): Marks field as required. Defaults to `false`.
+- `autoGrow` (boolean): Enables auto-growing height when typing. Defaults to `false`.
+- `helper` (string): Additional helper text printed underneath.
+
+### 17. Select Dropdown (`<x-catchy-select />`)
+A styled native select dropdown component with custom arrow icons, option array support, and inline validation:
+```html
+<x-catchy-select 
+    name="country" 
+    label="Country" 
+    placeholder="Choose your country"
+    :options="['us' => 'United States', 'eg' => 'Egypt', 'ca' => 'Canada']"
+    selected="eg"
+    required
+/>
+```
+Options:
+- `name` (string, required): The select field name and ID.
+- `label` (string): Text for the field label. Shows a red `*` symbol if `required` is true.
+- `options` (array): Key-value pairs of select options.
+- `selected` (string|array): Currently selected value(s).
+- `multiple` (boolean): Enables multi-select dropdown. Defaults to `false`.
+- `required` (boolean): Marks select field as required. Defaults to `false`.
+- `placeholder` (string): Default disabled selection placeholder text.
+- `helper` (string): Helper text printed underneath.
+
+### 18. Progress Bar (`<x-catchy-progress />`)
+A dynamic progress bar component that automatically hooks into Catchy SPA events or a specific form upload:
+```html
+<!-- Hooks into any active form submit upload -->
+<x-catchy-progress color="primary" height="h-2" show-percent />
+
+<!-- Hooks only into a specific form by ID -->
+<x-catchy-progress for="my-profile-form" color="gradient" />
+```
+Options:
+- `for` (string): Target form ID to track upload progress. If blank, tracks global/window SPA navigation.
+- `color` (`primary` | `accent` | `success` | `warning` | `danger` | `gradient`): Color theme of the progress bar. Defaults to `primary`.
+- `height` (string): Tailwind height class (e.g. `h-2`, `h-3`). Defaults to `h-2.5`.
+- `showPercent` (boolean): Displays progress label and percent value. Defaults to `true`.
+- `label` (string): Optional loading label text.
+
+### 19. File Upload (`<x-catchy-upload />`)
+A drag-and-drop file upload zone with instant file previews (images and generic files), list management, and inline validation:
+```html
+<x-catchy-upload 
+    name="avatar" 
+    label="Upload Avatar" 
+    accept="image/*" 
+    help-text="PNG, JPG, GIF up to 5MB" 
+/>
+```
+Options:
+- `name` (string, required): The file input field name.
+- `label` (string): Main upload instruction text.
+- `helpText` (string): Secondary instructions or constraint specifications.
+- `accept` (string): HTML accept attribute (e.g. `image/*`, `.pdf`). Defaults to `*/*`.
+- `multiple` (boolean): Permits uploading multiple files. Defaults to `false`.
+
 ---
 
 ## Advanced Options & APIs
@@ -396,6 +474,30 @@ Example:
 
 <!-- Lazy component observing and listing comments -->
 <x-catchy-lazy id="comment-list" src="/comments/list" />
+```
+
+#### 4. Modern Unified Shorthand Syntax (Recommended)
+Instead of multiple verbose attributes, you can use the unified `data-catchy-on-success` and `data-catchy-on-error` attributes. This format supports multiple chained actions separated by semicolons:
+
+- Format: `data-catchy-on-[success|error]="action:component:id;action2:component2:id2"`
+- Actions available:
+  - `open:modal:id` or `close:modal:id`
+  - `open:offcanvas:id` or `close:offcanvas:id`
+  - `toast:message`
+  - `reload:lazy-id`
+  - `reset` (resets form fields)
+
+Example:
+```html
+<!-- Submitting this profile form will close the edit modal, display a success toast, and refresh the user stats card -->
+<x-catchy-form 
+    action="/profile" 
+    method="POST"
+    data-catchy-on-success="close:modal:edit-modal;toast:Profile Updated!;reload:stats-card"
+>
+    <input type="text" name="name" required>
+    <button type="submit">Save</button>
+</x-catchy-form>
 ```
 
 ### Real-Time Data Syncing (`x-catchy-sync`)

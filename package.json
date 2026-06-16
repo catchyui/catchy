@@ -3,11 +3,20 @@
   "version": "1.4.1",
   "description": "Alpine.js SPA plugin for the Laravel Catchy package.",
   "main": "resources/js/catchy.js",
+  "module": "resources/js/catchy-modular.js",
   "author": "Hamzi",
   "license": "MIT",
+  "scripts": {
+    "build": "node build.js",
+    "build:min": "node build.js --minify",
+    "dev": "node build.js --watch"
+  },
   "dependencies": {
-    "alpinejs": "^3.0.0",
-    "@alpinejs/morph": "^3.0.0"
+    "@alpinejs/morph": "^3.0.0",
+    "alpinejs": "^3.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.5"
   },
   "peerDependencies": {
     "tailwindcss": "^3.0.0 || ^4.0.0"

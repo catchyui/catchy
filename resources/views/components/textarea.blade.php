@@ -1,11 +1,12 @@
 @props([
     'name',
     'label' => null,
-    'type' => 'text',
     'placeholder' => null,
     'value' => null,
     'required' => false,
+    'rows' => 3,
     'helper' => null,
+    'autoGrow' => false,
 ])
 
 <div class="space-y-1">
@@ -19,18 +20,27 @@
     @endif
 
     <div class="relative rounded-lg shadow-sm">
-        <input 
-            type="{{ $type }}" 
+        <textarea 
             name="{{ $name }}" 
             id="{{ $name }}"
             placeholder="{{ $placeholder }}"
-            value="{{ $value }}"
+            rows="{{ $rows }}"
             @if ($required) required @endif
             @if ($helper) aria-describedby="{{ $name }}-helper" @endif
+            @if ($autoGrow)
+                x-data="{ 
+                    resize() { 
+                        this.$el.style.height = 'auto'; 
+                        this.$el.style.height = this.$el.scrollHeight + 'px'; 
+                    } 
+                }"
+                x-init="resize(); $watch('value', () => $nextTick(() => resize()))"
+                x-on:input="resize()"
+            @endif
             {{ $attributes->merge([
-                'class' => 'block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors disabled:opacity-50'
+                'class' => 'block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors disabled:opacity-50 resize-y'
             ]) }}
-        >
+        >{{ $value ?? $slot }}</textarea>
     </div>
 
     @if ($helper)

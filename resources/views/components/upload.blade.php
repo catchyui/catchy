@@ -15,78 +15,7 @@
     {{ $attributes->merge([
         'class' => 'w-full'
     ]) }}
-    x-data="{
-        dragover: false,
-        files: [],
-        updating: false,
-        error: '',
-        addFiles(fileList) {
-            if (this.updating) return;
-            this.error = '';
-            const newFiles = Array.from(fileList).map(file => {
-                if (file.type.startsWith('image/')) {
-                    file.previewUrl = URL.createObjectURL(file);
-                }
-                return file;
-            });
-            if ({{ $multiple ? 'true' : 'false' }}) {
-                this.files = [...this.files, ...newFiles];
-            } else {
-                this.files.forEach(file => {
-                    if (file.previewUrl) {
-                        URL.revokeObjectURL(file.previewUrl);
-                    }
-                });
-                this.files = newFiles.slice(0, 1);
-            }
-            this.updateInput();
-        },
-        removeFile(index) {
-            const file = this.files[index];
-            if (file && file.previewUrl) {
-                URL.revokeObjectURL(file.previewUrl);
-            }
-            this.files.splice(index, 1);
-            this.updateInput();
-        },
-        updateInput() {
-            this.updating = true;
-            try {
-                const dt = new DataTransfer();
-                this.files.forEach(file => dt.items.add(file));
-                this.$refs.fileInput.files = dt.files;
-                
-                // Trigger change event to notify form or other validation
-                this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-            } finally {
-                this.updating = false;
-            }
-        },
-        getFileSize(size) {
-            if (size < 1024) return size + ' B';
-            if (size < 1048576) return (size / 1024).toFixed(1) + ' KB';
-            return (size / 1048576).toFixed(1) + ' MB';
-        },
-        isImage(file) {
-            return file.type.startsWith('image/');
-        },
-        getPreviewUrl(file) {
-            return file.previewUrl || '';
-        },
-        handleValidationErrors(event) {
-            const key = '{{ $name }}'.replace(/\[\]/g, '').replace(/\[/g, '.').replace(/\]/g, '');
-            if (event.detail && event.detail[key]) {
-                this.error = event.detail[key][0];
-            }
-        },
-        destroy() {
-            this.files.forEach(file => {
-                if (file.previewUrl) {
-                    URL.revokeObjectURL(file.previewUrl);
-                }
-            });
-        }
-    }"
+    x-data="catchyUpload({ name: @js($name), multiple: @js($multiple) })"
     x-on:catchy-validation-errors.window="handleValidationErrors($event)"
     x-on:catchy:validation-errors.window="handleValidationErrors($event)"
 >
@@ -114,6 +43,8 @@
         }"
         class="relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ease-in-out group outline-none focus-within:ring-2 focus-within:ring-indigo-500"
         tabindex="0"
+        role="button"
+        aria-label="{{ $label }}"
         x-on:keydown.enter="$refs.fileInput.click()"
         x-on:keydown.space="$refs.fileInput.click()"
     >

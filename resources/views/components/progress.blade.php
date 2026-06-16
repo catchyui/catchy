@@ -20,64 +20,7 @@
 @endphp
 
 <div 
-    x-data="{ 
-        show: false, 
-        progress: 0,
-        init() {
-            const forId = '{{ $for }}';
-            let target = null;
-            
-            if (forId) {
-                target = document.getElementById(forId);
-            } else {
-                target = this.$el.closest('form') || window;
-            }
-            
-            if (!target) return;
-            
-            const handleStart = (e) => {
-                // If listening on window, ignore form uploads so the global bar doesn't animate on inline uploads
-                if (target === window && e.detail && e.detail.trigger && e.detail.trigger.tagName === 'FORM') {
-                    return;
-                }
-                this.show = true;
-                this.progress = 0;
-            };
-            
-            const handleProgress = (e) => {
-                // If scoped to a target, only react if this progress matches the target
-                if (target !== window && e.detail && e.detail.trigger !== target) {
-                    return;
-                }
-                this.show = true;
-                this.progress = e.detail.percent;
-            };
-            
-            const handleEnd = () => {
-                this.progress = 100;
-                setTimeout(() => {
-                    this.show = false;
-                    setTimeout(() => { this.progress = 0; }, 300);
-                }, 500);
-            };
-            
-            const handleError = () => {
-                setTimeout(() => {
-                    this.show = false;
-                    setTimeout(() => { this.progress = 0; }, 300);
-                }, 500);
-            };
-            
-            target.addEventListener('catchy-start', handleStart);
-            target.addEventListener('catchy:start', handleStart);
-            target.addEventListener('catchy-progress', handleProgress);
-            target.addEventListener('catchy:progress', handleProgress);
-            target.addEventListener('catchy-end', handleEnd);
-            target.addEventListener('catchy:end', handleEnd);
-            target.addEventListener('catchy-error', handleError);
-            target.addEventListener('catchy:error', handleError);
-        }
-    }"
+    x-data="catchyProgress({ for: @js($for) })"
     x-show="show"
     x-transition:enter="transition ease-out duration-300"
     x-transition:enter-start="opacity-0 scale-95"
@@ -87,8 +30,13 @@
     x-transition:leave-end="opacity-0 scale-95"
     {{ $attributes->merge([
         'class' => 'w-full space-y-2',
-        'style' => 'display: none;'
+        'style' => 'display: none;',
+        'role' => 'progressbar',
+        'aria-valuemin' => '0',
+        'aria-valuemax' => '100',
+        'aria-label' => $label,
     ]) }}
+    :aria-valuenow="progress"
 >
     @if ($showPercent)
         <div class="flex justify-between items-center text-xs font-semibold text-gray-700 dark:text-gray-300">

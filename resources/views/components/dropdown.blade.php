@@ -18,7 +18,13 @@
     @close.stop="open = false" 
     class="relative inline-block text-start"
 >
-    <div @click="open = !open" class="cursor-pointer">
+    <div 
+        @click="open = !open" 
+        class="cursor-pointer"
+        role="button"
+        aria-haspopup="true"
+        :aria-expanded="open.toString()"
+    >
         {{ $trigger }}
     </div>
 
@@ -32,6 +38,7 @@
         x-transition:leave-end="transform opacity-0 scale-95"
         class="absolute z-50 mt-2 {{ $width }} rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 py-1 focus:outline-none {{ $alignmentClasses }}"
         style="display: none;"
+        role="menu"
     >
         <div class="rounded-xl py-1 bg-white dark:bg-slate-900">
             {{ $content }}
