@@ -50,21 +50,38 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
     }
 
     /**
-     * Extract both title and container in a single DOM parse operation.
+     * Extract the inner HTML of the <head> element from the HTML page.
+     *
+     * @param  string  $html
+     * @return string|null
+     */
+    public function extractHead(string $html): ?string
+    {
+        $dom = $this->parseHtml($html);
+        if (!$dom) {
+            return null;
+        }
+
+        return $this->extractHeadFromDom($dom);
+    }
+
+    /**
+     * Extract title, head, and container in a single DOM parse operation.
      *
      * @param  string  $html
      * @param  string  $containerId
-     * @return array{title: string|null, fragment: string|null}
+     * @return array{title: string|null, head: string|null, fragment: string|null}
      */
     public function extractAll(string $html, string $containerId): array
     {
         $dom = $this->parseHtml($html);
         if (!$dom) {
-            return ['title' => null, 'fragment' => null];
+            return ['title' => null, 'head' => null, 'fragment' => null];
         }
 
         return [
             'title' => $this->extractTitleFromDom($dom),
+            'head' => $this->extractHeadFromDom($dom),
             'fragment' => $this->extractContainerFromDom($dom, $containerId),
         ];
     }
@@ -137,4 +154,47 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
 
         return $title !== '' ? $title : null;
     }
+
+    /**
+     * Extract the inner HTML of the <head> element from a parsed DOM.
+     * Excludes the <title> tag and non-dynamic elements (charset, viewport).
+     *
+     * @param  \DOMDocument  $dom
+     * @return string|null
+     */
+    protected function extractHeadFromDom(\DOMDocument $dom): ?string
+    {
+        $xpath = new \DOMXPath($dom);
+        $headNodes = $xpath->query('//head');
+
+        if ($headNodes->length === 0) {
+            return null;
+        }
+
+        $head = $headNodes->item(0);
+        $html = '';
+
+        foreach ($head->childNodes as $child) {
+            // Skip title (already extracted separately) and text nodes
+            if ($child->nodeName === 'title' || $child->nodeType === XML_TEXT_NODE) {
+                continue;
+            }
+
+            // Skip static infrastructure meta tags (charset, viewport, csrf)
+            if ($child->nodeName === 'meta') {
+                $charset = $child->getAttribute('charset');
+                $name = $child->getAttribute('name');
+                if ($charset !== '' || $name === 'viewport' || $name === 'csrf-token') {
+                    continue;
+                }
+            }
+
+            $html .= $dom->saveHTML($child);
+        }
+
+        $html = trim($html);
+
+        return $html !== '' ? $html : null;
+    }
 }
+

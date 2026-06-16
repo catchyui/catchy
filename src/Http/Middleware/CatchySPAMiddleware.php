@@ -62,10 +62,10 @@ class CatchySPAMiddleware
 
         // 2. Asset version verification (Inertia-style)
         $serverVersion = $this->versionProvider->getVersion();
-        
+
         if ($serverVersion !== '') {
             $clientVersion = $request->header('X-Catchy-Version', '');
-            
+
             // If the client has a version cached, and it differs from the server's build version
             if ($clientVersion !== '' && $clientVersion !== $serverVersion) {
                 // Return a 409 Conflict response to trigger a hard client-side reload
@@ -78,79 +78,101 @@ class CatchySPAMiddleware
         // 3. Process the request to get the response
         $response = $next($request);
 
-        // Intercept redirects and convert them to 200 OK with X-Catchy-Redirect header to preserve SPA routing and headers
+        // 4. Intercept redirects and convert them to 200 OK with X-Catchy-Redirect header
         if ($response->isRedirection()) {
-            $redirectUrl = $response->headers->get('Location');
-            $flash = [];
-            if ($request->hasSession()) {
-                foreach (['success', 'error', 'warning', 'info', 'status'] as $key) {
-                    if ($request->session()->has($key)) {
-                        $flash[$key] = $request->session()->pull($key);
-                    }
-                }
-
-                // Extract validation errors from session
-                if ($request->session()->has('errors')) {
-                    $errorBag = $request->session()->get('errors');
-                    if (method_exists($errorBag, 'getBag')) {
-                        $flash['validation_errors'] = $errorBag->getBag('default')->toArray();
-                    } elseif (method_exists($errorBag, 'toArray')) {
-                        $flash['validation_errors'] = $errorBag->toArray();
-                    }
-                }
-            }
-
-            $headers = [
-                'X-Catchy-Redirect' => $redirectUrl,
-                'X-Catchy-SPA' => 'true',
-            ];
-
-            if (!empty($flash)) {
-                $headers['X-Catchy-Flash'] = base64_encode(json_encode($flash));
-            }
-
-            if ($serverVersion !== '') {
-                $headers['X-Catchy-Version'] = $serverVersion;
-            }
-
-            return response('', 200, $headers);
+            return $this->handleRedirect($request, $response, $serverVersion);
         }
 
-        // 4. Append the current version header to the response
+        // 5. Append the current version header to the response
         if ($serverVersion !== '') {
             $response->headers->set('X-Catchy-Version', $serverVersion);
         }
 
-        // 5. Append flash messages from session to header if session exists
-        if ($request->hasSession()) {
-            $flash = [];
-            foreach (['success', 'error', 'warning', 'info', 'status'] as $key) {
-                if ($request->session()->has($key)) {
-                    $flash[$key] = $request->session()->pull($key);
-                }
-            }
+        // 6. Append flash messages from session to header if session exists
+        $this->appendFlashHeaders($request, $response);
 
-            // Extract validation errors from session
-            if ($request->session()->has('errors')) {
-                $errorBag = $request->session()->get('errors');
-                if (method_exists($errorBag, 'getBag')) {
-                    $flash['validation_errors'] = $errorBag->getBag('default')->toArray();
-                } elseif (method_exists($errorBag, 'toArray')) {
-                    $flash['validation_errors'] = $errorBag->toArray();
-                }
-            }
-
-            if (!empty($flash)) {
-                $response->headers->set('X-Catchy-Flash', base64_encode(json_encode($flash)));
-            }
-        }
-
-        // 6. Only intercept successful, non-redirection HTML responses
+        // 7. Only intercept successful, non-redirection HTML responses
         if ($this->shouldIntercept($response)) {
             $this->interceptResponse($response);
         }
 
         return $response;
+    }
+
+    /**
+     * Handle redirect responses by converting them to 200 OK with SPA headers.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Symfony\Component\HttpFoundation\Response  $response
+     * @param  string  $serverVersion
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function handleRedirect(Request $request, Response $response, string $serverVersion): Response
+    {
+        $headers = [
+            'X-Catchy-Redirect' => $response->headers->get('Location'),
+            'X-Catchy-SPA' => 'true',
+        ];
+
+        $flash = $this->extractFlashData($request);
+        if (!empty($flash)) {
+            $headers['X-Catchy-Flash'] = base64_encode(json_encode($flash));
+        }
+
+        if ($serverVersion !== '') {
+            $headers['X-Catchy-Version'] = $serverVersion;
+        }
+
+        return response('', 200, $headers);
+    }
+
+    /**
+     * Append flash messages from session to the response as a base64-encoded JSON header.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Symfony\Component\HttpFoundation\Response  $response
+     * @return void
+     */
+    protected function appendFlashHeaders(Request $request, Response $response): void
+    {
+        $flash = $this->extractFlashData($request);
+
+        if (!empty($flash)) {
+            $response->headers->set('X-Catchy-Flash', base64_encode(json_encode($flash)));
+        }
+    }
+
+    /**
+     * Extract flash messages and validation errors from the session.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array<string, mixed>
+     */
+    protected function extractFlashData(Request $request): array
+    {
+        if (!$request->hasSession()) {
+            return [];
+        }
+
+        $flash = [];
+        $session = $request->session();
+
+        foreach (['success', 'error', 'warning', 'info', 'status'] as $key) {
+            if ($session->has($key)) {
+                $flash[$key] = $session->pull($key);
+            }
+        }
+
+        if ($session->has('errors')) {
+            $errorBag = $session->get('errors');
+            if (method_exists($errorBag, 'getBag')) {
+                $flash['validation_errors'] = $errorBag->getBag('default')->toArray();
+            } elseif (method_exists($errorBag, 'toArray')) {
+                $flash['validation_errors'] = $errorBag->toArray();
+            }
+        }
+
+        return $flash;
     }
 
     /**
@@ -190,11 +212,15 @@ class CatchySPAMiddleware
 
         $containerId = config('catchy.container_id', 'catchy-app');
 
-        // Extract title and container in a single DOM parse operation
+        // Extract title, head, and container in a single DOM parse operation
         $result = $this->extractor->extractAll($content, $containerId);
 
         if ($result['title'] !== null) {
             $response->headers->set('X-Catchy-Title', base64_encode($result['title']));
+        }
+
+        if (isset($result['head']) && $result['head'] !== null) {
+            $response->headers->set('X-Catchy-Head', base64_encode($result['head']));
         }
 
         if ($result['fragment'] !== null) {

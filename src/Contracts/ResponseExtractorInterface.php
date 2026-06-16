@@ -31,11 +31,20 @@ interface ResponseExtractorInterface
     public function extractTitle(string $html): ?string;
 
     /**
-     * Extract both title and container in a single DOM parse operation.
+     * Extract the inner HTML of the <head> element from the HTML page.
+     *
+     * @param  string  $html
+     * @return string|null
+     */
+    public function extractHead(string $html): ?string;
+
+    /**
+     * Extract title, head, and container in a single DOM parse operation.
      *
      * @param  string  $html
      * @param  string  $containerId
-     * @return array{title: string|null, fragment: string|null}
+     * @return array{title: string|null, head: string|null, fragment: string|null}
      */
     public function extractAll(string $html, string $containerId): array;
 }
+
