@@ -49,6 +49,12 @@ class CatchyServiceProvider extends ServiceProvider
         $this->registerViewsAndComponents();
         $this->registerDirectives();
         $this->registerPublishing();
+        $this->registerCommands();
+
+        // Auto-publish assets in local environment if missing
+        if ($this->app->environment('local') && !$this->app->runningInConsole()) {
+            $this->autoPublishAssets();
+        }
     }
 
     /**
@@ -141,6 +147,40 @@ class CatchyServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../resources/js/catchy.js' => public_path('vendor/catchy/catchy.js'),
             ], 'catchy-assets');
+        }
+    }
+
+    /**
+     * Register console commands.
+     *
+     * @return void
+     */
+    protected function registerCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Hamzi\Catchy\Console\InstallCommand::class,
+            ]);
+        }
+    }
+
+    /**
+     * Auto-publish compiled assets to public directory in local dev if they do not exist.
+     *
+     * @return void
+     */
+    protected function autoPublishAssets(): void
+    {
+        $targetPath = public_path('vendor/catchy/catchy.js');
+        if (!file_exists($targetPath)) {
+            $sourcePath = __DIR__ . '/../resources/js/catchy.js';
+            if (file_exists($sourcePath)) {
+                $dir = dirname($targetPath);
+                if (!is_dir($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                copy($sourcePath, $targetPath);
+            }
         }
     }
 }

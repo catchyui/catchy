@@ -166,6 +166,19 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
                 const redirectUrl = response.headers.get('X-Catchy-Redirect');
                 if (redirectUrl) {
                     processFlashHeader(response, trigger);
+                    
+                    // Direct external redirect immediately to avoid CORS errors
+                    try {
+                        const targetUrl = new URL(redirectUrl, window.location.href);
+                        if (targetUrl.origin !== window.location.origin) {
+                            window.location.href = redirectUrl;
+                            return;
+                        }
+                    } catch (e) {
+                        window.location.href = redirectUrl;
+                        return;
+                    }
+
                     visit(redirectUrl, { trigger, targetId: config.containerId }, updateHistory, config, Alpine);
                     return;
                 }

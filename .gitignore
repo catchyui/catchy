@@ -4,5 +4,4 @@
 composer.lock
 .php-cs-fixer.cache
 /tests/fixtures/
-HTML;
 /node_modules/

@@ -1,5 +1,5 @@
 /**
- * Hamzi/Catchy - Alpine.js SPA Plugin v1.4.1
+ * Hamzi/Catchy - Alpine.js SPA Plugin v1.4.2
  * (c) 2026 Hamzi
  * Released under the MIT License.
  */
@@ -890,6 +890,16 @@
           const redirectUrl = response.headers.get("X-Catchy-Redirect");
           if (redirectUrl) {
             processFlashHeader(response, trigger);
+            try {
+              const targetUrl = new URL(redirectUrl, window.location.href);
+              if (targetUrl.origin !== window.location.origin) {
+                window.location.href = redirectUrl;
+                return;
+              }
+            } catch (e) {
+              window.location.href = redirectUrl;
+              return;
+            }
             visit(redirectUrl, { trigger, targetId: config.containerId }, updateHistory, config, Alpine);
             return;
           }
