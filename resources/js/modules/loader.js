@@ -1,0 +1,90 @@
+/**
+ * Catchy — Loading Bar Module
+ *
+ * CSS-only top loading progress bar with smooth animation.
+ */
+
+let loaderElement = null;
+let loaderTimer = null;
+let progressInterval = null;
+
+/**
+ * Initialize the loading bar DOM element and CSS styles.
+ *
+ * @param {Object} config
+ */
+export function initLoader(config) {
+    if (!config.loadingBar) return;
+
+    const style = document.createElement('style');
+    style.textContent = `
+        #catchy-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: ${config.loadingBarHeight};
+            background: ${config.loadingBarColor};
+            z-index: 99999;
+            transition: width 0.2s cubic-bezier(0.1, 0.8, 0.29, 1), opacity 0.4s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+    `;
+    document.head.appendChild(style);
+
+    loaderElement = document.createElement('div');
+    loaderElement.id = 'catchy-loader';
+    document.body.appendChild(loaderElement);
+}
+
+/**
+ * Triggers the CSS loader animation if the request takes more than 120ms.
+ */
+export function startLoading() {
+    if (!loaderElement) return;
+    clearTimeout(loaderTimer);
+    clearInterval(progressInterval);
+
+    loaderTimer = setTimeout(() => {
+        loaderElement.style.width = '0%';
+        loaderElement.style.opacity = '1';
+
+        let width = 0;
+        progressInterval = setInterval(() => {
+            if (width < 88) {
+                width += (90 - width) * 0.08;
+                loaderElement.style.width = `${width}%`;
+            }
+        }, 150);
+    }, 120);
+}
+
+/**
+ * Fills progress loader to 100% and fades out.
+ */
+export function stopLoading() {
+    if (!loaderElement) return;
+    clearTimeout(loaderTimer);
+    clearInterval(progressInterval);
+
+    loaderElement.style.width = '100%';
+
+    setTimeout(() => {
+        loaderElement.style.opacity = '0';
+        setTimeout(() => {
+            loaderElement.style.width = '0%';
+        }, 400);
+    }, 100);
+}
+
+/**
+ * Instantly resets the loader status.
+ */
+export function resetLoading() {
+    if (!loaderElement) return;
+    clearTimeout(loaderTimer);
+    clearInterval(progressInterval);
+    loaderElement.style.opacity = '0';
+    loaderElement.style.width = '0%';
+}
