@@ -111,7 +111,7 @@ export function handleLifecycleTriggers(trigger, type) {
  * @param {HTMLElement} trigger
  * @param {string} type
  */
-function parseShorthandAction(actionStr, trigger, type) {
+export function parseShorthandAction(actionStr, trigger, type) {
     const actions = actionStr.split(';').map(a => a.trim()).filter(Boolean);
 
     actions.forEach(action => {
@@ -129,9 +129,16 @@ function parseShorthandAction(actionStr, trigger, type) {
                 }
                 break;
             }
-            case 'reset':
-                if (trigger.tagName === 'FORM') trigger.reset();
+            case 'reset': {
+                const id = parts[1];
+                if (id) {
+                    const el = document.getElementById(id);
+                    if (el && el.tagName === 'FORM') el.reset();
+                } else if (trigger && trigger.tagName === 'FORM') {
+                    trigger.reset();
+                }
                 break;
+            }
             case 'toast': {
                 const message = parts.slice(1).join(':');
                 if (message) emit('flash', { message, type });
@@ -140,6 +147,57 @@ function parseShorthandAction(actionStr, trigger, type) {
             case 'reload': {
                 const id = parts[1];
                 if (id) emit('lazy-reload', { id });
+                break;
+            }
+            case 'click': {
+                const id = parts[1];
+                if (id) {
+                    const el = document.getElementById(id);
+                    if (el) el.click();
+                }
+                break;
+            }
+            case 'submit': {
+                const id = parts[1];
+                if (id) {
+                    const el = document.getElementById(id);
+                    if (el && el.tagName === 'FORM') {
+                        el.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                    }
+                }
+                break;
+            }
+            case 'toggle':
+            case 'add':
+            case 'remove': {
+                const className = parts[1];
+                const id = parts[2];
+                if (className && id) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (verb === 'toggle') el.classList.toggle(className);
+                        else if (verb === 'add') el.classList.add(className);
+                        else if (verb === 'remove') el.classList.remove(className);
+                    }
+                }
+                break;
+            }
+            case 'copy': {
+                const sourceId = parts[1];
+                const targetId = parts[2];
+                if (sourceId && targetId) {
+                    const src = document.getElementById(sourceId);
+                    const dest = document.getElementById(targetId);
+                    if (src && dest) {
+                        if ('value' in src && 'value' in dest) {
+                            dest.value = src.value;
+                            dest.dispatchEvent(new Event('input', { bubbles: true }));
+                            dest.dispatchEvent(new Event('change', { bubbles: true }));
+                        } else {
+                            dest.innerHTML = src.innerHTML;
+                        }
+                    }
+                }
                 break;
             }
         }
@@ -198,6 +256,10 @@ export function registerAlpineComponents(Alpine, config) {
         toasts: [],
         duration: params.duration || 4000,
         add(message, type = 'success') {
+            // Prevent duplicate toasts within a short timeframe (1 second)
+            const isDuplicate = this.toasts.some(t => t.message === message && t.type === type && (Date.now() - t.id < 1000));
+            if (isDuplicate) return;
+
             const id = Date.now();
             this.toasts.push({ id, message, type, timer: null });
             this.$nextTick(() => {

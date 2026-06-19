@@ -5,7 +5,7 @@
  */
 
 import { decodeBase64Utf8, emit, executeScriptsInContainer, focusAutofocusElements, executeCallback } from './utils.js';
-import { getCachedResponse, setCachedResponse } from './cache.js';
+import { getCachedResponse, setCachedResponse, clearCache } from './cache.js';
 import { startLoading, stopLoading, resetLoading } from './loader.js';
 import { mergeHead, mergeHeadFromHeader } from './head-merge.js';
 import { xhrRequest } from './forms.js';
@@ -58,6 +58,24 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
 
     const trigger = options.trigger || document;
 
+    // Parse custom headers from trigger element
+    if (trigger && typeof trigger.getAttribute === 'function') {
+        const customHeadersAttr = trigger.getAttribute('data-catchy-headers') || trigger.getAttribute('headers');
+        if (customHeadersAttr) {
+            customHeadersAttr.split(';').forEach(pair => {
+                const parts = pair.split(':');
+                if (parts.length >= 2) {
+                    const key = parts[0].trim();
+                    const val = parts.slice(1).join(':').trim();
+                    if (key && val) {
+                        options.headers = options.headers || {};
+                        options.headers[key] = val;
+                    }
+                }
+            });
+        }
+    }
+
     // Execute beforesend callback hook if defined
     if (executeCallback(trigger, 'data-catchy-beforesend', { url, options, trigger }) === false) {
         return;
@@ -81,6 +99,12 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
     }
 
     function restoreSubmitButton() {
+        if (trigger && typeof trigger.classList?.remove === 'function') {
+            trigger.classList.remove('catchy-loading');
+        }
+        document.body.classList.remove('catchy-loading');
+        document.documentElement.classList.remove('catchy-loading');
+
         if (submitBtn && submitBtn.dataset.originalHtml) {
             submitBtn.innerHTML = submitBtn.dataset.originalHtml;
             submitBtn.disabled = false;
@@ -88,6 +112,13 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
             delete submitBtn.dataset.originalHtml;
         }
     }
+
+    // Add loading class to trigger and document elements
+    if (trigger && typeof trigger.classList?.add === 'function') {
+        trigger.classList.add('catchy-loading');
+    }
+    document.body.classList.add('catchy-loading');
+    document.documentElement.classList.add('catchy-loading');
 
     startLoading();
 
@@ -100,6 +131,9 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
 
         // 1. Try to resolve from cache (only for GET requests)
         const isGet = !options.method || options.method.toUpperCase() === 'GET';
+        if (!isGet) {
+            clearCache();
+        }
         const cached = isGet ? getCachedResponse(url, config.cacheTTL) : null;
 
         if (cached) {
@@ -179,6 +213,35 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
                         return;
                     }
 
+                    // Check if there are validation errors in the response
+                    let hasValidationErrors = false;
+                    const flashHeader = response.headers.get('X-Catchy-Flash');
+                    if (flashHeader) {
+                        try {
+                            const flashJson = decodeBase64Utf8(flashHeader);
+                            const flash = JSON.parse(flashJson);
+                            if (flash && flash.validation_errors) {
+                                hasValidationErrors = true;
+                            }
+                        } catch (e) {}
+                    }
+
+                    if (hasValidationErrors) {
+                        stopLoading();
+                        restoreSubmitButton();
+                        executeCallback(trigger, 'data-catchy-error', { url, error: new Error('Validation failed'), trigger });
+                        handleLifecycleTriggers(trigger, 'error');
+                        emit('error', { url, error: new Error('Validation failed'), trigger }, trigger);
+                        return;
+                    }
+
+                    // Close any active modals and offcanvas drawers on successful redirect
+                    const modals = document.querySelectorAll('[catchy-modal], #catchy-modal, #task-modal, #delete-confirm-modal');
+                    modals.forEach(m => emit('modal-close', {}, m));
+
+                    const drawers = document.querySelectorAll('[catchy-offcanvas], #catchy-offcanvas, #task-drawer');
+                    drawers.forEach(d => emit('offcanvas-close', {}, d));
+
                     visit(redirectUrl, { trigger, targetId: config.containerId }, updateHistory, config, Alpine);
                     return;
                 }
@@ -235,6 +298,10 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
             const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
             const offcanvas = resolveOffcanvas(trigger);
             if (offcanvas) {
+                // Close any active modals to avoid overlay issues
+                const modals = document.querySelectorAll('[catchy-modal], #catchy-modal, #task-modal, #delete-confirm-modal');
+                modals.forEach(m => emit('modal-close', {}, m));
+
                 emit('offcanvas-load', { html: incomingContent.innerHTML, title: doc.title || '' }, offcanvas);
                 stopLoading();
                 executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
@@ -252,6 +319,10 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
             const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
             const modal = resolveModal(trigger);
             if (modal) {
+                // Close any active offcanvas drawers to avoid overlap issues
+                const drawers = document.querySelectorAll('[catchy-offcanvas], #catchy-offcanvas, #task-drawer');
+                drawers.forEach(d => emit('offcanvas-close', {}, d));
+
                 emit('modal-load', { html: incomingContent.innerHTML, title: doc.title || '' }, modal);
                 stopLoading();
                 executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
@@ -335,10 +406,16 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
             window.scrollTo({ left: options.state.scrollX, top: options.state.scrollY, behavior: 'instant' });
         } else {
             const finalURLObj = new URL(finalUrl);
-            const keepScroll = trigger && typeof trigger.getAttribute === 'function' && trigger.getAttribute('data-catchy-scroll') === 'keep';
+            const scrollAttr = trigger && typeof trigger.getAttribute === 'function' ? trigger.getAttribute('data-catchy-scroll') : null;
 
-            if (keepScroll) {
+            if (scrollAttr === 'keep') {
                 // Do not change scroll position
+            } else if (scrollAttr && document.querySelector(scrollAttr)) {
+                try {
+                    document.querySelector(scrollAttr).scrollIntoView({ behavior: 'smooth' });
+                } catch (e) {
+                    document.querySelector(scrollAttr).scrollIntoView();
+                }
             } else if (finalURLObj.hash) {
                 const el = document.querySelector(finalURLObj.hash);
                 if (el) el.scrollIntoView();

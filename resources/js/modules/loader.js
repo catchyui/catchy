@@ -42,6 +42,8 @@ export function initLoader(config) {
  * Triggers the CSS loader animation if the request takes more than 120ms.
  */
 export function startLoading() {
+    document.body.classList.add('catchy-loading');
+    document.documentElement.classList.add('catchy-loading');
     if (!loaderElement) return;
     clearTimeout(loaderTimer);
     clearInterval(progressInterval);
@@ -64,6 +66,8 @@ export function startLoading() {
  * Fills progress loader to 100% and fades out.
  */
 export function stopLoading() {
+    document.body.classList.remove('catchy-loading');
+    document.documentElement.classList.remove('catchy-loading');
     if (!loaderElement) return;
     clearTimeout(loaderTimer);
     clearInterval(progressInterval);
@@ -82,6 +86,8 @@ export function stopLoading() {
  * Instantly resets the loader status.
  */
 export function resetLoading() {
+    document.body.classList.remove('catchy-loading');
+    document.documentElement.classList.remove('catchy-loading');
     if (!loaderElement) return;
     clearTimeout(loaderTimer);
     clearInterval(progressInterval);

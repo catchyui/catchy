@@ -152,8 +152,30 @@ export function shouldIgnoreForm(form, ignoreAttribute) {
  */
 export function executeCallback(element, attrName, context) {
     if (!element || typeof element.getAttribute !== 'function') return;
-    const callback = element.getAttribute(attrName);
+
+    let callback = element.getAttribute(attrName);
+
+    // Support fallback aliases for ease of use
+    if (!callback) {
+        if (attrName === 'data-catchy-beforesend') {
+            callback = element.getAttribute('onbeforesend') || element.getAttribute('beforesend');
+        } else if (attrName === 'data-catchy-success') {
+            callback = element.getAttribute('onsuccess') || element.getAttribute('success');
+        } else if (attrName === 'data-catchy-error') {
+            callback = element.getAttribute('onerror') || element.getAttribute('error');
+        }
+    }
+
     if (!callback) return;
+
+    // Evaluate in Alpine context if available for seamless reactive variable bindings
+    if (window.Alpine && typeof window.Alpine.evaluate === 'function') {
+        try {
+            return window.Alpine.evaluate(element, callback, { extraLocals: { event: context } });
+        } catch (e) {
+            console.error(`Catchy: Alpine evaluation error for callback "${callback}":`, e);
+        }
+    }
 
     try {
         if (typeof window[callback] === 'function') {
@@ -162,6 +184,6 @@ export function executeCallback(element, attrName, context) {
         const fn = new Function('event', `with(window) { ${callback} }`);
         return fn(context);
     } catch (e) {
-        console.error(`Catchy: Error in ${attrName} callback execution:`, e);
+        console.error(`Catchy: Error in callback execution for "${callback}":`, e);
     }
 }

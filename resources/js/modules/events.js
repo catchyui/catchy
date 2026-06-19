@@ -6,6 +6,7 @@
 
 import { shouldIgnoreLink, shouldIgnoreForm, emit } from './utils.js';
 import { submitForm } from './forms.js';
+import { parseShorthandAction } from './components.js';
 
 let pendingAction = null;
 
@@ -21,6 +22,18 @@ export function initEventListeners(config, visitFn, submitFormFn) {
     document.addEventListener('click', (event) => {
         const target = event.target;
         if (!target || typeof target.closest !== 'function') return;
+
+        // Handle Declarative Click Actions (e.g. data-catchy-click / data-catchy-action)
+        const actionEl = target.closest('[data-catchy-click], [data-catchy-action], [data-catchy-on-click]');
+        if (actionEl) {
+            const actionStr = actionEl.getAttribute('data-catchy-click') || actionEl.getAttribute('data-catchy-action') || actionEl.getAttribute('data-catchy-on-click');
+            if (actionStr) {
+                if (actionEl.tagName === 'A' || (actionEl.tagName === 'BUTTON' && actionEl.getAttribute('type') !== 'submit')) {
+                    event.preventDefault();
+                }
+                parseShorthandAction(actionStr, actionEl, 'click');
+            }
+        }
 
         // Handle Confirm Button click inside a modal
         const confirmBtn = target.closest('[data-catchy-confirm-button]');

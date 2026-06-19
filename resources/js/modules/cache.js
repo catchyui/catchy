@@ -36,6 +36,13 @@ export function setCachedResponse(url, data) {
 }
 
 /**
+ * Clear the cache Map.
+ */
+export function clearCache() {
+    cache.clear();
+}
+
+/**
  * Get the raw cache Map (for public API exposure).
  *
  * @returns {Map}

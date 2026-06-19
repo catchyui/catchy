@@ -4,6 +4,9 @@
     'beforesend' => null,
     'success' => null,
     'error' => null,
+    'onbeforesend' => null,
+    'onsuccess' => null,
+    'onerror' => null,
 ])
 
 @php
@@ -11,27 +14,31 @@
     $formMethod = $method === 'GET' ? 'GET' : 'POST';
     $spoofMethod = !in_array($method, ['GET', 'POST']) ? $method : null;
 
+    $beforesendValue = $beforesend ?? $onbeforesend;
+    $successValue = $success ?? $onsuccess;
+    $errorValue = $error ?? $onerror;
+
     // Build form attributes dynamically to avoid syntax issues in IDE formatters
     $formAttributes = [
         'x-data' => true,
     ];
 
-    if ($beforesend) {
-        $formAttributes['@catchy:start'] = $beforesend;
-        $formAttributes['@catchy-start'] = $beforesend;
-        $formAttributes['data-catchy-beforesend'] = $beforesend;
+    if ($beforesendValue) {
+        $formAttributes['@catchy:start'] = $beforesendValue;
+        $formAttributes['@catchy-start'] = $beforesendValue;
+        $formAttributes['data-catchy-beforesend'] = $beforesendValue;
     }
 
-    if ($success) {
-        $formAttributes['@catchy:end'] = $success;
-        $formAttributes['@catchy-end'] = $success;
-        $formAttributes['data-catchy-success'] = $success;
+    if ($successValue) {
+        $formAttributes['@catchy:end'] = $successValue;
+        $formAttributes['@catchy-end'] = $successValue;
+        $formAttributes['data-catchy-success'] = $successValue;
     }
 
-    if ($error) {
-        $formAttributes['@catchy:error'] = $error;
-        $formAttributes['@catchy-error'] = $error;
-        $formAttributes['data-catchy-error'] = $error;
+    if ($errorValue) {
+        $formAttributes['@catchy:error'] = $errorValue;
+        $formAttributes['@catchy-error'] = $errorValue;
+        $formAttributes['data-catchy-error'] = $errorValue;
     }
 @endphp
 

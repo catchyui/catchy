@@ -23,6 +23,11 @@ import { initConnectivity } from './modules/connectivity.js';
 function CatchyPlugin(Alpine) {
     "use strict";
 
+    // Prevent duplicate registrations
+    if (Alpine.catchy) {
+        return;
+    }
+
     // Defer morph plugin warning check
     setTimeout(() => {
         if (!Alpine.morph) {
