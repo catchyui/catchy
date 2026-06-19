@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy;
+namespace Hamzi\Catchy\Support;
 
 /**
  * Class CatchyDirective
  *
  * Compiles and renders the dynamic @catchy Blade directive attributes for forms.
+ * Caches in-memory assets for faster compiles.
  *
- * @package Hamzi\Catchy
+ * @package Hamzi\Catchy\Support
  */
 class CatchyDirective
 {
@@ -47,7 +48,7 @@ class CatchyDirective
     /**
      * Cache storage for JavaScript file contents, keyed by file path.
      *
-     * @var array
+     * @var array<string, string>
      */
     private static array $jsCache = [];
 
@@ -60,8 +61,9 @@ class CatchyDirective
     public static function getJavaScript(string $path): string
     {
         if (!isset(self::$jsCache[$path])) {
-            self::$jsCache[$path] = file_exists($path) ? file_get_contents($path) : '';
+            self::$jsCache[$path] = file_exists($path) ? (string) file_get_contents($path) : '';
         }
+
         return self::$jsCache[$path];
     }
 }

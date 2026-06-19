@@ -29,7 +29,7 @@ return [
     | to load the latest builds.
     |
     | You can define a static string here (like a release number), or leave it
-    | empty to let the AssetVersionProvider automatically hash the production
+    | empty to let the AssetVersionRepository automatically hash the production
     | Vite build/manifest.json file. Set to null to disable version checks.
     |
     | Default: '' (Auto-resolve Vite build manifests)
@@ -83,6 +83,57 @@ return [
         'enabled' => true,
         'height' => '3px',   // Loading bar thickness
         'color' => 'linear-gradient(to right, #4f46e5, #06b6d4)', // CSS color/gradient
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTTP Pipeline Stages
+    |--------------------------------------------------------------------------
+    |
+    | The middleware filters requests through these stages. You can customize,
+    | append, or swap stages to inject custom logic (e.g. tracking, logs)
+    | inside your SPA application routing cycle.
+    |
+    */
+
+    'pipeline' => [
+        \Hamzi\Catchy\Http\Middleware\Pipeline\VerifyAssetVersion::class,
+        \Hamzi\Catchy\Http\Middleware\Pipeline\HandleRedirectResponse::class,
+        \Hamzi\Catchy\Http\Middleware\Pipeline\AppendResponseHeaders::class,
+        \Hamzi\Catchy\Http\Middleware\Pipeline\ExtractResponseContainer::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dynamic UI Blade Components
+    |--------------------------------------------------------------------------
+    |
+    | Map the built-in package component views to their corresponding
+    | HTML tags. This allows customizing, styling, or swapping components
+    | without modifying core package source files.
+    |
+    */
+
+    'components' => [
+        'spinner'   => 'catchy-spinner',
+        'skeleton'  => 'catchy-skeleton',
+        'fade'      => 'catchy-fade',
+        'form'      => 'catchy-form',
+        'modal'     => 'catchy-modal',
+        'toast'     => 'catchy-toast',
+        'progress'  => 'catchy-progress',
+        'upload'    => 'catchy-upload',
+        'error'     => 'catchy-error',
+        'lazy'      => 'catchy-lazy',
+        'offcanvas' => 'catchy-offcanvas',
+        'button'    => 'catchy-button',
+        'card'      => 'catchy-card',
+        'alert'     => 'catchy-alert',
+        'badge'     => 'catchy-badge',
+        'dropdown'  => 'catchy-dropdown',
+        'input'     => 'catchy-input',
+        'textarea'  => 'catchy-textarea',
+        'select'    => 'catchy-select',
     ],
 
 ];

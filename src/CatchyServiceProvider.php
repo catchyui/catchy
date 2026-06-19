@@ -7,10 +7,13 @@ namespace Hamzi\Catchy;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 use Hamzi\Catchy\Http\Middleware\CatchySPAMiddleware;
-use Hamzi\Catchy\Contracts\ResponseExtractorInterface;
-use Hamzi\Catchy\Extractors\HtmlResponseExtractor;
-use Hamzi\Catchy\Contracts\VersionProviderInterface;
-use Hamzi\Catchy\Providers\AssetVersionProvider;
+use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
+use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
+use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
+use Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository;
+use Hamzi\Catchy\Domain\Contracts\ComponentRepositoryInterface;
+use Hamzi\Catchy\Infrastructure\Repositories\ConfigComponentRepository;
+use Hamzi\Catchy\Support\CatchyDirective;
 
 /**
  * Class CatchyServiceProvider
@@ -32,9 +35,10 @@ class CatchyServiceProvider extends ServiceProvider
         // Merge default configuration
         $this->mergeConfigFrom(__DIR__ . '/../config/catchy.php', 'catchy');
 
-        // Bind contracts to implementations to satisfy Dependency Inversion (DIP)
+        // Bind contracts to implementations (Dependency Inversion Principle - DIP)
         $this->app->bind(ResponseExtractorInterface::class, HtmlResponseExtractor::class);
-        $this->app->singleton(VersionProviderInterface::class, AssetVersionProvider::class);
+        $this->app->singleton(VersionRepositoryInterface::class, AssetVersionRepository::class);
+        $this->app->singleton(ComponentRepositoryInterface::class, ConfigComponentRepository::class);
     }
 
     /**
@@ -68,7 +72,7 @@ class CatchyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load views and register custom Blade UI components.
+     * Load views and register custom Blade UI components using the dynamic ComponentRepository.
      *
      * @return void
      */
@@ -77,30 +81,10 @@ class CatchyServiceProvider extends ServiceProvider
         // Load package views (enables custom component resolution)
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'catchy');
 
-        // Register custom Blade component tags dynamically
-        $components = [
-            'spinner'  => 'catchy-spinner',
-            'skeleton' => 'catchy-skeleton',
-            'fade'     => 'catchy-fade',
-            'form'     => 'catchy-form',
-            'modal'    => 'catchy-modal',
-            'toast'    => 'catchy-toast',
-            'progress' => 'catchy-progress',
-            'upload'   => 'catchy-upload',
-            'error'    => 'catchy-error',
-            'lazy'     => 'catchy-lazy',
-            'offcanvas' => 'catchy-offcanvas',
-            'button'   => 'catchy-button',
-            'card'     => 'catchy-card',
-            'alert'    => 'catchy-alert',
-            'badge'    => 'catchy-badge',
-            'dropdown' => 'catchy-dropdown',
-            'input'    => 'catchy-input',
-            'textarea' => 'catchy-textarea',
-            'select'   => 'catchy-select',
-        ];
+        // Fetch dynamic component configurations from repository
+        $repository = $this->app->make(ComponentRepositoryInterface::class);
 
-        foreach ($components as $view => $alias) {
+        foreach ($repository->getComponents() as $view => $alias) {
             Blade::component("catchy::components.{$view}", $alias);
         }
     }
@@ -114,7 +98,7 @@ class CatchyServiceProvider extends ServiceProvider
     {
         // Register the form custom directive
         Blade::directive('catchyForm', function ($expression) {
-            return "<?php echo \\Hamzi\\Catchy\\CatchyDirective::render(" . ($expression ?: '[]') . "); ?>";
+            return "<?php echo \\Hamzi\\Catchy\\Support\\CatchyDirective::render(" . ($expression ?: '[]') . "); ?>";
         });
 
         // Register the scripts/config injection directive
