@@ -96,6 +96,9 @@ export function submitForm(form, visitFn) {
         visitFn(url.toString(), { trigger: form });
     } else {
         const formData = new FormData(form);
+        if (!formData.has('_method') && method !== 'POST') {
+            formData.append('_method', method);
+        }
         const options = {
             method: 'POST',
             body: formData,

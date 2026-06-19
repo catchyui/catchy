@@ -331,7 +331,12 @@ function applyScroll(trigger, targetId, finalUrl, oldPathname, options, config) 
         ? trigger.getAttribute('data-catchy-scroll')
         : null;
 
-    if (scrollSetting === 'preserve' || options.scroll === 'preserve') {
+    if (
+        scrollSetting === 'preserve' ||
+        scrollSetting === 'keep' ||
+        options.scroll === 'preserve' ||
+        options.scroll === 'keep'
+    ) {
         return;
     }
 

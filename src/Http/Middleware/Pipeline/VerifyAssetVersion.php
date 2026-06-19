@@ -40,9 +40,9 @@ class VerifyAssetVersion
      *
      * @param  \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData  $data
      * @param  \Closure(\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData): (\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData)  $next
-     * @return mixed
+     * @return \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData
      */
-    public function handle(CatchyPipelineData $data, Closure $next)
+    public function handle(CatchyPipelineData $data, Closure $next): CatchyPipelineData
     {
         $request = $data->getRequest();
         $serverVersion = $this->versionRepository->getVersion();

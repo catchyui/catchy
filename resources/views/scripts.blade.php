@@ -21,7 +21,7 @@
         'loadingBar' => config('catchy.loading_bar.enabled', true),
         'loadingBarHeight' => config('catchy.loading_bar.height', '3px'),
         'loadingBarColor' => config('catchy.loading_bar.color', 'linear-gradient(to right, #4f46e5, #06b6d4)'),
-    ]) !!};
+    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};
 </script>
 
 @if($usePublished)

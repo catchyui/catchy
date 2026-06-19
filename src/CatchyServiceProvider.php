@@ -36,7 +36,7 @@ class CatchyServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/catchy.php', 'catchy');
 
         // Bind contracts to implementations (Dependency Inversion Principle - DIP)
-        $this->app->bind(ResponseExtractorInterface::class, HtmlResponseExtractor::class);
+        $this->app->singleton(ResponseExtractorInterface::class, HtmlResponseExtractor::class);
         $this->app->singleton(VersionRepositoryInterface::class, AssetVersionRepository::class);
         $this->app->singleton(ComponentRepositoryInterface::class, ConfigComponentRepository::class);
     }
@@ -103,9 +103,18 @@ class CatchyServiceProvider extends ServiceProvider
 
         // Register the scripts/config injection directive
         Blade::directive('catchyScripts', function () {
-            $path = __DIR__ . '/../resources/js/catchy.js';
-            return "<?php echo view('catchy::scripts', ['jsPath' => '{$path}'])->render(); ?>";
+            return "<?php echo view('catchy::scripts', ['jsPath' => \\Hamzi\\Catchy\\CatchyServiceProvider::getJsPath()])->render(); ?>";
         });
+    }
+
+    /**
+     * Get the absolute path to the package's compiled catchy.js asset.
+     *
+     * @return string
+     */
+    public static function getJsPath(): string
+    {
+        return __DIR__ . '/../resources/js/catchy.js';
     }
 
     /**

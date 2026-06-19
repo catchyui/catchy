@@ -46,6 +46,9 @@ export function registerSyncDirective(Alpine, config) {
                 let body;
                 if (modifiers.includes('form') && form) {
                     body = new FormData(form);
+                    if (!body.has('_token') && csrfToken) {
+                        body.append('_token', csrfToken);
+                    }
                 } else {
                     if (!name) {
                         console.warn('Catchy: x-catchy-sync requires el to have a name or id attribute when not using .form modifier.');

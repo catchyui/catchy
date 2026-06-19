@@ -100,8 +100,8 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
             return null;
         }
 
-        // Suppress HTML parsing warnings gracefully
-        libxml_use_internal_errors(true);
+        // Suppress HTML parsing warnings gracefully while preserving global state
+        $previousState = libxml_use_internal_errors(true);
         $dom = new DOMDocument();
 
         // Enforce UTF-8 parsing to avoid encoding issues with Arabic/special characters
@@ -111,6 +111,7 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
         );
 
         libxml_clear_errors();
+        libxml_use_internal_errors($previousState);
 
         return $loaded ? $dom : null;
     }
@@ -127,8 +128,8 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
         $xpath = new DOMXPath($dom);
 
         // Safely escape the containerId to prevent XPath injection
-        $escapedId = addcslashes($containerId, "'\\");
-        $nodes = $xpath->query("//*[@id='{$escapedId}']");
+        $escapedId = $this->xpathEscapeString($containerId);
+        $nodes = $xpath->query("//*[@id={$escapedId}]");
 
         if ($nodes === false || $nodes->length === 0) {
             return null;
@@ -137,6 +138,25 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
         $fragment = $dom->saveHTML($nodes->item(0));
 
         return $fragment ?: null;
+    }
+
+    /**
+     * Proper XPath string escaping.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    private function xpathEscapeString(string $value): string
+    {
+        if (!str_contains($value, "'")) {
+            return "'{$value}'";
+        }
+        if (!str_contains($value, '"')) {
+            return "\"{$value}\"";
+        }
+        // Complex case: string contains both single and double quotes, use concat()
+        $parts = explode("'", $value);
+        return "concat('" . implode("',\"'\",'", $parts) . "')";
     }
 
     /**

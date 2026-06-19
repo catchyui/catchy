@@ -252,16 +252,18 @@ export function registerAlpineComponents(Alpine, config) {
     }));
 
     // Toast component
+    let toastCounter = 0;
     Alpine.data('catchyToast', (params = {}) => ({
         toasts: [],
         duration: params.duration || 4000,
         add(message, type = 'success') {
+            const now = Date.now();
             // Prevent duplicate toasts within a short timeframe (1 second)
-            const isDuplicate = this.toasts.some(t => t.message === message && t.type === type && (Date.now() - t.id < 1000));
+            const isDuplicate = this.toasts.some(t => t.message === message && t.type === type && (now - t.timestamp < 1000));
             if (isDuplicate) return;
 
-            const id = Date.now();
-            this.toasts.push({ id, message, type, timer: null });
+            const id = ++toastCounter;
+            this.toasts.push({ id, message, type, timestamp: now, timer: null });
             this.$nextTick(() => {
                 const toast = this.toasts.find(t => t.id === id);
                 if (toast) {

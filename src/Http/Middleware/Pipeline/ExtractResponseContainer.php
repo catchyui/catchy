@@ -40,16 +40,16 @@ class ExtractResponseContainer
      *
      * @param  \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData  $data
      * @param  \Closure(\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData): (\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData)  $next
-     * @return mixed
+     * @return \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData
      */
-    public function handle(CatchyPipelineData $data, Closure $next)
+    public function handle(CatchyPipelineData $data, Closure $next): CatchyPipelineData
     {
         $response = $data->getResponse();
 
         if ($this->shouldIntercept($response)) {
             $content = $response->getContent();
 
-            if (!empty($content)) {
+            if (is_string($content) && $content !== '') {
                 $request = $data->getRequest();
                 $containerId = $request->header('X-Catchy-Target', config('catchy.container_id', 'catchy-app'));
                 if (str_starts_with($containerId, '#')) {
@@ -58,6 +58,9 @@ class ExtractResponseContainer
 
                 // Extract title, head, and container in a single DOM parse operation
                 $result = $this->extractor->extractAll($content, $containerId);
+
+                // Clone response to preserve immutability
+                $response = clone $response;
 
                 if ($result['title'] !== null) {
                     $response->headers->set('X-Catchy-Title', base64_encode($result['title']));
@@ -70,6 +73,8 @@ class ExtractResponseContainer
                 if ($result['fragment'] !== null) {
                     $response->setContent($result['fragment']);
                 }
+
+                return $next($data->withResponse($response));
             }
         }
 
@@ -98,3 +103,4 @@ class ExtractResponseContainer
         return true;
     }
 }
+

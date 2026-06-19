@@ -5,6 +5,7 @@
  */
 
 const cache = new Map();
+const MAX_CACHE_SIZE = 50;
 
 /**
  * Get a cached response if it exists and is not expired.
@@ -32,6 +33,12 @@ export function getCachedResponse(url, ttl) {
  * @param {Object} data
  */
 export function setCachedResponse(url, data) {
+    if (cache.has(url)) {
+        cache.delete(url);
+    } else if (cache.size >= MAX_CACHE_SIZE) {
+        const firstKey = cache.keys().next().value;
+        cache.delete(firstKey);
+    }
     cache.set(url, { ...data, timestamp: Date.now() });
 }
 

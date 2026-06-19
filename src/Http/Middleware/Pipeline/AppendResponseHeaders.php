@@ -7,6 +7,7 @@ namespace Hamzi\Catchy\Http\Middleware\Pipeline;
 use Closure;
 use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
 use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
+use Hamzi\Catchy\Support\FlashExtractor;
 
 /**
  * Class AppendResponseHeaders
@@ -40,11 +41,11 @@ class AppendResponseHeaders
      *
      * @param  \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData  $data
      * @param  \Closure(\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData): (\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData)  $next
-     * @return mixed
+     * @return \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData
      */
-    public function handle(CatchyPipelineData $data, Closure $next)
+    public function handle(CatchyPipelineData $data, Closure $next): CatchyPipelineData
     {
-        $response = $data->getResponse();
+        $response = clone $data->getResponse();
         $request = $data->getRequest();
 
         $serverVersion = $this->versionRepository->getVersion();
@@ -55,45 +56,13 @@ class AppendResponseHeaders
         }
 
         // 2. Append flash messages from session to header if session exists
-        $flash = $this->extractFlashData($request);
+        $flash = FlashExtractor::extract($request, true);
 
         if (!empty($flash)) {
             $response->headers->set('X-Catchy-Flash', base64_encode((string) json_encode($flash)));
         }
 
-        return $next($data);
-    }
-
-    /**
-     * Extract flash messages and validation errors from the session.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array<string, mixed>
-     */
-    protected function extractFlashData($request): array
-    {
-        if (!$request->hasSession()) {
-            return [];
-        }
-
-        $flash = [];
-        $session = $request->session();
-
-        foreach (['success', 'error', 'warning', 'info', 'status'] as $key) {
-            if ($session->has($key)) {
-                $flash[$key] = $session->pull($key);
-            }
-        }
-
-        if ($session->has('errors')) {
-            $errorBag = $session->get('errors');
-            if (method_exists($errorBag, 'getBag')) {
-                $flash['validation_errors'] = $errorBag->getBag('default')->toArray();
-            } elseif (method_exists($errorBag, 'toArray')) {
-                $flash['validation_errors'] = $errorBag->toArray();
-            }
-        }
-
-        return $flash;
+        return $next($data->withResponse($response));
     }
 }
+

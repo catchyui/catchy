@@ -17,6 +17,21 @@ use Hamzi\Catchy\Domain\Contracts\ComponentRepositoryInterface;
 class ConfigComponentRepository implements ComponentRepositoryInterface
 {
     /**
+     * The cached components mapping.
+     *
+     * @var array<string, string>
+     */
+    private array $components;
+
+    /**
+     * ConfigComponentRepository constructor.
+     */
+    public function __construct()
+    {
+        $this->components = config('catchy.components', []);
+    }
+
+    /**
      * Retrieve all registered components as a key-value mapping.
      * The key is the template name, and the value is the component alias tag.
      *
@@ -24,7 +39,7 @@ class ConfigComponentRepository implements ComponentRepositoryInterface
      */
     public function getComponents(): array
     {
-        return config('catchy.components', []);
+        return $this->components;
     }
 
     /**
@@ -35,9 +50,7 @@ class ConfigComponentRepository implements ComponentRepositoryInterface
      */
     public function has(string $name): bool
     {
-        $components = $this->getComponents();
-
-        return isset($components[$name]);
+        return isset($this->components[$name]);
     }
 
     /**
@@ -48,8 +61,6 @@ class ConfigComponentRepository implements ComponentRepositoryInterface
      */
     public function get(string $name): ?string
     {
-        $components = $this->getComponents();
-
-        return $components[$name] ?? null;
+        return $this->components[$name] ?? null;
     }
 }

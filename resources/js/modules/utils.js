@@ -93,7 +93,16 @@ export function shouldIgnoreLink(link, event, ignoreAttribute) {
     const href = link.getAttribute('href');
     if (!href) return true;
 
-    if (href.startsWith('#') || href.startsWith('javascript:')) return true;
+    if (
+        href.startsWith('#') ||
+        href.startsWith('javascript:') ||
+        href.startsWith('mailto:') ||
+        href.startsWith('tel:') ||
+        href.startsWith('blob:') ||
+        href.startsWith('data:')
+    ) {
+        return true;
+    }
     if (link.hasAttribute(ignoreAttribute)) return true;
     if (link.target && link.target.toLowerCase() !== '_self') return true;
     if (link.hasAttribute('download')) return true;
@@ -181,8 +190,7 @@ export function executeCallback(element, attrName, context) {
         if (typeof window[callback] === 'function') {
             return window[callback](context);
         }
-        const fn = new Function('event', `with(window) { ${callback} }`);
-        return fn(context);
+        console.warn(`Catchy: Unknown callback "${callback}". Only registered window functions are allowed.`);
     } catch (e) {
         console.error(`Catchy: Error in callback execution for "${callback}":`, e);
     }
