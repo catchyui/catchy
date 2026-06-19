@@ -6,14 +6,14 @@ namespace Hamzi\Catchy\Tests;
 
 use Illuminate\Support\Facades\Route;
 use Hamzi\Catchy\Http\Middleware\CatchySPAMiddleware;
-use Hamzi\Catchy\Contracts\ResponseExtractorInterface;
-use Hamzi\Catchy\Contracts\VersionProviderInterface;
+use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
+use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
 
 /**
  * Class MiddlewareTest
  *
  * Tests the CatchySPAMiddleware behaviour including HTML extraction, status codes,
- * and asset version validation checks.
+ * and asset version validation checks via the pipeline.
  *
  * @package Hamzi\Catchy\Tests
  */
@@ -168,18 +168,6 @@ class MiddlewareTest extends TestCase
         $this->assertTrue($response->headers->has('X-Catchy-Version'));
         $this->assertEquals('2.0.0', $response->headers->get('X-Catchy-Version'));
         $this->assertEmpty($response->getContent());
-    }
-
-    /**
-     * Verify dependency injection contracts resolution.
-     */
-    public function test_contracts_are_resolvable_from_container(): void
-    {
-        $extractor = $this->app->make(ResponseExtractorInterface::class);
-        $versionProvider = $this->app->make(VersionProviderInterface::class);
-
-        $this->assertInstanceOf(\Hamzi\Catchy\Extractors\HtmlResponseExtractor::class, $extractor);
-        $this->assertInstanceOf(\Hamzi\Catchy\Providers\AssetVersionProvider::class, $versionProvider);
     }
 
     /**

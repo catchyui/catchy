@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hamzi\Catchy\Tests;
 
 use Illuminate\Support\Facades\Blade;
+use Hamzi\Catchy\Support\CatchyDirective;
 
 /**
  * Class ComponentTest
@@ -167,14 +168,14 @@ class ComponentTest extends TestCase
         $tempFile = tempnam(sys_get_temp_dir(), 'catchy_test');
         file_put_contents($tempFile, 'console.log("Cached JS");');
 
-        $content1 = \Hamzi\Catchy\CatchyDirective::getJavaScript($tempFile);
+        $content1 = CatchyDirective::getJavaScript($tempFile);
         $this->assertEquals('console.log("Cached JS");', $content1);
 
         // Modify the file on disk
         file_put_contents($tempFile, 'console.log("Modified JS");');
 
         // Reading again should return cached content
-        $content2 = \Hamzi\Catchy\CatchyDirective::getJavaScript($tempFile);
+        $content2 = CatchyDirective::getJavaScript($tempFile);
         $this->assertEquals('console.log("Cached JS");', $content2);
 
         unlink($tempFile);
@@ -351,4 +352,3 @@ class ComponentTest extends TestCase
         $this->assertStringContainsString('catchyError({ field: \'country\' })', $html);
     }
 }
-

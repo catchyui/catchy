@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Hamzi\Catchy\Tests;
 
 use Illuminate\Support\Facades\Blade;
+use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
+use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
+use Hamzi\Catchy\Domain\Contracts\ComponentRepositoryInterface;
 
 /**
  * Class ServiceProviderTest
  *
  * Verifies that the CatchyServiceProvider boots correctly, registers middleware alias,
- * and configures the @catchyScripts Blade directive properly.
+ * binds core interfaces, and configures compiler directives.
  *
  * @package Hamzi\Catchy\Tests
  */
@@ -51,7 +54,6 @@ class ServiceProviderTest extends TestCase
     public function test_middleware_alias_is_registered(): void
     {
         $router = $this->app['router'];
-        
         $middleware = $router->getMiddleware();
 
         $this->assertArrayHasKey('catchy', $middleware);
@@ -91,7 +93,7 @@ class ServiceProviderTest extends TestCase
     {
         $publishedPath = public_path('vendor/catchy/catchy.js');
 
-        // We make sure the file is removed (our setup already backups it if it existed)
+        // We make sure the file is removed
         if (file_exists($publishedPath)) {
             unlink($publishedPath);
         }
@@ -107,5 +109,19 @@ class ServiceProviderTest extends TestCase
 
         // Verify the file was copied
         $this->assertTrue(file_exists($publishedPath));
+    }
+
+    /**
+     * Verify dependency injection contracts resolution from container.
+     */
+    public function test_contracts_are_resolvable_from_container(): void
+    {
+        $extractor = $this->app->make(ResponseExtractorInterface::class);
+        $versionRepository = $this->app->make(VersionRepositoryInterface::class);
+        $componentRepository = $this->app->make(ComponentRepositoryInterface::class);
+
+        $this->assertInstanceOf(\Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor::class, $extractor);
+        $this->assertInstanceOf(\Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository::class, $versionRepository);
+        $this->assertInstanceOf(\Hamzi\Catchy\Infrastructure\Repositories\ConfigComponentRepository::class, $componentRepository);
     }
 }

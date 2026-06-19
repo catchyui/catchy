@@ -3,7 +3,7 @@
     $js = '';
     if (!$usePublished) {
         $js = isset($jsPath) 
-            ? \Hamzi\Catchy\CatchyDirective::getJavaScript($jsPath)
+            ? \Hamzi\Catchy\Support\CatchyDirective::getJavaScript($jsPath)
             : 'console.warn("Catchy: resources/js/catchy.js not found.");';
     }
 @endphp
