@@ -258,22 +258,24 @@ function renderResponseData(data, targetId, config, Alpine, trigger) {
         mergeHead(doc.head);
     }
 
-    const isModalTarget = trigger && typeof trigger.hasAttribute === 'function' && trigger.hasAttribute('data-catchy-modal');
+    const isModalTarget = trigger && typeof trigger.hasAttribute === 'function' && (trigger.hasAttribute('data-catchy-modal') || trigger.hasAttribute('catchy-modal'));
     if (isModalTarget) {
         const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
         const modal = resolveModal(trigger);
         if (modal) {
             emit('modal-load', { html: incomingContent.innerHTML, title: doc.title || '' }, modal);
+            emit('modal-open', {}, modal);
             return;
         }
     }
 
-    const isOffcanvasTarget = trigger && typeof trigger.hasAttribute === 'function' && trigger.hasAttribute('data-catchy-offcanvas');
+    const isOffcanvasTarget = trigger && typeof trigger.hasAttribute === 'function' && (trigger.hasAttribute('data-catchy-offcanvas') || trigger.hasAttribute('catchy-offcanvas'));
     if (isOffcanvasTarget) {
         const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
         const offcanvas = resolveOffcanvas(trigger);
         if (offcanvas) {
             emit('offcanvas-load', { html: incomingContent.innerHTML, title: doc.title || '' }, offcanvas);
+            emit('offcanvas-open', {}, offcanvas);
             return;
         }
     }
@@ -314,9 +316,104 @@ function renderResponseData(data, targetId, config, Alpine, trigger) {
         return;
     }
 
-    Alpine.morph(appContainer, incomingApp.outerHTML);
-    executeScriptsInContainer(appContainer);
-    focusAutofocusElements(appContainer);
+    // Extract Out-of-Band (OOB) elements before morph
+    const oobElements = doc.querySelectorAll('[data-catchy-swap-oob], [catchy-swap-oob]');
+
+    // Resolve transition type
+    const transitionType = trigger && typeof trigger.getAttribute === 'function'
+        ? (trigger.getAttribute('data-catchy-transition') || trigger.getAttribute('catchy-transition') || config.viewTransitions)
+        : config.viewTransitions;
+
+    const performDomUpdates = () => {
+        // Morph the main container, supporting persistent elements (catchy-persist)
+        Alpine.morph(appContainer, incomingApp.outerHTML, {
+            updating(el, toEl, childrenOnly, skip) {
+                if (el.nodeType === Node.ELEMENT_NODE && (
+                    el.hasAttribute('catchy-persist') || 
+                    el.hasAttribute('data-catchy-persist') || 
+                    el.closest('[catchy-persist], [data-catchy-persist]')
+                )) {
+                    skip();
+                }
+            }
+        });
+        
+        executeScriptsInContainer(appContainer);
+        focusAutofocusElements(appContainer);
+
+        // Hydrate Alpine tree for main container
+        if (typeof Alpine.initTree === 'function') {
+            Alpine.initTree(appContainer);
+        }
+
+        // Process Out-of-Band (OOB) updates
+        oobElements.forEach(incomingOob => {
+            const id = incomingOob.id;
+            if (!id) {
+                console.warn('Catchy: Out-of-band element is missing an ID.', incomingOob);
+                return;
+            }
+            const activeOob = document.getElementById(id);
+            if (!activeOob) return;
+
+            const strategy = incomingOob.getAttribute('data-catchy-swap-oob') || incomingOob.getAttribute('catchy-swap-oob');
+            
+            if (strategy === 'innerHTML') {
+                if (Alpine.morph) {
+                    const temp = document.createElement(activeOob.tagName);
+                    temp.innerHTML = incomingOob.innerHTML;
+                    Alpine.morph(activeOob, temp.outerHTML, {
+                        childrenOnly: true,
+                        updating(el, toEl, childrenOnly, skip) {
+                            if (el.nodeType === Node.ELEMENT_NODE && (
+                                el.hasAttribute('catchy-persist') || 
+                                el.hasAttribute('data-catchy-persist') || 
+                                el.closest('[catchy-persist], [data-catchy-persist]')
+                            )) {
+                                skip();
+                            }
+                        }
+                    });
+                } else {
+                    activeOob.innerHTML = incomingOob.innerHTML;
+                }
+            } else {
+                if (Alpine.morph) {
+                    Alpine.morph(activeOob, incomingOob.outerHTML, {
+                        updating(el, toEl, childrenOnly, skip) {
+                            if (el.nodeType === Node.ELEMENT_NODE && (
+                                el.hasAttribute('catchy-persist') || 
+                                el.hasAttribute('data-catchy-persist') || 
+                                el.closest('[catchy-persist], [data-catchy-persist]')
+                            )) {
+                                skip();
+                            }
+                        }
+                    });
+                } else {
+                    activeOob.outerHTML = incomingOob.outerHTML;
+                }
+            }
+            
+            const reloadedOob = document.getElementById(id) || activeOob;
+            executeScriptsInContainer(reloadedOob);
+            if (typeof Alpine.initTree === 'function') {
+                Alpine.initTree(reloadedOob);
+            }
+        });
+    };
+
+    if (transitionType && document.startViewTransition) {
+        document.documentElement.setAttribute('data-catchy-transition', transitionType);
+        const transition = document.startViewTransition(() => performDomUpdates());
+        transition.finished.then(() => {
+            document.documentElement.removeAttribute('data-catchy-transition');
+        }).catch(() => {
+            document.documentElement.removeAttribute('data-catchy-transition');
+        });
+    } else {
+        performDomUpdates();
+    }
 
     // Emit catchy:after-morph
     emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
@@ -461,7 +558,12 @@ function getTargetContainerId(trigger, options, config) {
 function manageHistory(finalUrl, trigger, isGet, response) {
     const shouldUpdateHistory = isGet || (response && response.redirected);
     const hasHistoryAttr = trigger && typeof trigger.getAttribute === 'function' && trigger.getAttribute('data-catchy-history') === 'false';
-    const isModalOrOffcanvas = trigger && typeof trigger.hasAttribute === 'function' && (trigger.hasAttribute('data-catchy-modal') || trigger.hasAttribute('data-catchy-offcanvas'));
+    const isModalOrOffcanvas = trigger && typeof trigger.hasAttribute === 'function' && (
+        trigger.hasAttribute('data-catchy-modal') || 
+        trigger.hasAttribute('catchy-modal') || 
+        trigger.hasAttribute('data-catchy-offcanvas') ||
+        trigger.hasAttribute('catchy-offcanvas')
+    );
 
     if (shouldUpdateHistory && !hasHistoryAttr && !isModalOrOffcanvas) {
         window.history.pushState({ catchy: true, url: finalUrl }, '', finalUrl);

@@ -173,22 +173,143 @@ export function initEventListeners(config, visitFn, submitFormFn) {
 }
 
 /**
+ * Dynamically creates a premium, modern modal container and injects it into the DOM.
+ *
+ * @param {string} id
+ * @returns {HTMLElement}
+ */
+export function createDynamicModal(id = 'catchy-dynamic-modal') {
+    let modal = document.getElementById(id);
+    if (modal) return modal;
+
+    // Create backdrop wrapper
+    const backdrop = document.createElement('div');
+    backdrop.id = id;
+    backdrop.className = 'catchy-modal-backdrop';
+    
+    // Create centering container
+    const container = document.createElement('div');
+    container.className = 'catchy-modal-container';
+    
+    // Create header block
+    const header = document.createElement('div');
+    header.className = 'catchy-modal-header';
+    
+    const title = document.createElement('h3');
+    title.className = 'catchy-modal-title';
+    title.textContent = 'Loading...';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'catchy-modal-close';
+    closeBtn.setAttribute('aria-label', 'Close modal');
+    closeBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" style="width: 24px; height: 24px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    `;
+    
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    
+    // Create scrollable body
+    const body = document.createElement('div');
+    body.className = 'catchy-modal-body';
+    
+    container.appendChild(header);
+    container.appendChild(body);
+    backdrop.appendChild(container);
+    document.body.appendChild(backdrop);
+    
+    // Smooth transition control
+    const closeModal = () => {
+        backdrop.classList.remove('show');
+        setTimeout(() => {
+            if (backdrop.parentNode) {
+                backdrop.parentNode.removeChild(backdrop);
+            }
+        }, 200);
+        document.removeEventListener('keydown', handleEsc);
+    };
+    
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') closeModal();
+    };
+    
+    closeBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModal();
+    });
+    document.addEventListener('keydown', handleEsc);
+    
+    // Register event listeners to show/hide/load
+    backdrop.addEventListener('modal-open', () => {
+        // Trigger layout reflow for CSS animation
+        backdrop.offsetHeight;
+        backdrop.classList.add('show');
+    });
+    
+    backdrop.addEventListener('modal-close', closeModal);
+    
+    backdrop.addEventListener('modal-load', (e) => {
+        if (e.detail) {
+            if (e.detail.title) title.textContent = e.detail.title;
+            body.innerHTML = e.detail.html;
+            
+            // Re-evaluate script tags inside the modal body
+            const scripts = body.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                if (oldScript.hasAttribute('data-catchy-ignore')) return;
+                const newScript = document.createElement('script');
+                Array.from(oldScript.attributes).forEach(attr => {
+                    newScript.setAttribute(attr.name, attr.value);
+                });
+                newScript.textContent = oldScript.textContent;
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+            
+            // Re-hydrate Alpine components
+            if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                window.Alpine.initTree(body);
+            }
+        }
+    });
+    
+    return backdrop;
+}
+
+/**
  * Resolves the target modal element based on the trigger or default selectors.
  *
  * @param {HTMLElement} triggerElement
  * @returns {HTMLElement|null}
  */
 export function resolveModal(triggerElement) {
-    const modalAttr = triggerElement && typeof triggerElement.getAttribute === 'function' ? triggerElement.getAttribute('data-catchy-modal') : null;
+    const modalAttr = triggerElement && typeof triggerElement.getAttribute === 'function'
+        ? (triggerElement.getAttribute('data-catchy-modal') || triggerElement.getAttribute('catchy-modal'))
+        : null;
+
     if (modalAttr && modalAttr !== '' && modalAttr !== 'true') {
         const specificModal = document.getElementById(modalAttr);
         if (specificModal) return specificModal;
     }
+
     if (triggerElement && typeof triggerElement.closest === 'function') {
         const closestModal = triggerElement.closest('[catchy-modal]') || triggerElement.closest('#catchy-modal');
         if (closestModal) return closestModal;
     }
-    return document.querySelector('[catchy-modal]') || document.getElementById('catchy-modal');
+
+    const standardModal = document.querySelector('[catchy-modal]') || document.getElementById('catchy-modal');
+    if (standardModal) return standardModal;
+
+    // Create dynamic modal if the trigger requested a modal transition but none exists
+    const hasModalTrigger = triggerElement && typeof triggerElement.hasAttribute === 'function' &&
+        (triggerElement.hasAttribute('data-catchy-modal') || triggerElement.hasAttribute('catchy-modal'));
+
+    if (hasModalTrigger) {
+        return createDynamicModal();
+    }
+
+    return null;
 }
 
 /**
