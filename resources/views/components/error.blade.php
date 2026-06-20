@@ -2,13 +2,17 @@
     'field',
 ])
 
+@php
+    $baseClass = config('catchy.styles.error.base', 'text-sm text-red-600 dark:text-red-400 mt-1 font-medium');
+@endphp
+
 <div 
     x-data="catchyError({ field: @js($field) })"
     x-on:catchy-validation-errors.window="handleErrors($event.detail)"
     x-on:catchy:validation-errors.window="handleErrors($event.detail)"
     x-show="error"
     {{ $attributes->merge([
-        'class' => 'text-sm text-red-600 dark:text-red-400 mt-1 font-medium',
+        'class' => $baseClass,
         'role' => 'alert',
         'aria-live' => 'assertive',
     ]) }}

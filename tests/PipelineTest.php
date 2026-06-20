@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace Hamzi\Catchy\Tests;
 
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
-use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
 use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
-use Hamzi\Catchy\Http\Middleware\Pipeline\VerifyAssetVersion;
-use Hamzi\Catchy\Http\Middleware\Pipeline\HandleRedirectResponse;
+use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
+use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
 use Hamzi\Catchy\Http\Middleware\Pipeline\AppendResponseHeaders;
 use Hamzi\Catchy\Http\Middleware\Pipeline\ExtractResponseContainer;
+use Hamzi\Catchy\Http\Middleware\Pipeline\HandleRedirectResponse;
+use Hamzi\Catchy\Http\Middleware\Pipeline\VerifyAssetVersion;
+use Illuminate\Http\Request;
+use Illuminate\Session\Store;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class PipelineTest
  *
  * Verifies that the Catchy HTTP middleware pipeline stages execute correctly and in isolation.
- *
- * @package Hamzi\Catchy\Tests
  */
 class PipelineTest extends TestCase
 {
@@ -31,7 +30,7 @@ class PipelineTest extends TestCase
         $versionRepo = $this->createMock(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('1.0.0');
 
-        $request = new Request();
+        $request = new Request;
         $request->headers->set('X-Catchy-Version', '1.0.0');
         $response = new Response('Hello content');
 
@@ -54,7 +53,7 @@ class PipelineTest extends TestCase
         $versionRepo = $this->createMock(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('2.0.0');
 
-        $request = new Request();
+        $request = new Request;
         $request->headers->set('X-Catchy-Version', '1.0.0'); // outdated client version
         $response = new Response('Hello content');
 
@@ -78,7 +77,7 @@ class PipelineTest extends TestCase
         $versionRepo = $this->createMock(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('1.0.0');
 
-        $request = new Request();
+        $request = new Request;
         $response = redirect('/target-url');
 
         $data = new CatchyPipelineData($request, $response);
@@ -102,18 +101,18 @@ class PipelineTest extends TestCase
         $versionRepo = $this->createMock(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('3.2.1');
 
-        $session = $this->createMock(\Illuminate\Session\Store::class);
+        $session = $this->createMock(Store::class);
         $session->method('has')->willReturnMap([
             ['success', true],
             ['error', false],
             ['warning', false],
             ['info', false],
             ['status', false],
-            ['errors', false]
+            ['errors', false],
         ]);
         $session->method('pull')->with('success')->willReturn('Done successfully!');
 
-        $request = new Request();
+        $request = new Request;
         $request->setLaravelSession($session);
 
         $response = new Response('Hello body');
@@ -127,7 +126,7 @@ class PipelineTest extends TestCase
         $resp = $result->getResponse();
         $this->assertEquals('3.2.1', $resp->headers->get('X-Catchy-Version'));
         $this->assertTrue($resp->headers->has('X-Catchy-Flash'));
-        
+
         $flash = json_decode(base64_decode($resp->headers->get('X-Catchy-Flash')), true);
         $this->assertEquals('Done successfully!', $flash['success']);
     }
@@ -141,10 +140,10 @@ class PipelineTest extends TestCase
         $extractor->method('extractAll')->willReturn([
             'title' => 'Page Title',
             'head' => '<link rel="stylesheet">',
-            'fragment' => '<div id="catchy-app">Morphed Content</div>'
+            'fragment' => '<div id="catchy-app">Morphed Content</div>',
         ]);
 
-        $request = new Request();
+        $request = new Request;
         $response = new Response('<html><head><title>Original</title></head><body><div id="catchy-app">Original</div></body></html>');
         $response->headers->set('Content-Type', 'text/html');
 
@@ -175,10 +174,10 @@ class PipelineTest extends TestCase
             ->willReturn([
                 'title' => 'Target Title',
                 'head' => null,
-                'fragment' => '<div id="my-custom-target">Target Content</div>'
+                'fragment' => '<div id="my-custom-target">Target Content</div>',
             ]);
 
-        $request = new Request();
+        $request = new Request;
         $request->headers->set('X-Catchy-Target', '#my-custom-target');
 
         $response = new Response('<html><head><title>Original</title></head><body><div id="my-custom-target">Original</div></body></html>');

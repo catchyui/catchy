@@ -4,18 +4,23 @@ declare(strict_types=1);
 
 namespace Hamzi\Catchy\Tests;
 
-use Illuminate\Support\Facades\Blade;
+use Hamzi\Catchy\CatchyServiceProvider;
+use Hamzi\Catchy\Console\InstallCommand;
+use Hamzi\Catchy\Domain\Contracts\ComponentRepositoryInterface;
 use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
 use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
-use Hamzi\Catchy\Domain\Contracts\ComponentRepositoryInterface;
+use Hamzi\Catchy\Http\Middleware\CatchySPAMiddleware;
+use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
+use Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository;
+use Hamzi\Catchy\Infrastructure\Repositories\ConfigComponentRepository;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Blade;
 
 /**
  * Class ServiceProviderTest
  *
  * Verifies that the CatchyServiceProvider boots correctly, registers middleware alias,
  * binds core interfaces, and configures compiler directives.
- *
- * @package Hamzi\Catchy\Tests
  */
 class ServiceProviderTest extends TestCase
 {
@@ -38,7 +43,7 @@ class ServiceProviderTest extends TestCase
         if ($this->tempBackupPath && file_exists($this->tempBackupPath)) {
             $publishedPath = public_path('vendor/catchy/catchy.js');
             $dir = dirname($publishedPath);
-            if (!is_dir($dir)) {
+            if (! is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
             copy($this->tempBackupPath, $publishedPath);
@@ -57,7 +62,7 @@ class ServiceProviderTest extends TestCase
         $middleware = $router->getMiddleware();
 
         $this->assertArrayHasKey('catchy', $middleware);
-        $this->assertEquals(\Hamzi\Catchy\Http\Middleware\CatchySPAMiddleware::class, $middleware['catchy']);
+        $this->assertEquals(CatchySPAMiddleware::class, $middleware['catchy']);
     }
 
     /**
@@ -65,10 +70,10 @@ class ServiceProviderTest extends TestCase
      */
     public function test_console_command_is_registered(): void
     {
-        $commands = \Illuminate\Support\Facades\Artisan::all();
+        $commands = Artisan::all();
 
         $this->assertArrayHasKey('catchy:install', $commands);
-        $this->assertInstanceOf(\Hamzi\Catchy\Console\InstallCommand::class, $commands['catchy:install']);
+        $this->assertInstanceOf(InstallCommand::class, $commands['catchy:install']);
     }
 
     /**
@@ -99,9 +104,9 @@ class ServiceProviderTest extends TestCase
 
         $this->assertFalse(file_exists($publishedPath));
 
-        $provider = new \Hamzi\Catchy\CatchyServiceProvider($this->app);
-        
-        $reflector = new \ReflectionClass(\Hamzi\Catchy\CatchyServiceProvider::class);
+        $provider = new CatchyServiceProvider($this->app);
+
+        $reflector = new \ReflectionClass(CatchyServiceProvider::class);
         $method = $reflector->getMethod('autoPublishAssets');
         $method->setAccessible(true);
         $method->invoke($provider);
@@ -119,8 +124,8 @@ class ServiceProviderTest extends TestCase
         $versionRepository = $this->app->make(VersionRepositoryInterface::class);
         $componentRepository = $this->app->make(ComponentRepositoryInterface::class);
 
-        $this->assertInstanceOf(\Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor::class, $extractor);
-        $this->assertInstanceOf(\Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository::class, $versionRepository);
-        $this->assertInstanceOf(\Hamzi\Catchy\Infrastructure\Repositories\ConfigComponentRepository::class, $componentRepository);
+        $this->assertInstanceOf(HtmlResponseExtractor::class, $extractor);
+        $this->assertInstanceOf(AssetVersionRepository::class, $versionRepository);
+        $this->assertInstanceOf(ConfigComponentRepository::class, $componentRepository);
     }
 }

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Hamzi\Catchy\Tests;
 
-use Illuminate\Support\Facades\Blade;
 use Hamzi\Catchy\Support\CatchyDirective;
+use Illuminate\Support\Facades\Blade;
 
 /**
  * Class ComponentTest
  *
  * Verifies that the Catchy package Blade UI components render correctly.
- *
- * @package Hamzi\Catchy\Tests
  */
 class ComponentTest extends TestCase
 {
@@ -143,7 +141,7 @@ class ComponentTest extends TestCase
     {
         // 1. Test Arabic locale (should load Arabic text by default)
         $this->app->setLocale('ar');
-        
+
         $progressHtml = Blade::render('<x-catchy-progress />');
         $this->assertStringContainsString('جاري تحميل الملفات...', $progressHtml);
 

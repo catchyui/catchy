@@ -14,22 +14,16 @@ use Hamzi\Catchy\Support\FlashExtractor;
  *
  * Pipeline stage adding asset versions and session flash messages (encoded as base64 JSON)
  * directly to the HTTP response headers for processing in the frontend SPA router.
- *
- * @package Hamzi\Catchy\Http\Middleware\Pipeline
  */
 class AppendResponseHeaders
 {
     /**
      * The asset version repository instance.
-     *
-     * @var \Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface
      */
     protected VersionRepositoryInterface $versionRepository;
 
     /**
      * AppendResponseHeaders constructor.
-     *
-     * @param  \Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface  $versionRepository
      */
     public function __construct(VersionRepositoryInterface $versionRepository)
     {
@@ -39,9 +33,7 @@ class AppendResponseHeaders
     /**
      * Handle the pipeline stage.
      *
-     * @param  \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData  $data
-     * @param  \Closure(\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData): (\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData)  $next
-     * @return \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData
+     * @param  Closure(CatchyPipelineData): (CatchyPipelineData)  $next
      */
     public function handle(CatchyPipelineData $data, Closure $next): CatchyPipelineData
     {
@@ -58,11 +50,10 @@ class AppendResponseHeaders
         // 2. Append flash messages from session to header if session exists
         $flash = FlashExtractor::extract($request, true);
 
-        if (!empty($flash)) {
+        if (! empty($flash)) {
             $response->headers->set('X-Catchy-Flash', base64_encode((string) json_encode($flash)));
         }
 
         return $next($data->withResponse($response));
     }
 }
-

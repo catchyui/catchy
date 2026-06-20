@@ -5,33 +5,27 @@ declare(strict_types=1);
 namespace Hamzi\Catchy\Http\Middleware;
 
 use Closure;
+use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Symfony\Component\HttpFoundation\Response;
-use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
 
 /**
  * Class CatchySPAMiddleware
  *
  * Coordinates SPA request filtering by sending incoming request-response flows
  * through a configurable pipeline of clean architecture stages.
- *
- * @package Hamzi\Catchy\Http\Middleware
  */
 class CatchySPAMiddleware
 {
     /**
      * The IoC container instance.
-     *
-     * @var \Illuminate\Contracts\Container\Container
      */
     protected Container $container;
 
     /**
      * CatchySPAMiddleware constructor.
-     *
-     * @param  \Illuminate\Contracts\Container\Container  $container
      */
     public function __construct(Container $container)
     {
@@ -41,14 +35,12 @@ class CatchySPAMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         // 1. Detect if this is an SPA request from Catchy
-        if (!$request->headers->has('X-Catchy-SPA')) {
+        if (! $request->headers->has('X-Catchy-SPA')) {
             return $next($request);
         }
 
@@ -77,9 +69,6 @@ class CatchySPAMiddleware
 
     /**
      * Determine if the request matches any of the configured exclusion patterns.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
      */
     protected function shouldExclude(Request $request): bool
     {

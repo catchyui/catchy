@@ -9,37 +9,32 @@ namespace Hamzi\Catchy\Support;
  *
  * Compiles and renders the dynamic @catchy Blade directive attributes for forms.
  * Caches in-memory assets for faster compiles.
- *
- * @package Hamzi\Catchy\Support
  */
 class CatchyDirective
 {
     /**
      * Render the directive attributes dynamically.
-     *
-     * @param  array  $options
-     * @return string
      */
     public static function render(array $options = []): string
     {
         $attributes = ['x-data'];
 
         if (isset($options['beforesend'])) {
-            $attributes[] = '@catchy:start="' . e($options['beforesend']) . '"';
-            $attributes[] = '@catchy-start="' . e($options['beforesend']) . '"';
-            $attributes[] = 'data-catchy-beforesend="' . e($options['beforesend']) . '"';
+            $attributes[] = '@catchy:start="'.e($options['beforesend']).'"';
+            $attributes[] = '@catchy-start="'.e($options['beforesend']).'"';
+            $attributes[] = 'data-catchy-beforesend="'.e($options['beforesend']).'"';
         }
-        
+
         if (isset($options['success'])) {
-            $attributes[] = '@catchy:end="' . e($options['success']) . '"';
-            $attributes[] = '@catchy-end="' . e($options['success']) . '"';
-            $attributes[] = 'data-catchy-success="' . e($options['success']) . '"';
+            $attributes[] = '@catchy:end="'.e($options['success']).'"';
+            $attributes[] = '@catchy-end="'.e($options['success']).'"';
+            $attributes[] = 'data-catchy-success="'.e($options['success']).'"';
         }
-        
+
         if (isset($options['error'])) {
-            $attributes[] = '@catchy:error="' . e($options['error']) . '"';
-            $attributes[] = '@catchy-error="' . e($options['error']) . '"';
-            $attributes[] = 'data-catchy-error="' . e($options['error']) . '"';
+            $attributes[] = '@catchy:error="'.e($options['error']).'"';
+            $attributes[] = '@catchy-error="'.e($options['error']).'"';
+            $attributes[] = 'data-catchy-error="'.e($options['error']).'"';
         }
 
         return implode(' ', $attributes);
@@ -54,13 +49,10 @@ class CatchyDirective
 
     /**
      * Retrieve the cached JavaScript contents or read from disk if not cached.
-     *
-     * @param  string  $path
-     * @return string
      */
     public static function getJavaScript(string $path): string
     {
-        if (!isset(self::$jsCache[$path])) {
+        if (! isset(self::$jsCache[$path])) {
             self::$jsCache[$path] = file_exists($path) ? (string) file_get_contents($path) : '';
         }
 

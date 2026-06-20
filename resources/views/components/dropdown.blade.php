@@ -4,6 +4,11 @@
 ])
 
 @php
+    $wrapperClass = config('catchy.styles.dropdown.wrapper', 'relative inline-block text-start');
+    $triggerClass = config('catchy.styles.dropdown.trigger', 'cursor-pointer');
+    $menuClass = config('catchy.styles.dropdown.menu', 'absolute z-50 mt-2 rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 py-1 focus:outline-none');
+    $innerClass = config('catchy.styles.dropdown.inner', 'rounded-xl py-1 bg-white dark:bg-slate-900');
+
     $alignmentClasses = match ($align) {
         'left' => 'origin-top-left left-0',
         'right' => 'origin-top-right right-0',
@@ -16,11 +21,11 @@
     x-data="{ open: false }" 
     @click.outside="open = false" 
     @close.stop="open = false" 
-    class="relative inline-block text-start"
+    class="{{ $wrapperClass }}"
 >
     <div 
         @click="open = !open" 
-        class="cursor-pointer"
+        class="{{ $triggerClass }}"
         role="button"
         aria-haspopup="true"
         :aria-expanded="open.toString()"
@@ -36,11 +41,11 @@
         x-transition:leave="transition ease-in duration-75"
         x-transition:leave-start="transform opacity-100 scale-100"
         x-transition:leave-end="transform opacity-0 scale-95"
-        class="absolute z-50 mt-2 {{ $width }} rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 py-1 focus:outline-none {{ $alignmentClasses }}"
+        class="{{ $menuClass }} {{ $width }} {{ $alignmentClasses }}"
         style="display: none;"
         role="menu"
     >
-        <div class="rounded-xl py-1 bg-white dark:bg-slate-900">
+        <div class="{{ $innerClass }}">
             {{ $content }}
         </div>
     </div>

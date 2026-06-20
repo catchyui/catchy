@@ -11,15 +11,11 @@ use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
  *
  * Automates resolution of current build versions by checking static config values,
  * hashing production build manifests, or detecting active hot-reloading servers.
- *
- * @package Hamzi\Catchy\Infrastructure\Repositories
  */
 class AssetVersionRepository implements VersionRepositoryInterface
 {
     /**
      * Get the current version of the application assets.
-     *
-     * @return string
      */
     public function getVersion(): string
     {

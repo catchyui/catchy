@@ -13,22 +13,16 @@ use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
  *
  * Implements ResponseExtractorInterface utilizing DOMDocument and DOMXPath to safely parse HTML
  * and extract layout components while preserving UTF-8 encodings.
- *
- * @package Hamzi\Catchy\Infrastructure\Extractors
  */
 class HtmlResponseExtractor implements ResponseExtractorInterface
 {
     /**
      * Extract the outer HTML of the container matching containerId.
-     *
-     * @param  string  $html
-     * @param  string  $containerId
-     * @return string|null
      */
     public function extract(string $html, string $containerId): ?string
     {
         $dom = $this->parseHtml($html);
-        if (!$dom) {
+        if (! $dom) {
             return null;
         }
 
@@ -37,14 +31,11 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
 
     /**
      * Extract the title text content from the HTML page.
-     *
-     * @param  string  $html
-     * @return string|null
      */
     public function extractTitle(string $html): ?string
     {
         $dom = $this->parseHtml($html);
-        if (!$dom) {
+        if (! $dom) {
             return null;
         }
 
@@ -53,14 +44,11 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
 
     /**
      * Extract the inner HTML of the <head> element from the HTML page.
-     *
-     * @param  string  $html
-     * @return string|null
      */
     public function extractHead(string $html): ?string
     {
         $dom = $this->parseHtml($html);
-        if (!$dom) {
+        if (! $dom) {
             return null;
         }
 
@@ -70,14 +58,12 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
     /**
      * Extract title, head, and container in a single DOM parse operation.
      *
-     * @param  string  $html
-     * @param  string  $containerId
      * @return array{title: string|null, head: string|null, fragment: string|null}
      */
     public function extractAll(string $html, string $containerId): array
     {
         $dom = $this->parseHtml($html);
-        if (!$dom) {
+        if (! $dom) {
             return ['title' => null, 'head' => null, 'fragment' => null];
         }
 
@@ -90,9 +76,6 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
 
     /**
      * Parse raw HTML into a DOMDocument with UTF-8 support.
-     *
-     * @param  string  $html
-     * @return \DOMDocument|null
      */
     protected function parseHtml(string $html): ?DOMDocument
     {
@@ -102,11 +85,11 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
 
         // Suppress HTML parsing warnings gracefully while preserving global state
         $previousState = libxml_use_internal_errors(true);
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
 
         // Enforce UTF-8 parsing to avoid encoding issues with Arabic/special characters
         $loaded = $dom->loadHTML(
-            '<?xml encoding="utf-8" ?>' . $html,
+            '<?xml encoding="utf-8" ?>'.$html,
             LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
         );
 
@@ -118,10 +101,6 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
 
     /**
      * Extract the outer HTML of a container element by ID from a parsed DOM.
-     *
-     * @param  \DOMDocument  $dom
-     * @param  string  $containerId
-     * @return string|null
      */
     protected function extractContainerFromDom(DOMDocument $dom, string $containerId): ?string
     {
@@ -142,28 +121,23 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
 
     /**
      * Proper XPath string escaping.
-     *
-     * @param  string  $value
-     * @return string
      */
     private function xpathEscapeString(string $value): string
     {
-        if (!str_contains($value, "'")) {
+        if (! str_contains($value, "'")) {
             return "'{$value}'";
         }
-        if (!str_contains($value, '"')) {
+        if (! str_contains($value, '"')) {
             return "\"{$value}\"";
         }
         // Complex case: string contains both single and double quotes, use concat()
         $parts = explode("'", $value);
-        return "concat('" . implode("',\"'\",'", $parts) . "')";
+
+        return "concat('".implode("',\"'\",'", $parts)."')";
     }
 
     /**
      * Extract the page title from a parsed DOM.
-     *
-     * @param  \DOMDocument  $dom
-     * @return string|null
      */
     protected function extractTitleFromDom(DOMDocument $dom): ?string
     {
@@ -182,9 +156,6 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
     /**
      * Extract the inner HTML of the <head> element from a parsed DOM.
      * Excludes the <title> tag and non-dynamic elements (charset, viewport).
-     *
-     * @param  \DOMDocument  $dom
-     * @return string|null
      */
     protected function extractHeadFromDom(DOMDocument $dom): ?string
     {

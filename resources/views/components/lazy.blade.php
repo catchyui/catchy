@@ -4,6 +4,10 @@
     'placeholder' => null,
 ])
 
+@php
+    $errorClass = config('catchy.styles.lazy.error', 'text-sm text-rose-600 dark:text-rose-400 p-4 border border-rose-200 dark:border-rose-900/40 rounded-lg bg-rose-50 dark:bg-rose-950/20');
+@endphp
+
 <div 
     x-data="catchyLazy({ src: '{{ $src }}', trigger: '{{ $trigger }}' })"
     @catchy:lazy-reload.window="if (!$event.detail || !$event.detail.id || $event.detail.id === $el.id) reload()"
@@ -23,7 +27,7 @@
         </div>
     </template>
     <template x-if="error">
-        <div class="text-sm text-rose-600 dark:text-rose-400 p-4 border border-rose-200 dark:border-rose-900/40 rounded-lg bg-rose-50 dark:bg-rose-950/20">
+        <div class="{{ $errorClass }}">
             {{ __('catchy::messages.loading_lazy') }} - Connection Error
         </div>
     </template>

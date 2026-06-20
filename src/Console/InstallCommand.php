@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\File;
  *
  * Handles publishing configurations, JS assets, translation bundles,
  * and generates a boilerplate SPA starter layout.
- *
- * @package Hamzi\Catchy\Console
  */
 class InstallCommand extends Command
 {
@@ -33,8 +31,6 @@ class InstallCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -81,12 +77,12 @@ class InstallCommand extends Command
 
         $this->info("\n Hamzi/Catchy has been installed successfully!");
         $this->info("Make sure to register CatchySPAMiddleware in bootstrap/app.php or apply the 'catchy' middleware group to your routes.");
-        
+
         $this->comment("\n💡 JavaScript Integration Options:");
-        $this->line("  1. [Standalone Mode]: `@catchyScripts` will load the pre-compiled asset directly.");
-        $this->line("  2. [Vite/NPM Mode]: If you want to bundle Catchy inside your app.js, run:");
-        $this->info("     npm install");
-        $this->line("     And register the plugin in resources/js/app.js:");
+        $this->line('  1. [Standalone Mode]: `@catchyScripts` will load the pre-compiled asset directly.');
+        $this->line('  2. [Vite/NPM Mode]: If you want to bundle Catchy inside your app.js, run:');
+        $this->info('     npm install');
+        $this->line('     And register the plugin in resources/js/app.js:');
         $this->comment("     import CatchyPlugin from 'hamzi-catchy';");
         $this->comment("     Alpine.plugin(CatchyPlugin);\n");
 
@@ -95,22 +91,21 @@ class InstallCommand extends Command
 
     /**
      * Generate the starter layout file.
-     *
-     * @return void
      */
     protected function generateLayout(): void
     {
         $layoutPath = resource_path('views/layouts/catchy.blade.php');
 
         if (File::exists($layoutPath)) {
-            if (!$this->confirm("The layout file [layouts/catchy.blade.php] already exists. Do you want to overwrite it?", false)) {
+            if (! $this->confirm('The layout file [layouts/catchy.blade.php] already exists. Do you want to overwrite it?', false)) {
                 $this->warn('Skipped layout generation.');
+
                 return;
             }
         }
 
         $directory = dirname($layoutPath);
-        if (!File::isDirectory($directory)) {
+        if (! File::isDirectory($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 
@@ -151,6 +146,6 @@ class InstallCommand extends Command
 HTML;
 
         File::put($layoutPath, $content);
-        $this->info("Created starter layout file: [resources/views/layouts/catchy.blade.php]");
+        $this->info('Created starter layout file: [resources/views/layouts/catchy.blade.php]');
     }
 }

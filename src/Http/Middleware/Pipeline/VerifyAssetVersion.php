@@ -13,22 +13,16 @@ use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
  *
  * Pipeline stage verifying client asset build versions against the server.
  * Returns a 409 Conflict if they mismatch to force a clean reload on the client.
- *
- * @package Hamzi\Catchy\Http\Middleware\Pipeline
  */
 class VerifyAssetVersion
 {
     /**
      * The asset version repository instance.
-     *
-     * @var \Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface
      */
     protected VersionRepositoryInterface $versionRepository;
 
     /**
      * VerifyAssetVersion constructor.
-     *
-     * @param  \Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface  $versionRepository
      */
     public function __construct(VersionRepositoryInterface $versionRepository)
     {
@@ -38,9 +32,7 @@ class VerifyAssetVersion
     /**
      * Handle the pipeline stage.
      *
-     * @param  \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData  $data
-     * @param  \Closure(\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData): (\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData)  $next
-     * @return \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData
+     * @param  Closure(CatchyPipelineData): (CatchyPipelineData)  $next
      */
     public function handle(CatchyPipelineData $data, Closure $next): CatchyPipelineData
     {
