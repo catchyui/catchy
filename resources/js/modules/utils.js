@@ -64,7 +64,9 @@ export function executeScriptsInContainer(container) {
             newScript.setAttribute(attr.name, attr.value);
         });
         newScript.textContent = oldScript.textContent;
-        oldScript.parentNode.replaceChild(newScript, oldScript);
+        if (oldScript.parentNode) {
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        }
     });
 }
 
@@ -187,8 +189,18 @@ export function executeCallback(element, attrName, context) {
     }
 
     try {
-        if (typeof window[callback] === 'function') {
-            return window[callback](context);
+        const parts = callback.split('.');
+        let func = window;
+        for (const part of parts) {
+            if (func === undefined || func === null) {
+                func = undefined;
+                break;
+            }
+            func = func[part];
+        }
+
+        if (typeof func === 'function') {
+            return func(context);
         }
         console.warn(`Catchy: Unknown callback "${callback}". Only registered window functions are allowed.`);
     } catch (e) {

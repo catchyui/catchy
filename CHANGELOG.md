@@ -5,6 +5,15 @@ All notable changes to `Laravel Catchy` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-06-20
+
+### Added
+- Added support for resolving dot-separated nested object paths (e.g. `App.callbacks.onSuccess`) for global window callbacks in JS.
+
+### Fixed
+- Fixed critical bug where redirect cookies (session, CSRF, auth tokens) and custom headers were lost during SPA redirection by cloning and modifying the original Laravel redirect response.
+- Added defensive parentNode checks in `executeScriptsInContainer` to avoid runtime errors when replacing script elements without parent nodes.
+
 ## [1.4.8] - 2026-06-20
 
 ### Added

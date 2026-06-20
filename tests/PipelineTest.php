@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hamzi\Catchy\Tests;
 
+use Hamzi\Catchy\Domain\Contracts\PipelineStageInterface;
 use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
 use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
 use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
@@ -91,6 +92,36 @@ class PipelineTest extends TestCase
         $this->assertEquals(url('/target-url'), $result->getResponse()->headers->get('X-Catchy-Redirect'));
         $this->assertEquals('true', $result->getResponse()->headers->get('X-Catchy-Request'));
         $this->assertEquals('1.0.0', $result->getResponse()->headers->get('X-Catchy-Version'));
+    }
+
+    /**
+     * Test that HandleRedirectResponse preserves redirect cookies and custom headers.
+     */
+    public function test_handle_redirect_preserves_cookies_and_custom_headers(): void
+    {
+        $versionRepo = $this->createMock(VersionRepositoryInterface::class);
+        $versionRepo->method('getVersion')->willReturn('1.0.0');
+
+        $request = new Request;
+        $response = redirect('/target-url')->withCookie(cookie('my-cookie', 'cookie-value'));
+        $response->headers->set('X-Custom-Header', 'custom-value');
+
+        $data = new CatchyPipelineData($request, $response);
+        $stage = new HandleRedirectResponse($versionRepo);
+
+        $result = $stage->handle($data, function (CatchyPipelineData $d) {
+            $this->fail('Pipeline should have stopped on redirect intercepts.');
+        });
+
+        $resp = $result->getResponse();
+        $this->assertEquals(200, $resp->getStatusCode());
+        $this->assertEquals(url('/target-url'), $resp->headers->get('X-Catchy-Redirect'));
+        $this->assertEquals('custom-value', $resp->headers->get('X-Custom-Header'));
+
+        $cookies = $resp->headers->getCookies();
+        $this->assertCount(1, $cookies);
+        $this->assertEquals('my-cookie', $cookies[0]->getName());
+        $this->assertEquals('cookie-value', $cookies[0]->getValue());
     }
 
     /**
@@ -201,19 +232,19 @@ class PipelineTest extends TestCase
     public function test_pipeline_stages_implement_pipeline_stage_interface(): void
     {
         $this->assertInstanceOf(
-            \Hamzi\Catchy\Domain\Contracts\PipelineStageInterface::class,
+            PipelineStageInterface::class,
             new VerifyAssetVersion($this->createMock(VersionRepositoryInterface::class))
         );
         $this->assertInstanceOf(
-            \Hamzi\Catchy\Domain\Contracts\PipelineStageInterface::class,
+            PipelineStageInterface::class,
             new HandleRedirectResponse($this->createMock(VersionRepositoryInterface::class))
         );
         $this->assertInstanceOf(
-            \Hamzi\Catchy\Domain\Contracts\PipelineStageInterface::class,
+            PipelineStageInterface::class,
             new AppendResponseHeaders($this->createMock(VersionRepositoryInterface::class))
         );
         $this->assertInstanceOf(
-            \Hamzi\Catchy\Domain\Contracts\PipelineStageInterface::class,
+            PipelineStageInterface::class,
             new ExtractResponseContainer($this->createMock(ResponseExtractorInterface::class))
         );
     }

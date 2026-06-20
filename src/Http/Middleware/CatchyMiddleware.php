@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hamzi\Catchy\Http\Middleware;
 
 use Closure;
+use Hamzi\Catchy\CatchyServiceProvider;
 use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
@@ -96,8 +97,8 @@ class CatchyMiddleware
 
         $pos = strripos($content, '</body>');
         if ($pos !== false) {
-            $scriptsHtml = view('catchy::scripts', ['jsPath' => \Hamzi\Catchy\CatchyServiceProvider::getJsPath()])->render();
-            $content = substr($content, 0, $pos) . $scriptsHtml . substr($content, $pos);
+            $scriptsHtml = view('catchy::scripts', ['jsPath' => CatchyServiceProvider::getJsPath()])->render();
+            $content = substr($content, 0, $pos).$scriptsHtml.substr($content, $pos);
             $response->setContent($content);
         }
 

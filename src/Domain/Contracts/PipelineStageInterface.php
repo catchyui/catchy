@@ -17,9 +17,7 @@ interface PipelineStageInterface
     /**
      * Handle the pipeline stage.
      *
-     * @param  CatchyPipelineData  $data
      * @param  Closure(CatchyPipelineData): (CatchyPipelineData)  $next
-     * @return CatchyPipelineData
      */
     public function handle(CatchyPipelineData $data, Closure $next): CatchyPipelineData;
 }

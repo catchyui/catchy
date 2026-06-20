@@ -10,6 +10,7 @@ use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
 use Hamzi\Catchy\Http\Middleware\CatchyMiddleware;
 use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
 use Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -59,8 +60,8 @@ class CatchyServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('catchy', CatchyMiddleware::class);
 
         // Automatically append the middleware to the 'web' group for ease of installation
-        if ($this->app->bound(\Illuminate\Contracts\Http\Kernel::class)) {
-            $kernel = $this->app->make(\Illuminate\Contracts\Http\Kernel::class);
+        if ($this->app->bound(Kernel::class)) {
+            $kernel = $this->app->make(Kernel::class);
             $kernel->appendMiddlewareToGroup('web', CatchyMiddleware::class);
         }
     }
@@ -73,6 +74,7 @@ class CatchyServiceProvider extends ServiceProvider
         // Register the @catchy wrapper directive
         Blade::directive('catchy', function ($expression) {
             $id = $expression ?: "'catchy-app'";
+
             return "<div id=\"<?php echo e({$id}); ?>\">";
         });
 
