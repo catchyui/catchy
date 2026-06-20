@@ -12,7 +12,7 @@ import { startLoading, stopLoading, resetLoading } from './loader.js';
 import { mergeHead, mergeHeadFromHeader } from './head-merge.js';
 import { xhrRequest } from './forms.js';
 import { getActiveRequests } from './prefetch.js';
-import { resolveModal, resolveOffcanvas, handleLifecycleTriggers } from './components.js';
+import { resolveModal, resolveOffcanvas, handleLifecycleTriggers } from './events.js';
 
 let currentVersion = '';
 
@@ -101,6 +101,10 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
             renderResponseData(cached, targetId, config, Alpine, trigger);
             applyScroll(trigger, targetId, cached.finalUrl, oldPathname, options, config);
 
+            if (updateHistory) {
+                manageHistory(cached.finalUrl, trigger, isGet, null);
+            }
+
             cleanUpUi();
             emit('end', { url: cached.finalUrl, trigger, fromCache: true }, trigger);
             emit('after-visit', { url: cached.finalUrl, trigger, fromCache: true }, trigger);
@@ -108,20 +112,20 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
             console.error('Catchy: SWR instant render failed, falling back to network.', e);
         }
 
-        // Revalidate silently in the background
-        fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, false);
+        // Revalidate silently in the background, passing the original updateHistory and isRevalidation = true
+        fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, true);
         return;
     }
 
     // No SWR cache found -> Full fetch visit
     startLoading();
-    fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory);
+    fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, false);
 }
 
 /**
  * Perform network request to fetch fresh HTML page.
  */
-async function fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory) {
+async function fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, isRevalidation = false) {
     const isGet = !options.method || options.method.toUpperCase() === 'GET';
     const oldPathname = window.location.pathname;
 
@@ -206,7 +210,7 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
         // Render fresh updates
         renderResponseData(dataToRender, targetId, config, Alpine, trigger);
 
-        if (updateHistory) {
+        if (updateHistory && !isRevalidation) {
             manageHistory(finalUrl, trigger, isGet, response);
         }
 

@@ -1,7 +1,7 @@
-<h1 align="center">Catchy</h1>
+<h1 align="center">Catchy ⚡</h1>
 
 <p align="center">
-  <strong>A featherweight Single Page Application (SPA) adapter for Laravel 11, 12 & 13</strong>
+  <strong>A lightweight, headless Single Page Application (SPA) adapter for Laravel 11, 12 & 13</strong>
 </p>
 
 <p align="center">
@@ -14,18 +14,19 @@
 
 ---
 
-**Laravel Catchy** converts standard Laravel applications into high-performance SPAs using **Alpine.js** and **`@alpinejs/morph`**. No complex JS builds, 100% SEO-friendly, dynamic meta updates, logical LTR/RTL support, and instant navigation.
+**Laravel Catchy** converts standard Laravel applications into high-performance, seamless SPAs using **Alpine.js** and **`@alpinejs/morph`**. By removing styling opinions and visual components, Catchy v2 is a **100% headless** engine. You get absolute styling freedom while Catchy manages instant page transitions, form interceptions, SWR caching, and dynamic head/meta updates in the background.
 
 ---
 
 ## ⚡ Core Features
 
-- **HTML-over-the-wire**: Only layout changes are sent over the network, saving bandwidth.
-- **Dynamic SEO/Head Merging**: Seamlessly synchronizes meta descriptions, titles, scripts, and styles.
-- **Form Interception**: Automatically intercepts GET & POST forms (handles CSRF & methods spoofing).
-- **RTL/LTR Support**: UI Components use Tailwind logical properties (`start`, `end`, `ms-`, `me-`).
-- **Data Syncing (`x-catchy-sync`)**: Real-time two-way backend syncing (ideal for live search and auto-saving).
-- **Graceful Degradation**: Automatically falls back to standard page requests on connection errors.
+- **HTML-over-the-wire**: Only modified page body fragments are exchanged, saving bandwidth and rendering instantly.
+- **Zero-Configuration**: Standard links and forms are intercepted automatically. Plug and play out-of-the-box.
+- **Dynamic SEO/Head Merging**: Seamlessly synchronizes page titles, meta tags, styles, and scripts on navigation.
+- **Stale-While-Revalidate (SWR)**: Instantly renders cached pages and updates them in the background.
+- **Headless Lazy Loading (`x-catchy-lazy`)**: Load sections asynchronously on page load or viewport intersection.
+- **Two-way Syncing (`x-catchy-sync`)**: Sync inputs (such as search boxes) with the backend in real-time.
+- **Graceful Degradation**: Fallbacks to standard browser requests if the connection is lost.
 
 ---
 
@@ -37,160 +38,115 @@ composer require hamzi/catchy
 ```
 
 ### 2. Run Installation Command
-This will publish the configuration file, compiled assets, and set up everything:
+This command publishes the config file, compiled assets, and generates an optional layout boilerplate:
 ```bash
 php artisan catchy:install
 ```
 
-And you are done! Catchy's middleware is automatically registered to the `web` group, and the SPA routing scripts are automatically injected before the closing `</body>` tag on all standard HTML responses.
+### 3. Setup Your Layout
+Add the `@catchyScripts` Blade directive before the closing `</body>` tag of your application layout:
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Laravel App</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body>
 
----
+    <!-- Main SPA Container (Must match your container ID, default: catchy-app) -->
+    <div id="catchy-app">
+        @yield('content')
+    </div>
 
-## 🎨 Styling Presets & Customization
-
----
-
-## 🎨 Styling Presets & Customization
-
-Catchy is completely styling-agnostic. It features built-in style presets for **Tailwind CSS**, **Bootstrap 5**, and **Vanilla/Custom CSS**, controllable via a single configuration option.
-
-### 1. Choosing a Style Preset
-You can set your preferred styling framework in the published `config/catchy.php`:
-
-```php
-// config/catchy.php
-'preset' => 'tailwind', // Options: 'tailwind', 'bootstrap', 'vanilla', or 'custom'
-```
-
-- **tailwind**: Component templates compile with standard Tailwind classes.
-- **bootstrap**: Component templates compile with Bootstrap 5 utility classes and structure.
-- **vanilla**: Component templates use standard CSS class prefixes (e.g. `catchy-btn`, `catchy-card`). Ideal if you write your own stylesheets.
-- **custom**: Disables all default styles, allowing you to supply custom class names for each element.
-
-### 2. Register Tailwind Content Path
-To prevent Tailwind from purging classes used inside Catchy components, add the vendor folder to the `content` array of your `tailwind.config.js`:
-```javascript
-module.exports = {
-  content: [
-    "./resources/**/*.blade.php",
-    "./resources/**/*.js",
-    "./vendor/hamzi/catchy/resources/views/**/*.blade.php", // <-- Add this line
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-```
-
-### 3. Customizing Styles Globally
-All component styles are fully decoupled. You can override visual styles (colors, sizing, padding, active states) by editing the `styles` array inside your published `config/catchy.php`. This allows Catchy components to integrate seamlessly with your project's custom design system:
-
-```php
-// config/catchy.php
-'styles' => [
-    'button' => [
-        'base' => 'inline-flex items-center justify-center font-semibold rounded-lg...',
-        'variants' => [
-            'primary' => 'bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500...',
-            // Change color classes to match your brand (e.g., bg-blue-600, bg-primary-600)
-        ],
-    ],
-    // Customize styles for alert, badge, card, input, dropdown, modal, etc.
-]
+    <!-- Injects Catchy SPA scripts and configuration -->
+    @catchyScripts
+</body>
+</html>
 ```
 
 ---
 
-## 📦 Built-in Blade UI Components
+## 🛠️ Usage & Directives
 
-Catchy includes 19 pre-styled, translatable, and RTL-safe UI components:
-
-| Component Tag | Description & Primary Features | Key Attributes |
-| :--- | :--- | :--- |
-| `<x-catchy-button>` | Interactive button with spinner auto-loading on form submits. | `type`, `variant`, `size`, `loading` |
-| `<x-catchy-input>` | Input field with labels, helper texts, and validation errors. | `name`, `label`, `type`, `placeholder`, `required`, `helper` |
-| `<x-catchy-textarea>` | Textarea with auto-grow and validation errors. | `name`, `label`, `placeholder`, `rows`, `required`, `auto-grow` |
-| `<x-catchy-select>` | Styled dropdown select with arrow helper. | `name`, `label`, `options`, `selected`, `multiple`, `placeholder` |
-| `<x-catchy-upload>` | Drag & drop file/image uploader with previews. | `name`, `multiple`, `accept`, `label`, `helpText` |
-| `<x-catchy-modal>` | Keyboard closeable, dynamic backdrop blurred modal. | `id`, `title`, `size`, `closeOnOutsideClick` |
-| `<x-catchy-offcanvas>` | Slide-in drawer supporting 6 logical entry directions. | `id`, `title`, `direction`, `closeOnOutsideClick` |
-| `<x-catchy-toast>` | Global notifier displaying flash and real-time session updates. | `position`, `duration` |
-| `<x-catchy-alert>` | Dismissible inline information or warning banner. | `type`, `dismissible` |
-| `<x-catchy-badge>` | Visual pill or label displaying metadata statuses. | `variant`, `size`, `rounded` |
-| `<x-catchy-dropdown>` | Relative overlay dropdown with outside click closing. | `align`, `width` |
-| `<x-catchy-progress>` | Progress bar tracking global page navigation or file uploads. | `for`, `color`, `height`, `showPercent` |
-| `<x-catchy-lazy>` | Lazy loader rendering components on load or viewport intersection. | `src`, `trigger` |
-| `<x-catchy-skeleton>` | Placeholder skeleton loaders (text lines, circles, cards). | `type`, `lines`, `animate` |
-| `<x-catchy-spinner>` | Standard loading SVG animation helper. | `size`, `color` |
-| `<x-catchy-error>` | Validation feedback field rendering backend validation errors. | `field` |
-| `<x-catchy-fade>` | Subtle transition wrapper to fade in content. | `duration` |
-| `<x-catchy-form>` | Form wrapper implementing SPA interception, callbacks, and CSRF. | `action`, `method`, `beforesend`, `success`, `error` |
-
----
-
-## 🛠️ Advanced Dynamic APIs
-
-### 1. Real-time Backend Syncing (`x-catchy-sync`)
-Sync input values or whole forms with your backend asynchronously. Extremely useful for live-search or auto-saving:
+### 1. Headless Lazy Loading (`x-catchy-lazy`)
+You can lazy-load any standard HTML container immediately or when it scrolls into view (using the `.intersect` modifier). Catchy will fetch the HTML from the backend and morph it into place.
 
 ```html
-<!-- Live Search: fires key-up query (debounced) and morphs results container -->
-<input type="text" name="q" x-catchy-sync.input.debounce.300ms.target.results-box="/search">
+<!-- Load immediately on page load -->
+<div x-catchy-lazy="/comments">
+    <p>Loading comments...</p> <!-- Your custom unstyled loader -->
+</div>
 
-<div id="results-box">
-    <!-- Results list will render here -->
+<!-- Load only when scrolled into view -->
+<div x-catchy-lazy.intersect="/recommended-products">
+    <p>Loading recommendations...</p>
 </div>
 ```
-**Modifiers**: `.input` (keystroke trigger), `.debounce.Xms` (delay), `.form` (serialize parent form), `.target.element-id` (response target container).
 
-### 2. Declarative Event Triggers
-You can chain multiple actions on form success or error triggers without writing JavaScript.
-Use `data-catchy-on-success` or `data-catchy-on-error` with actions separated by semicolons:
-
-- **Format**: `data-catchy-on-[success|error]="action:component:id"`
-- **Available Actions**: `open:modal:id`, `close:modal:id`, `open:offcanvas:id`, `close:offcanvas:id`, `reload:lazy-component-id`, `toast:message`, `reset` (clear form).
-
-```html
-<!-- Automatically resets inputs, triggers a toast alert, and reloads comments list on success -->
-<x-catchy-form action="/comments" method="POST" 
-    data-catchy-on-success="reset;toast:Comment posted!;reload:comment-section">
-    <textarea name="comment" required></textarea>
-    <button type="submit">Submit Comment</button>
-</x-catchy-form>
-
-<x-catchy-lazy id="comment-section" src="/comments/list" />
+To trigger a reload programmatically, dispatch a `catchy:lazy-reload` event:
+```javascript
+// Reload a specific lazy-load block by targeting its element ID
+window.dispatchEvent(new CustomEvent('catchy:lazy-reload', { detail: { id: 'comments-box' } }));
 ```
 
-### 3. Action Confirmations
-Protect destructive actions from accidental clicks by displaying native or custom confirmations:
+### 2. Real-Time Backend Syncing (`x-catchy-sync`)
+Perfect for live search queries, filtering, or auto-saving drafts. This directive captures input events and morphs the target container with the search results.
+
+```html
+<!-- Live search: fires key-up query (debounced) and morphs the #results-box -->
+<input type="text" name="query" 
+       x-catchy-sync.input.debounce.300ms.target.results-box="/search" 
+       placeholder="Search...">
+
+<div id="results-box">
+    <!-- Results list will morph here -->
+</div>
+```
+- **Modifiers**: `.input` (fires on input/keystrokes), `.debounce.Xms` (delay), `.form` (serializes parent form), `.target.element-id` (identifies morph target).
+
+### 3. Declarative Action Confirmation
+Intercept actions to prevent accidental clicks:
 
 ```html
 <!-- Native prompt -->
-<a href="/delete" data-catchy-confirm="Are you sure you want to delete this?">Delete</a>
-
-<!-- Custom Styled Modal confirm -->
-<x-catchy-form action="/purge" method="POST" data-catchy-confirm-modal="confirm-modal">
-    <button type="submit">Purge Data</button>
-</x-catchy-form>
-
-<x-catchy-modal id="confirm-modal" title="Confirm Purge">
-    <p>Are you absolutely sure?</p>
-    <div class="mt-4 flex gap-3">
-        <button type="button" @click="close()">Cancel</button>
-        <button type="button" data-catchy-confirm-button class="bg-red-600 text-white">Yes, Purge</button>
-    </div>
-</x-catchy-modal>
+<a href="/delete" data-catchy-confirm="Are you sure you want to delete this comment?">Delete</a>
 ```
 
-### 4. NPM / Vite Bundler Mode (Alternative Integration)
-If you prefer packaging Catchy inside your `resources/js/app.js` using Vite instead of `@catchyScripts`:
+### 4. Declarative Event Hooks
+You can chain multiple operations on link/form success or error states using `data-catchy-on-success` or `data-catchy-on-error`:
 
-1. Install Alpine dependencies via NPM:
+- **Shorthand Actions**: `reset` (clears form), `reload:lazy-id` (triggers lazy component reload), `toast:message` (fires a toast notification event).
+- **Available Events**: Catchy dispatches standard custom events on the window/trigger element:
+  - `catchy:start` / `catchy:end` (starts/stops loading)
+  - `catchy:error` (request failed)
+  - `catchy:flash` (contains flash message session payloads)
+  - `catchy:validation-errors` (contains form validation errors)
+
+```html
+<!-- Automatically resets inputs and reloads the feed on successful post -->
+<form action="/posts" method="POST" 
+      data-catchy-on-success="reset;reload:posts-feed;toast:Post published successfully!">
+    <textarea name="content" required></textarea>
+    <button type="submit">Publish</button>
+</form>
+
+<!-- Feed gets reloaded automatically -->
+<div id="posts-feed" x-catchy-lazy="/posts/feed"></div>
+```
+
+---
+
+## 🎨 NPM / Vite Integration (Optional)
+
+If you prefer bundling Catchy inside your primary compiled JS bundle:
+
+1. Install required peer dependencies:
 ```bash
 npm install alpinejs @alpinejs/morph
 ```
-2. Bundle inside `resources/js/app.js` (importing the published Catchy asset):
+
+2. Register the Catchy plugin inside `resources/js/app.js`:
 ```javascript
 import Alpine from 'alpinejs';
 import morph from '@alpinejs/morph';
@@ -203,7 +159,13 @@ window.Alpine = Alpine;
 Alpine.start();
 ```
 
+3. Disable standalone auto-injection in `config/catchy.php`:
+```php
+'auto_inject' => false,
+```
+
 ---
 
 ## 📄 License
+
 The MIT License (MIT). Please see [License File](LICENSE) for more details.

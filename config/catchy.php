@@ -119,39 +119,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Dynamic UI Blade Components
-    |--------------------------------------------------------------------------
-    |
-    | Map the built-in package component views to their corresponding
-    | HTML tags. This allows customizing, styling, or swapping components
-    | without modifying core package source files.
-    |
-    */
-
-    'components' => [
-        'spinner' => 'catchy-spinner',
-        'skeleton' => 'catchy-skeleton',
-        'fade' => 'catchy-fade',
-        'form' => 'catchy-form',
-        'modal' => 'catchy-modal',
-        'toast' => 'catchy-toast',
-        'progress' => 'catchy-progress',
-        'upload' => 'catchy-upload',
-        'error' => 'catchy-error',
-        'lazy' => 'catchy-lazy',
-        'offcanvas' => 'catchy-offcanvas',
-        'button' => 'catchy-button',
-        'card' => 'catchy-card',
-        'alert' => 'catchy-alert',
-        'badge' => 'catchy-badge',
-        'dropdown' => 'catchy-dropdown',
-        'input' => 'catchy-input',
-        'textarea' => 'catchy-textarea',
-        'select' => 'catchy-select',
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Excluded Routes
     |--------------------------------------------------------------------------
     |
@@ -164,34 +131,5 @@ return [
         // 'api/*',
         // 'stripe/*',
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Component Styling Preset
-    |--------------------------------------------------------------------------
-    |
-    | Supported presets: "tailwind", "bootstrap", "vanilla", "custom"
-    |
-    | If set to "tailwind", "bootstrap", or "vanilla", components will load the
-    | corresponding stylesheet class preset. Set to "custom" to manage your
-    | own custom styles inside the 'styles' array below.
-    |
-    | Default: "tailwind"
-    |
-    */
-
-    'preset' => 'tailwind',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Component Style Overrides
-    |--------------------------------------------------------------------------
-    |
-    | Customize or override style classes for individual package components.
-    | If you want to change colors, sizing, or spacing to match your theme,
-    | you can define custom classes here, which will override the active preset.
-    |
-    */
-
 
 ];
