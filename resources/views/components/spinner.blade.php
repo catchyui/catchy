@@ -4,25 +4,9 @@
 ])
 
 @php
-    $baseClass = config('catchy.styles.spinner.base', 'animate-spin');
-
-    $sizes = array_merge([
-        'xs' => 'h-3.5 w-3.5',
-        'sm' => 'h-4 w-4',
-        'md' => 'h-6 w-6',
-        'lg' => 'h-8 w-8',
-        'xl' => 'h-12 w-12',
-    ], config('catchy.styles.spinner.sizes', []));
-
-    $colors = array_merge([
-        'primary' => 'text-indigo-600 dark:text-indigo-400',
-        'accent' => 'text-cyan-500 dark:text-cyan-400',
-        'white' => 'text-white',
-        'gray' => 'text-gray-400 dark:text-gray-500',
-    ], config('catchy.styles.spinner.colors', []));
-
-    $sizeClass = $sizes[$size] ?? $sizes['md'];
-    $colorClass = $colors[$color] ?? $colors['primary'];
+    $baseClass = catchy_style('spinner.base', 'animate-spin');
+    $sizeClass = catchy_style("spinner.sizes.{$size}", catchy_style('spinner.sizes.md', 'h-6 w-6'));
+    $colorClass = catchy_style("spinner.colors.{$color}", catchy_style('spinner.colors.primary', 'text-indigo-600 dark:text-indigo-400'));
 @endphp
 
 <svg {{ $attributes->merge(['class' => "{$baseClass} {$sizeClass} {$colorClass}"]) }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

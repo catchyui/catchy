@@ -6,29 +6,16 @@
 ])
 
 @php
-    $baseClass = config('catchy.styles.modal.base', 'fixed inset-0 z-50 overflow-y-auto');
-    $backdropClass = config('catchy.styles.modal.backdrop', 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity');
-    $wrapperClass = config('catchy.styles.modal.wrapper', 'flex min-h-screen items-center justify-center p-4 text-center sm:p-0');
-    $contentClass = config('catchy.styles.modal.content', 'relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-start shadow-2xl transition-all w-full flex flex-col max-h-[90vh]');
-    $headerClass = config('catchy.styles.modal.header', 'flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4');
-    $titleClass = config('catchy.styles.modal.title', 'text-lg font-semibold text-slate-900 dark:text-slate-100');
-    $closeBtnClass = config('catchy.styles.modal.close_btn', 'rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500');
-    $bodyClass = config('catchy.styles.modal.body', 'flex-1 overflow-y-auto px-6 py-4 text-slate-600 dark:text-slate-300');
-    $footerClass = config('catchy.styles.modal.footer', 'border-t border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3');
-
-    $sizes = array_merge([
-        'sm' => 'sm:max-w-sm',
-        'md' => 'sm:max-w-md',
-        'lg' => 'sm:max-w-lg',
-        'xl' => 'sm:max-w-xl',
-        '2xl' => 'sm:max-w-2xl',
-        '3xl' => 'sm:max-w-3xl',
-        '4xl' => 'sm:max-w-4xl',
-        '5xl' => 'sm:max-w-5xl',
-        'full' => 'sm:max-w-full m-4',
-    ], config('catchy.styles.modal.sizes', []));
-
-    $sizeClass = $sizes[$size] ?? $sizes['md'];
+    $baseClass = catchy_style('modal.base', 'fixed inset-0 z-50 overflow-y-auto');
+    $backdropClass = catchy_style('modal.backdrop', 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity');
+    $wrapperClass = catchy_style('modal.wrapper', 'flex min-h-screen items-center justify-center p-4 text-center sm:p-0');
+    $contentClass = catchy_style('modal.content', 'relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-start shadow-2xl transition-all w-full flex flex-col max-h-[90vh]');
+    $headerClass = catchy_style('modal.header', 'flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4');
+    $titleClass = catchy_style('modal.title', 'text-lg font-semibold text-slate-900 dark:text-slate-100');
+    $closeBtnClass = catchy_style('modal.close_btn', 'rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500');
+    $bodyClass = catchy_style('modal.body', 'flex-1 overflow-y-auto px-6 py-4 text-slate-600 dark:text-slate-300');
+    $footerClass = catchy_style('modal.footer', 'border-t border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3');
+    $sizeClass = catchy_style("modal.sizes.{$size}", catchy_style('modal.sizes.md', 'sm:max-w-md'));
 @endphp
 
 <div

@@ -10,14 +10,14 @@
 ])
 
 @php
-    $wrapperClass = config('catchy.styles.select.wrapper', 'space-y-1');
-    $labelClass = config('catchy.styles.select.label', 'block text-sm font-medium text-slate-700 dark:text-slate-300');
-    $requiredClass = config('catchy.styles.select.required', 'text-rose-500');
-    $inputWrapperClass = config('catchy.styles.select.input_wrapper', 'relative rounded-lg shadow-sm');
-    $selectClass = config('catchy.styles.select.select', 'block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors disabled:opacity-50');
-    $arrowWrapperClass = config('catchy.styles.select.arrow_wrapper', 'pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500 dark:text-slate-400');
-    $helperClass = config('catchy.styles.select.helper', 'text-xs text-slate-500 dark:text-slate-400');
-    $errorClass = config('catchy.styles.select.error', 'text-rose-500 text-xs mt-1');
+    $wrapperClass = catchy_style('select.wrapper', 'space-y-1');
+    $labelClass = catchy_style('select.label', 'block text-sm font-medium text-slate-700 dark:text-slate-300');
+    $requiredClass = catchy_style('select.required', 'text-rose-500');
+    $inputWrapperClass = catchy_style('select.input_wrapper', 'relative rounded-lg shadow-sm');
+    $selectClass = catchy_style('select.select', 'block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors disabled:opacity-50');
+    $arrowWrapperClass = catchy_style('select.arrow_wrapper', 'pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500 dark:text-slate-400');
+    $helperClass = catchy_style('select.helper', 'text-xs text-slate-500 dark:text-slate-400');
+    $errorClass = catchy_style('select.error', 'text-rose-500 text-xs mt-1');
 @endphp
 
 <div class="{{ $wrapperClass }}">

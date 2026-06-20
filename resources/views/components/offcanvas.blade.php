@@ -6,15 +6,15 @@
 ])
 
 @php
-    $baseClass = config('catchy.styles.offcanvas.base', 'fixed inset-0 z-50 overflow-hidden');
-    $backdropClass = config('catchy.styles.offcanvas.backdrop', 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity');
-    $headerClass = config('catchy.styles.offcanvas.header', 'flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4');
-    $titleClass = config('catchy.styles.offcanvas.title', 'text-lg font-semibold text-slate-900 dark:text-slate-100');
-    $closeBtnClass = config('catchy.styles.offcanvas.close_btn', 'rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500');
-    $bodyClass = config('catchy.styles.offcanvas.body', 'flex-1 overflow-y-auto px-6 py-4 text-slate-600 dark:text-slate-300');
-    $footerClass = config('catchy.styles.offcanvas.footer', 'border-t border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3');
+    $baseClass = catchy_style('offcanvas.base', 'fixed inset-0 z-50 overflow-hidden');
+    $backdropClass = catchy_style('offcanvas.backdrop', 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity');
+    $headerClass = catchy_style('offcanvas.header', 'flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4');
+    $titleClass = catchy_style('offcanvas.title', 'text-lg font-semibold text-slate-900 dark:text-slate-100');
+    $closeBtnClass = catchy_style('offcanvas.close_btn', 'rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500');
+    $bodyClass = catchy_style('offcanvas.body', 'flex-1 overflow-y-auto px-6 py-4 text-slate-600 dark:text-slate-300');
+    $footerClass = catchy_style('offcanvas.footer', 'border-t border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3');
 
-    $directions = array_merge([
+    $directions = [
         'left' => [
             'position' => 'top-0 left-0 bottom-0 w-80 border-r',
             'enter_start' => '-translate-x-full',
@@ -57,9 +57,9 @@
             'leave_start' => 'translate-y-0',
             'leave_end' => 'translate-y-full',
         ],
-    ], config('catchy.styles.offcanvas.directions', []));
+    ];
 
-    $cfg = $directions[$direction] ?? $directions['right'];
+    $cfg = catchy_style("offcanvas.directions.{$direction}", $directions[$direction] ?? $directions['right']);
 @endphp
 
 <div

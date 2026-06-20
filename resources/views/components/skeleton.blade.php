@@ -5,11 +5,11 @@
 ])
 
 @php
-    $wrapperClass = config('catchy.styles.skeleton.wrapper', 'space-y-3');
-    $circleClass = config('catchy.styles.skeleton.circle', 'rounded-full bg-gray-200 dark:bg-slate-700 h-12 w-12');
-    $titleClass = config('catchy.styles.skeleton.title', 'h-6 bg-gray-200 dark:bg-slate-700 rounded-md w-2/3');
-    $cardClass = config('catchy.styles.skeleton.card', 'rounded-lg bg-gray-200 dark:bg-slate-700 h-32 w-full');
-    $lineClass = config('catchy.styles.skeleton.line', 'h-4 bg-gray-200 dark:bg-slate-700 rounded-md');
+    $wrapperClass = catchy_style('skeleton.wrapper', 'space-y-3');
+    $circleClass = catchy_style('skeleton.circle', 'rounded-full bg-gray-200 dark:bg-slate-700 h-12 w-12');
+    $titleClass = catchy_style('skeleton.title', 'h-6 bg-gray-200 dark:bg-slate-700 rounded-md w-2/3');
+    $cardClass = catchy_style('skeleton.card', 'rounded-lg bg-gray-200 dark:bg-slate-700 h-32 w-full');
+    $lineClass = catchy_style('skeleton.line', 'h-4 bg-gray-200 dark:bg-slate-700 rounded-md');
 
     $animation = $animate === 'pulse' ? 'animate-pulse' : '';
 @endphp

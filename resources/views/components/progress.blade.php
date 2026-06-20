@@ -8,20 +8,11 @@
 
 @php
     $label = $label ?? __('catchy::messages.loading');
-    $wrapperClass = config('catchy.styles.progress.wrapper', 'w-full space-y-2');
-    $percentWrapperClass = config('catchy.styles.progress.percent_wrapper', 'flex justify-between items-center text-xs font-semibold text-gray-700 dark:text-gray-300');
-    $barTrackClass = config('catchy.styles.progress.bar_track', 'w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-300/30 dark:border-gray-750/30');
-    $barBaseClass = config('catchy.styles.progress.bar_base', 'rounded-full transition-all duration-300 ease-out shadow-sm');
-
-    $colors = array_merge([
-        'primary' => 'bg-indigo-600 dark:bg-indigo-500',
-        'accent' => 'bg-cyan-500 dark:bg-cyan-400',
-        'success' => 'bg-emerald-500 dark:bg-emerald-400',
-        'warning' => 'bg-amber-500 dark:bg-amber-400',
-        'danger' => 'bg-rose-500 dark:bg-rose-400',
-        'gradient' => 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500',
-    ], config('catchy.styles.progress.colors', []));
-    $colorClass = $colors[$color] ?? $colors['primary'];
+    $wrapperClass = catchy_style('progress.wrapper', 'w-full space-y-2');
+    $percentWrapperClass = catchy_style('progress.percent_wrapper', 'flex justify-between items-center text-xs font-semibold text-gray-700 dark:text-gray-300');
+    $barTrackClass = catchy_style('progress.bar_track', 'w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-300/30 dark:border-gray-750/30');
+    $barBaseClass = catchy_style('progress.bar_base', 'rounded-full transition-all duration-300 ease-out shadow-sm');
+    $colorClass = catchy_style("progress.colors.{$color}", catchy_style('progress.colors.primary', 'bg-indigo-600 dark:bg-indigo-500'));
 @endphp
 
 <div 

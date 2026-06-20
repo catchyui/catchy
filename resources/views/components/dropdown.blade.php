@@ -4,10 +4,10 @@
 ])
 
 @php
-    $wrapperClass = config('catchy.styles.dropdown.wrapper', 'relative inline-block text-start');
-    $triggerClass = config('catchy.styles.dropdown.trigger', 'cursor-pointer');
-    $menuClass = config('catchy.styles.dropdown.menu', 'absolute z-50 mt-2 rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 py-1 focus:outline-none');
-    $innerClass = config('catchy.styles.dropdown.inner', 'rounded-xl py-1 bg-white dark:bg-slate-900');
+    $wrapperClass = catchy_style('dropdown.wrapper', 'relative inline-block text-start');
+    $triggerClass = catchy_style('dropdown.trigger', 'cursor-pointer');
+    $menuClass = catchy_style('dropdown.menu', 'absolute z-50 mt-2 rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 py-1 focus:outline-none');
+    $innerClass = catchy_style('dropdown.inner', 'rounded-xl py-1 bg-white dark:bg-slate-900');
 
     $alignmentClasses = match ($align) {
         'left' => 'origin-top-left left-0',

@@ -5,7 +5,7 @@
 ])
 
 @php
-    $errorClass = config('catchy.styles.lazy.error', 'text-sm text-rose-600 dark:text-rose-400 p-4 border border-rose-200 dark:border-rose-900/40 rounded-lg bg-rose-50 dark:bg-rose-950/20');
+    $errorClass = catchy_style('lazy.error', 'text-sm text-rose-600 dark:text-rose-400 p-4 border border-rose-200 dark:border-rose-900/40 rounded-lg bg-rose-50 dark:bg-rose-950/20');
 @endphp
 
 <div 

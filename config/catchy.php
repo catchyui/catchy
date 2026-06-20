@@ -164,12 +164,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Component Tailwind Styles
+    | Component Styling Preset
     |--------------------------------------------------------------------------
     |
-    | Customize the default Tailwind classes for the package components. If you
-    | want to change the visual design, colors, sizes, or spacing to match your
-    | theme, you can customize these classes here.
+    | Supported presets: "tailwind", "bootstrap", "vanilla", "custom"
+    |
+    | If set to "tailwind", "bootstrap", or "vanilla", components will load the
+    | corresponding stylesheet class preset. Set to "custom" to manage your
+    | own custom styles inside the 'styles' array below.
+    |
+    | Default: "tailwind"
+    |
+    */
+
+    'preset' => 'tailwind',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Component Style Overrides
+    |--------------------------------------------------------------------------
+    |
+    | Customize or override style classes for individual package components.
+    | If you want to change colors, sizing, or spacing to match your theme,
+    | you can define custom classes here, which will override the active preset.
     |
     */
 

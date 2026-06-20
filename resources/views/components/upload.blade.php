@@ -10,22 +10,22 @@
     $label = $label ?? __('catchy::messages.drag_drop_label');
     $helpText = $helpText ?? __('catchy::messages.help_text');
 
-    $wrapperClass = config('catchy.styles.upload.wrapper', 'w-full');
-    $dropZoneClass = config('catchy.styles.upload.drop_zone', 'relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ease-in-out group outline-none focus-within:ring-2 focus-within:ring-indigo-500');
-    $dropZoneActiveClass = config('catchy.styles.upload.drop_zone_active', 'border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/20 shadow-md scale-[1.01]');
-    $dropZoneInactiveClass = config('catchy.styles.upload.drop_zone_inactive', 'border-gray-300 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 bg-gray-50/50 dark:bg-gray-900/50');
-    $iconWrapperClass = config('catchy.styles.upload.icon_wrapper', 'mb-4 rounded-full bg-indigo-100/80 dark:bg-indigo-950/50 p-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300');
-    $titleClass = config('catchy.styles.upload.title', 'text-sm font-semibold text-gray-700 dark:text-gray-200');
-    $helpClass = config('catchy.styles.upload.help', 'mt-1 text-xs text-gray-500 dark:text-gray-400');
-    $previewListClass = config('catchy.styles.upload.preview_list', 'mt-4 space-y-2');
-    $previewItemClass = config('catchy.styles.upload.preview_item', 'flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm transition-all duration-200 hover:shadow');
-    $thumbnailImgClass = config('catchy.styles.upload.thumbnail_img', 'h-10 w-10 object-cover rounded-md border border-gray-100 dark:border-gray-850 flex-shrink-0');
-    $thumbnailIconWrapperClass = config('catchy.styles.upload.thumbnail_icon_wrapper', 'h-10 w-10 flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900 border border-gray-100 dark:border-gray-850 flex-shrink-0 text-gray-400 dark:text-gray-500');
-    $fileInfoClass = config('catchy.styles.upload.file_info', 'min-w-0 flex-1 px-2');
-    $fileNameClass = config('catchy.styles.upload.file_name', 'text-sm font-medium text-gray-700 dark:text-gray-300 truncate');
-    $fileSizeClass = config('catchy.styles.upload.file_size', 'text-xs text-gray-500 dark:text-gray-400');
-    $removeBtnClass = config('catchy.styles.upload.remove_btn', 'p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors');
-    $errorClass = config('catchy.styles.upload.error', 'mt-2 text-sm text-red-600 dark:text-red-400 font-semibold');
+    $wrapperClass = catchy_style('upload.wrapper', 'w-full');
+    $dropZoneClass = catchy_style('upload.drop_zone', 'relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ease-in-out group outline-none focus-within:ring-2 focus-within:ring-indigo-500');
+    $dropZoneActiveClass = catchy_style('upload.drop_zone_active', 'border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/20 shadow-md scale-[1.01]');
+    $dropZoneInactiveClass = catchy_style('upload.drop_zone_inactive', 'border-gray-300 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 bg-gray-50/50 dark:bg-gray-900/50');
+    $iconWrapperClass = catchy_style('upload.icon_wrapper', 'mb-4 rounded-full bg-indigo-100/80 dark:bg-indigo-950/50 p-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300');
+    $titleClass = catchy_style('upload.title', 'text-sm font-semibold text-gray-700 dark:text-gray-200');
+    $helpClass = catchy_style('upload.help', 'mt-1 text-xs text-gray-500 dark:text-gray-400');
+    $previewListClass = catchy_style('upload.preview_list', 'mt-4 space-y-2');
+    $previewItemClass = catchy_style('upload.preview_item', 'flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm transition-all duration-200 hover:shadow');
+    $thumbnailImgClass = catchy_style('upload.thumbnail_img', 'h-10 w-10 object-cover rounded-md border border-gray-100 dark:border-gray-850 flex-shrink-0');
+    $thumbnailIconWrapperClass = catchy_style('upload.thumbnail_icon_wrapper', 'h-10 w-10 flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900 border border-gray-100 dark:border-gray-850 flex-shrink-0 text-gray-400 dark:text-gray-500');
+    $fileInfoClass = catchy_style('upload.file_info', 'min-w-0 flex-1 px-2');
+    $fileNameClass = catchy_style('upload.file_name', 'text-sm font-medium text-gray-700 dark:text-gray-300 truncate');
+    $fileSizeClass = catchy_style('upload.file_size', 'text-xs text-gray-500 dark:text-gray-400');
+    $removeBtnClass = catchy_style('upload.remove_btn', 'p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors');
+    $errorClass = catchy_style('upload.error', 'mt-2 text-sm text-red-600 dark:text-red-400 font-semibold');
 @endphp
 
 <div 

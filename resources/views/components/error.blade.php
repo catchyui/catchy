@@ -3,7 +3,7 @@
 ])
 
 @php
-    $baseClass = config('catchy.styles.error.base', 'text-sm text-red-600 dark:text-red-400 mt-1 font-medium');
+    $baseClass = catchy_style('error.base', 'text-sm text-red-600 dark:text-red-400 mt-1 font-medium');
 @endphp
 
 <div 
