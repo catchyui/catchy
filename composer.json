@@ -25,9 +25,6 @@
         "illuminate/http": "^11.0 || ^12.0"
     },
     "autoload": {
-        "files": [
-            "src/Support/helpers.php"
-        ],
         "psr-4": {
             "Hamzi\\Catchy\\": "src/"
         }

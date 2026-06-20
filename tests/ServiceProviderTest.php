@@ -6,13 +6,11 @@ namespace Hamzi\Catchy\Tests;
 
 use Hamzi\Catchy\CatchyServiceProvider;
 use Hamzi\Catchy\Console\InstallCommand;
-use Hamzi\Catchy\Domain\Contracts\ComponentRepositoryInterface;
 use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
 use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
 use Hamzi\Catchy\Http\Middleware\CatchySPAMiddleware;
 use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
 use Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository;
-use Hamzi\Catchy\Infrastructure\Repositories\ConfigComponentRepository;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
 
@@ -122,10 +120,8 @@ class ServiceProviderTest extends TestCase
     {
         $extractor = $this->app->make(ResponseExtractorInterface::class);
         $versionRepository = $this->app->make(VersionRepositoryInterface::class);
-        $componentRepository = $this->app->make(ComponentRepositoryInterface::class);
 
         $this->assertInstanceOf(HtmlResponseExtractor::class, $extractor);
         $this->assertInstanceOf(AssetVersionRepository::class, $versionRepository);
-        $this->assertInstanceOf(ConfigComponentRepository::class, $componentRepository);
     }
 }

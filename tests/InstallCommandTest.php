@@ -43,16 +43,13 @@ class InstallCommandTest extends TestCase
 
         // Call the installer command and mock interactions
         $this->artisan('catchy:install')
-            ->expectsConfirmation('Do you want to publish the Blade views and components to customize their templates?', 'no')
-            ->expectsConfirmation('Do you want to publish the translation files to customize languages?', 'no')
+            ->expectsConfirmation('Do you want to publish the Blade views to customize script templates?', 'no')
             ->expectsConfirmation('Do you want to generate a pre-configured SPA layouts template?', 'yes')
             ->assertExitCode(0);
 
         $this->assertTrue(File::exists($layoutPath));
         $this->assertStringContainsString('id="catchy-app"', File::get($layoutPath));
         $this->assertStringContainsString('@catchyScripts', File::get($layoutPath));
-        $this->assertStringContainsString('<x-catchy-progress', File::get($layoutPath));
-        $this->assertStringContainsString('<x-catchy-toast', File::get($layoutPath));
         $this->assertStringContainsString('@vite', File::get($layoutPath));
         $this->assertStringNotContainsString('tailwindcss.com', File::get($layoutPath));
     }

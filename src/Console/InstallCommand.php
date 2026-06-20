@@ -53,24 +53,15 @@ class InstallCommand extends Command
         ]);
 
         // 3. Optional Views publishing
-        if ($this->confirm('Do you want to publish the Blade views and components to customize their templates?', false)) {
-            $this->comment('Publishing Blade components...');
+        if ($this->confirm('Do you want to publish the Blade views to customize script templates?', false)) {
+            $this->comment('Publishing Blade views...');
             $this->call('vendor:publish', [
                 '--provider' => 'Hamzi\Catchy\CatchyServiceProvider',
                 '--tag' => 'catchy-views',
             ]);
         }
 
-        // 4. Optional Translation publishing
-        if ($this->confirm('Do you want to publish the translation files to customize languages?', false)) {
-            $this->comment('Publishing translation files...');
-            $this->call('vendor:publish', [
-                '--provider' => 'Hamzi\Catchy\CatchyServiceProvider',
-                '--tag' => 'catchy-translations',
-            ]);
-        }
-
-        // 5. Generate SPA starter layout
+        // 4. Generate SPA starter layout
         if ($this->confirm('Do you want to generate a pre-configured SPA layouts template?', true)) {
             $this->generateLayout();
         }
@@ -125,19 +116,10 @@ class InstallCommand extends Command
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen antialiased">
 
-    <!-- Top Loading Bar (Interacts with SPA visits) -->
-    <x-catchy-progress color="gradient" height="h-1" :show-percent="false" />
-
-    <!-- Global Toast Container (Shows session flash notices) -->
-    <x-catchy-toast position="top-right" duration="4000" />
-
     <!-- Main SPA Container (Morphed on page transitions) -->
-    <div id="catchy-app" class="min-h-screen flex flex-col justify-between">
+    <div id="catchy-app" class="min-h-screen">
         @yield('content')
     </div>
-
-    <!-- Global Modal Dialog (Declarative SPA modals) -->
-    <x-catchy-modal id="catchy-modal" size="md" />
 
     <!-- Injects Catchy SPA scripts & Alpine configuration -->
     @catchyScripts

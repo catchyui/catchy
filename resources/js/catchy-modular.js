@@ -10,7 +10,7 @@ import { getCache } from './modules/cache.js';
 import { visit, getCurrentVersion } from './modules/navigation.js';
 import { prefetch, initHoverPrefetch, initViewportPrefetch } from './modules/prefetch.js';
 import { submitForm } from './modules/forms.js';
-import { registerAlpineComponents } from './modules/components.js';
+import { registerLazyDirective } from './modules/lazy.js';
 import { registerSyncDirective } from './modules/sync.js';
 import { initEventListeners } from './modules/events.js';
 import { initConnectivity } from './modules/connectivity.js';
@@ -60,8 +60,8 @@ function CatchyPlugin(Alpine) {
         return submitForm(form, boundVisit);
     };
 
-    // Register Alpine.data() components
-    registerAlpineComponents(Alpine, config);
+    // Register x-catchy-lazy directive
+    registerLazyDirective(Alpine, config);
 
     // Register x-catchy-sync directive
     registerSyncDirective(Alpine, config);
