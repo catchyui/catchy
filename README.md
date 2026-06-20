@@ -14,7 +14,7 @@
 
 ---
 
-**Laravel Catchy** converts standard Laravel applications into high-performance, seamless SPAs using **Alpine.js** and **`@alpinejs/morph`**. By removing styling opinions and visual components, Catchy v2 is a **100% headless** engine. You get absolute styling freedom while Catchy manages instant page transitions, form interceptions, SWR caching, and dynamic head/meta updates in the background.
+**Laravel Catchy** converts standard Laravel applications into high-performance, seamless SPAs using **Alpine.js** and **`@alpinejs/morph`**. By removing styling opinions and visual components, Catchy is a **100% headless** engine. You get absolute styling freedom while Catchy manages instant page transitions, form interceptions, SWR caching, and dynamic head/meta updates in the background.
 
 ---
 

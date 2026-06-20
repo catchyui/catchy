@@ -64,7 +64,9 @@ export function executeScriptsInContainer(container) {
             newScript.setAttribute(attr.name, attr.value);
         });
         newScript.textContent = oldScript.textContent;
-        oldScript.parentNode.replaceChild(newScript, oldScript);
+        if (oldScript.parentNode) {
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        }
     });
 }
 
@@ -187,11 +189,35 @@ export function executeCallback(element, attrName, context) {
     }
 
     try {
-        if (typeof window[callback] === 'function') {
-            return window[callback](context);
+        const parts = callback.split('.');
+        let func = window;
+        for (const part of parts) {
+            if (func === undefined || func === null) {
+                func = undefined;
+                break;
+            }
+            func = func[part];
+        }
+
+        if (typeof func === 'function') {
+            return func(context);
         }
         console.warn(`Catchy: Unknown callback "${callback}". Only registered window functions are allowed.`);
     } catch (e) {
         console.error(`Catchy: Error in callback execution for "${callback}":`, e);
     }
 }
+
+/**
+ * Initialize / hydrate Alpine.js tree inside a container.
+ *
+ * @param {HTMLElement} container
+ * @param {Object} Alpine
+ */
+export function hydrateAlpine(container, Alpine) {
+    if (!container || !Alpine) return;
+    if (typeof Alpine.initTree === 'function') {
+        Alpine.initTree(container);
+    }
+}
+

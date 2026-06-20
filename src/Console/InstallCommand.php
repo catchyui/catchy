@@ -67,7 +67,7 @@ class InstallCommand extends Command
         }
 
         $this->info("\n Hamzi/Catchy has been installed successfully! 🎉");
-        $this->info("Middleware and script auto-injection are now active. Standard HTML page visits will automatically run as SPA requests.");
+        $this->info('Middleware and script auto-injection are now active. Standard HTML page visits will automatically run as SPA requests.');
 
         $this->comment("\n💡 Standalone Mode vs Vite/NPM Mode:");
         $this->line('  - [Standalone Mode] (Default): Catchy scripts are auto-injected. No extra setup required!');
@@ -75,7 +75,7 @@ class InstallCommand extends Command
         $this->info('     npm install alpinejs @alpinejs/morph');
         $this->line('     And import and register:');
         $this->comment("     import CatchyPlugin from '../../public/vendor/catchy/catchy.js';");
-        $this->comment("     Alpine.plugin(morph);");
+        $this->comment('     Alpine.plugin(morph);');
         $this->comment("     Alpine.plugin(CatchyPlugin);\n");
 
         return 0;

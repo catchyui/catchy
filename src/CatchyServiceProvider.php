@@ -7,9 +7,10 @@ namespace Hamzi\Catchy;
 use Hamzi\Catchy\Console\InstallCommand;
 use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
 use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
-use Hamzi\Catchy\Http\Middleware\CatchySPAMiddleware;
+use Hamzi\Catchy\Http\Middleware\CatchyMiddleware;
 use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
 use Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -56,12 +57,12 @@ class CatchyServiceProvider extends ServiceProvider
      */
     protected function registerMiddleware(): void
     {
-        $this->app['router']->aliasMiddleware('catchy', CatchySPAMiddleware::class);
+        $this->app['router']->aliasMiddleware('catchy', CatchyMiddleware::class);
 
         // Automatically append the middleware to the 'web' group for ease of installation
-        if ($this->app->bound(\Illuminate\Contracts\Http\Kernel::class)) {
-            $kernel = $this->app->make(\Illuminate\Contracts\Http\Kernel::class);
-            $kernel->appendMiddlewareToGroup('web', CatchySPAMiddleware::class);
+        if ($this->app->bound(Kernel::class)) {
+            $kernel = $this->app->make(Kernel::class);
+            $kernel->appendMiddlewareToGroup('web', CatchyMiddleware::class);
         }
     }
 
@@ -70,6 +71,18 @@ class CatchyServiceProvider extends ServiceProvider
      */
     protected function registerDirectives(): void
     {
+        // Register the @catchy wrapper directive
+        Blade::directive('catchy', function ($expression) {
+            $id = $expression ?: "'catchy-app'";
+
+            return "<div id=\"<?php echo e({$id}); ?>\">";
+        });
+
+        // Register the @endcatchy wrapper directive
+        Blade::directive('endcatchy', function () {
+            return '</div>';
+        });
+
         // Register the scripts/config injection directive
         Blade::directive('catchyScripts', function () {
             return "<?php echo view('catchy::scripts', ['jsPath' => \\Hamzi\\Catchy\\CatchyServiceProvider::getJsPath()])->render(); ?>";

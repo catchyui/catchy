@@ -101,6 +101,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | View Transition Style
+    |--------------------------------------------------------------------------
+    |
+    | Defines the CSS View Transition animation used during SPA page navigations.
+    | Requires browser support for the View Transitions API (Chrome 111+).
+    |
+    | Supported values:
+    |   - 'none'     : Instant swap, no animation
+    |   - 'fade'     : Smooth cross-dissolve (default)
+    |   - 'slide'    : Subtle horizontal slide with fade
+    |   - 'slide-up' : Vertical entrance from below with fade
+    |   - 'scale'    : Gentle scale with fade
+    |
+    */
+
+    'view_transitions' => 'fade',
+
+    /*
+    |--------------------------------------------------------------------------
     | HTTP Pipeline Stages
     |--------------------------------------------------------------------------
     |

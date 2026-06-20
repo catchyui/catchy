@@ -44,21 +44,22 @@ class HandleRedirectResponse implements PipelineStageInterface
             $request = $data->getRequest();
             $serverVersion = $this->versionRepository->getVersion();
 
-            $headers = [
-                'X-Catchy-Redirect' => $response->headers->get('Location'),
-                'X-Catchy-SPA' => 'true',
-            ];
+            $redirectResponse = clone $response;
+            $redirectResponse->setStatusCode(200);
+            $redirectResponse->setContent('');
 
-            $flash = FlashExtractor::extract($request, false);
+            $redirectResponse->headers->set('X-Catchy-Redirect', $response->headers->get('Location'));
+            $redirectResponse->headers->set('X-Catchy-Request', 'true');
+            $redirectResponse->headers->remove('Location');
+
+            $flash = FlashExtractor::extract($request, true);
             if (! empty($flash)) {
-                $headers['X-Catchy-Flash'] = base64_encode((string) json_encode($flash));
+                $redirectResponse->headers->set('X-Catchy-Flash', base64_encode((string) json_encode($flash)));
             }
 
             if ($serverVersion !== '') {
-                $headers['X-Catchy-Version'] = $serverVersion;
+                $redirectResponse->headers->set('X-Catchy-Version', $serverVersion);
             }
-
-            $redirectResponse = response('', 200, $headers);
 
             return $data->withResponse($redirectResponse);
         }

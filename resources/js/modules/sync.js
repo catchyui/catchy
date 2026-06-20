@@ -13,7 +13,7 @@ import { executeScriptsInContainer, focusAutofocusElements } from './utils.js';
  * @param {Object} config
  */
 export function registerSyncDirective(Alpine, config) {
-    Alpine.directive('catchy-sync', (el, { expression, modifiers }, { evaluate }) => {
+    Alpine.directive('catchy-sync', (el, { expression, modifiers }, { evaluate, cleanup }) => {
         const eventName = modifiers.includes('input') ? 'input' : 'change';
 
         let debounceMs = 0;
@@ -38,7 +38,7 @@ export function registerSyncDirective(Alpine, config) {
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const headers = { 'X-Catchy-SPA': 'true' };
+                const headers = { 'X-Catchy-Request': 'true' };
                 if (csrfToken) {
                     headers['X-CSRF-TOKEN'] = csrfToken;
                 }
@@ -93,5 +93,11 @@ export function registerSyncDirective(Alpine, config) {
         };
 
         el.addEventListener(eventName, listener);
+
+        // Cleanup event listener and pending debounce on element destruction
+        cleanup(() => {
+            el.removeEventListener(eventName, listener);
+            clearTimeout(timeout);
+        });
     });
 }

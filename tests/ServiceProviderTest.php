@@ -8,7 +8,7 @@ use Hamzi\Catchy\CatchyServiceProvider;
 use Hamzi\Catchy\Console\InstallCommand;
 use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
 use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
-use Hamzi\Catchy\Http\Middleware\CatchySPAMiddleware;
+use Hamzi\Catchy\Http\Middleware\CatchyMiddleware;
 use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
 use Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository;
 use Illuminate\Support\Facades\Artisan;
@@ -60,7 +60,22 @@ class ServiceProviderTest extends TestCase
         $middleware = $router->getMiddleware();
 
         $this->assertArrayHasKey('catchy', $middleware);
-        $this->assertEquals(CatchySPAMiddleware::class, $middleware['catchy']);
+        $this->assertEquals(CatchyMiddleware::class, $middleware['catchy']);
+    }
+
+    /**
+     * Test that @catchy and @endcatchy compile to the correct wrapper element.
+     */
+    public function test_catchy_blade_directive_renders_wrapper(): void
+    {
+        $html1 = Blade::render('@catchy');
+        $this->assertEquals('<div id="catchy-app">', $html1);
+
+        $html2 = Blade::render("@catchy('my-custom-app')");
+        $this->assertEquals('<div id="my-custom-app">', $html2);
+
+        $html3 = Blade::render('@endcatchy');
+        $this->assertEquals('</div>', $html3);
     }
 
     /**
