@@ -5,6 +5,20 @@ All notable changes to `Laravel Catchy` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] - 2026-06-20
+
+### Added
+- Added support for customizable component styles and theme presets (`tailwind`, `bootstrap`, `vanilla`) via a global `catchy_style()` helper.
+- Added missing `close` translation key (en/ar) for modal accessibility.
+- Added `toast.types.*` keys to all component style presets.
+
+### Fixed
+- Fixed duplicated "Excluded Routes" comment block in config.
+- Fixed performance by caching styling presets statically and caching asset version lookups at instance level.
+- Fixed select component option matching to use strict type comparison.
+- Fixed Composer constraints to remove premature Laravel 13 support.
+- Fixed peer dependencies by removing tailwindcss.
+
 ## [1.4.3] - 2026-06-19
 
 ### Added
