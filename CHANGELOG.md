@@ -5,6 +5,18 @@ All notable changes to `Laravel Catchy` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.8] - 2026-06-20
+
+### Added
+- Added `@catchy` and `@endcatchy` Blade wrapper directives.
+- Created `x-catchy-lazy` Alpine.js directive supporting lazy loading on viewport intersection.
+
+### Changed
+- Restructured package into a 100% headless SPA engine by removing all 19 visual UI components and style configurations.
+- Renamed middleware class to `CatchyMiddleware` and updated HTTP request header to `X-Catchy-Request`.
+- Compiled modular frontend assets into `resources/js/catchy.js` under version 1.4.8.
+- Updated all automated test assertions to match the new headless signature.
+
 ## [1.4.7] - 2026-06-20
 
 ### Added
