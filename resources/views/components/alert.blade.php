@@ -3,20 +3,6 @@
     'dismissible' => true,
 ])
 
-@php
-    $baseClass = catchy_style('alert.base', 'flex p-4 rounded-xl border');
-    $dismissBtnClass = catchy_style('alert.dismiss_btn', 'inline-flex rounded-lg p-1.5 hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none transition-colors');
-    $variantClass = catchy_style("alert.variants.{$type}", catchy_style('alert.variants.info', 'bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900/30'));
-    
-    $icons = [
-        'success' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-        'danger' => 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
-        'warning' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
-        'info' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-    ];
-    $iconPath = catchy_style("alert.icons.{$type}", $icons[$type] ?? $icons['info']);
-@endphp
-
 <div 
     x-data="{ show: true }"
     x-show="show"
@@ -24,14 +10,19 @@
     x-transition:leave-start="opacity-100 scale-100"
     x-transition:leave-end="opacity-0 scale-95"
     {{ $attributes->merge([
-        'class' => "{$baseClass} {$variantClass}",
+        'class' => catchy_style('alert.base', 'flex p-4 rounded-xl border') . ' ' . catchy_style("alert.variants.{$type}", catchy_style('alert.variants.info', 'bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900/30')),
         'role' => 'alert',
     ]) }}
 >
     <!-- Icon -->
     <div class="flex-shrink-0">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ catchy_style("alert.icons.{$type}", match($type) {
+                'success' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                'danger' => 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
+                'warning' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+                default => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+            }) }}" />
         </svg>
     </div>
 
@@ -47,7 +38,7 @@
                 <button 
                     type="button" 
                     @click="show = false"
-                    class="{{ $dismissBtnClass }}"
+                    class="{{ catchy_style('alert.dismiss_btn', 'inline-flex rounded-lg p-1.5 hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none transition-colors') }}"
                     aria-label="Dismiss alert"
                 >
                     <span class="sr-only">Dismiss</span>

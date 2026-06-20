@@ -4,25 +4,9 @@
 ])
 
 @php
-    $wrapperClass = catchy_style('toast.wrapper', 'fixed z-[99998] flex flex-col gap-3 min-w-80 max-w-md');
-    $itemBaseClass = catchy_style('toast.item_base', 'flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl backdrop-blur-lg border transition-all duration-300');
-    $dismissBtnClass = catchy_style('toast.dismiss_btn', 'shrink-0 rounded-lg p-1 opacity-60 hover:opacity-100 transition-opacity focus:outline-none');
-
-    $positionClass = catchy_style("toast.positions.{$position}", catchy_style('toast.positions.top-right', 'top-5 end-5'));
-
-    $types = [
-        'success' => catchy_style('toast.types.success', 'bg-emerald-50/95 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'),
-        'error' => catchy_style('toast.types.error', 'bg-rose-50/95 dark:bg-rose-950/90 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'),
-        'danger' => catchy_style('toast.types.danger', 'bg-rose-50/95 dark:bg-rose-950/90 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'),
-        'warning' => catchy_style('toast.types.warning', 'bg-amber-50/95 dark:bg-amber-950/90 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200'),
-        'info' => catchy_style('toast.types.info', 'bg-sky-50/95 dark:bg-sky-950/90 border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-200'),
-        'status' => catchy_style('toast.types.status', 'bg-sky-50/95 dark:bg-sky-950/90 border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-200'),
-    ];
-
     // Retrieve initial flash messages from session
     $initialFlash = [];
-    $flashKeys = ['success', 'error', 'warning', 'info', 'status'];
-    foreach ($flashKeys as $key) {
+    foreach (['success', 'error', 'warning', 'info', 'status'] as $key) {
         if (session()->has($key)) {
             $initialFlash[] = ['message' => session($key), 'type' => $key];
         }
@@ -31,7 +15,7 @@
 
 <div
     {{ $attributes->merge([
-        'class' => $wrapperClass . ' ' . $positionClass,
+        'class' => catchy_style('toast.wrapper', 'fixed z-[99998] flex flex-col gap-3 min-w-80 max-w-md') . ' ' . catchy_style("toast.positions.{$position}", catchy_style('toast.positions.top-right', 'top-5 end-5')),
     ]) }}
     x-data="catchyToast({ duration: {{ $duration }} })"
     role="region"
@@ -73,14 +57,14 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-y-0"
             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-            class="{{ $itemBaseClass }}"
+            class="{{ catchy_style('toast.item_base', 'flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl backdrop-blur-lg border transition-all duration-300') }}"
             role="alert"
             aria-live="polite"
             :class="{
-                '{{ $types['success'] }}': toast.type === 'success',
-                '{{ $types['error'] }}': toast.type === 'error' || toast.type === 'danger',
-                '{{ $types['warning'] }}': toast.type === 'warning',
-                '{{ $types['info'] }}': toast.type === 'info' || toast.type === 'status',
+                '{{ catchy_style('toast.types.success', 'bg-emerald-50/95 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200') }}': toast.type === 'success',
+                '{{ catchy_style('toast.types.error', 'bg-rose-50/95 dark:bg-rose-950/90 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200') }}': toast.type === 'error' || toast.type === 'danger',
+                '{{ catchy_style('toast.types.warning', 'bg-amber-50/95 dark:bg-amber-950/90 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200') }}': toast.type === 'warning',
+                '{{ catchy_style('toast.types.info', 'bg-sky-50/95 dark:bg-sky-950/90 border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-200') }}': toast.type === 'info' || toast.type === 'status',
             }"
         >
             <!-- Icon -->
@@ -113,7 +97,7 @@
             <!-- Dismiss -->
             <button
                 type="button"
-                class="{{ $dismissBtnClass }}"
+                class="{{ catchy_style('toast.dismiss_btn', 'shrink-0 rounded-lg p-1 opacity-60 hover:opacity-100 transition-opacity focus:outline-none') }}"
                 @click="remove(toast.id)"
                 aria-label="Dismiss"
             >

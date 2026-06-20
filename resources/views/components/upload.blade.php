@@ -6,31 +6,9 @@
     'helpText' => null,
 ])
 
-@php
-    $label = $label ?? __('catchy::messages.drag_drop_label');
-    $helpText = $helpText ?? __('catchy::messages.help_text');
-
-    $wrapperClass = catchy_style('upload.wrapper', 'w-full');
-    $dropZoneClass = catchy_style('upload.drop_zone', 'relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ease-in-out group outline-none focus-within:ring-2 focus-within:ring-indigo-500');
-    $dropZoneActiveClass = catchy_style('upload.drop_zone_active', 'border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/20 shadow-md scale-[1.01]');
-    $dropZoneInactiveClass = catchy_style('upload.drop_zone_inactive', 'border-gray-300 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 bg-gray-50/50 dark:bg-gray-900/50');
-    $iconWrapperClass = catchy_style('upload.icon_wrapper', 'mb-4 rounded-full bg-indigo-100/80 dark:bg-indigo-950/50 p-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300');
-    $titleClass = catchy_style('upload.title', 'text-sm font-semibold text-gray-700 dark:text-gray-200');
-    $helpClass = catchy_style('upload.help', 'mt-1 text-xs text-gray-500 dark:text-gray-400');
-    $previewListClass = catchy_style('upload.preview_list', 'mt-4 space-y-2');
-    $previewItemClass = catchy_style('upload.preview_item', 'flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm transition-all duration-200 hover:shadow');
-    $thumbnailImgClass = catchy_style('upload.thumbnail_img', 'h-10 w-10 object-cover rounded-md border border-gray-100 dark:border-gray-850 flex-shrink-0');
-    $thumbnailIconWrapperClass = catchy_style('upload.thumbnail_icon_wrapper', 'h-10 w-10 flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900 border border-gray-100 dark:border-gray-850 flex-shrink-0 text-gray-400 dark:text-gray-500');
-    $fileInfoClass = catchy_style('upload.file_info', 'min-w-0 flex-1 px-2');
-    $fileNameClass = catchy_style('upload.file_name', 'text-sm font-medium text-gray-700 dark:text-gray-300 truncate');
-    $fileSizeClass = catchy_style('upload.file_size', 'text-xs text-gray-500 dark:text-gray-400');
-    $removeBtnClass = catchy_style('upload.remove_btn', 'p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors');
-    $errorClass = catchy_style('upload.error', 'mt-2 text-sm text-red-600 dark:text-red-400 font-semibold');
-@endphp
-
 <div 
     {{ $attributes->merge([
-        'class' => $wrapperClass
+        'class' => catchy_style('upload.wrapper', 'w-full')
     ]) }}
     x-data="catchyUpload({ name: @js($name), multiple: @js($multiple) })"
     x-on:catchy-validation-errors.window="handleValidationErrors($event)"
@@ -55,42 +33,42 @@
         x-on:drop.prevent="dragover = false; addFiles($event.dataTransfer.files)"
         x-on:click="$refs.fileInput.click()"
         :class="{
-            '{{ $dropZoneActiveClass }}': dragover,
-            '{{ $dropZoneInactiveClass }}': !dragover
+            '{{ catchy_style('upload.drop_zone_active', 'border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/20 shadow-md scale-[1.01]') }}': dragover,
+            '{{ catchy_style('upload.drop_zone_inactive', 'border-gray-300 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 bg-gray-50/50 dark:bg-gray-900/50') }}': !dragover
         }"
-        class="{{ $dropZoneClass }}"
+        class="{{ catchy_style('upload.drop_zone', 'relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ease-in-out group outline-none focus-within:ring-2 focus-within:ring-indigo-500') }}"
         tabindex="0"
         role="button"
-        aria-label="{{ $label }}"
+        aria-label="{{ $label ?? __('catchy::messages.drag_drop_label') }}"
         x-on:keydown.enter="$refs.fileInput.click()"
         x-on:keydown.space="$refs.fileInput.click()"
     >
-        <div class="{{ $iconWrapperClass }}">
+        <div class="{{ catchy_style('upload.icon_wrapper', 'mb-4 rounded-full bg-indigo-100/80 dark:bg-indigo-950/50 p-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300') }}">
             <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
         </div>
 
-        <p class="{{ $titleClass }}">
-            {{ $label }}
+        <p class="{{ catchy_style('upload.title', 'text-sm font-semibold text-gray-700 dark:text-gray-200') }}">
+            {{ $label ?? __('catchy::messages.drag_drop_label') }}
         </p>
-        <p class="{{ $helpClass }}">
-            {{ $helpText }}
+        <p class="{{ catchy_style('upload.help', 'mt-1 text-xs text-gray-500 dark:text-gray-400') }}">
+            {{ $helpText ?? __('catchy::messages.help_text') }}
         </p>
     </div>
 
     <!-- Preview Container -->
     <template x-if="files.length > 0">
-        <div class="{{ $previewListClass }}">
+        <div class="{{ catchy_style('upload.preview_list', 'mt-4 space-y-2') }}">
             <template x-for="(file, index) in files" :key="index">
-                <div class="{{ $previewItemClass }}">
+                <div class="{{ catchy_style('upload.preview_item', 'flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm transition-all duration-200 hover:shadow') }}">
                     <div class="flex items-center gap-3 min-w-0">
                         <!-- Thumbnail Preview -->
                         <template x-if="isImage(file)">
-                            <img :src="getPreviewUrl(file)" class="{{ $thumbnailImgClass }}" />
+                            <img :src="getPreviewUrl(file)" class="{{ catchy_style('upload.thumbnail_img', 'h-10 w-10 object-cover rounded-md border border-gray-100 dark:border-gray-850 flex-shrink-0') }}" />
                         </template>
                         <template x-if="!isImage(file)">
-                            <div class="{{ $thumbnailIconWrapperClass }}">
+                            <div class="{{ catchy_style('upload.thumbnail_icon_wrapper', 'h-10 w-10 flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900 border border-gray-100 dark:border-gray-850 flex-shrink-0 text-gray-400 dark:text-gray-500') }}">
                                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -98,9 +76,9 @@
                         </template>
 
                         <!-- File Info -->
-                        <div class="{{ $fileInfoClass }}">
-                            <p class="{{ $fileNameClass }}" x-text="file.name"></p>
-                            <p class="{{ $fileSizeClass }}" x-text="getFileSize(file.size)"></p>
+                        <div class="{{ catchy_style('upload.file_info', 'min-w-0 flex-1 px-2') }}">
+                            <p class="{{ catchy_style('upload.file_name', 'text-sm font-medium text-gray-700 dark:text-gray-300 truncate') }}" x-text="file.name"></p>
+                            <p class="{{ catchy_style('upload.file_size', 'text-xs text-gray-500 dark:text-gray-400') }}" x-text="getFileSize(file.size)"></p>
                         </div>
                     </div>
 
@@ -108,7 +86,7 @@
                     <button 
                         type="button" 
                         x-on:click.stop="removeFile(index)" 
-                        class="{{ $removeBtnClass }}"
+                        class="{{ catchy_style('upload.remove_btn', 'p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors') }}"
                         title="{{ __('catchy::messages.delete_file') }}"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,5 +98,5 @@
         </div>
     </template>
 
-    <p x-show="error" x-text="error" class="{{ $errorClass }}" style="display: none;"></p>
+    <p x-show="error" x-text="error" class="{{ catchy_style('upload.error', 'mt-2 text-sm text-red-600 dark:text-red-400 font-semibold') }}" style="display: none;"></p>
 </div>

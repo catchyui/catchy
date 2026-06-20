@@ -9,28 +9,17 @@
     'placeholder' => null,
 ])
 
-@php
-    $wrapperClass = catchy_style('select.wrapper', 'space-y-1');
-    $labelClass = catchy_style('select.label', 'block text-sm font-medium text-slate-700 dark:text-slate-300');
-    $requiredClass = catchy_style('select.required', 'text-rose-500');
-    $inputWrapperClass = catchy_style('select.input_wrapper', 'relative rounded-lg shadow-sm');
-    $selectClass = catchy_style('select.select', 'block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors disabled:opacity-50');
-    $arrowWrapperClass = catchy_style('select.arrow_wrapper', 'pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500 dark:text-slate-400');
-    $helperClass = catchy_style('select.helper', 'text-xs text-slate-500 dark:text-slate-400');
-    $errorClass = catchy_style('select.error', 'text-rose-500 text-xs mt-1');
-@endphp
-
-<div class="{{ $wrapperClass }}">
+<div class="{{ catchy_style('select.wrapper', 'space-y-1') }}">
     @if ($label)
-        <label for="{{ $name }}" class="{{ $labelClass }}">
+        <label for="{{ $name }}" class="{{ catchy_style('select.label', 'block text-sm font-medium text-slate-700 dark:text-slate-300') }}">
             {{ $label }}
             @if ($required)
-                <span class="{{ $requiredClass }}">*</span>
+                <span class="{{ catchy_style('select.required', 'text-rose-500') }}">*</span>
             @endif
         </label>
     @endif
 
-    <div class="{{ $inputWrapperClass }}">
+    <div class="{{ catchy_style('select.input_wrapper', 'relative rounded-lg shadow-sm') }}">
         <select 
             name="{{ $name }}{{ $multiple ? '[]' : '' }}" 
             id="{{ $name }}"
@@ -38,7 +27,7 @@
             @if ($multiple) multiple @endif
             @if ($helper) aria-describedby="{{ $name }}-helper" @endif
             {{ $attributes->merge([
-                'class' => $selectClass . ($multiple ? '' : ' appearance-none')
+                'class' => catchy_style('select.select', 'block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors disabled:opacity-50') . ($multiple ? '' : ' appearance-none')
             ]) }}
         >
             @if ($placeholder && !$multiple)
@@ -64,7 +53,7 @@
         </select>
 
         @if (!$multiple)
-            <div class="{{ $arrowWrapperClass }}">
+            <div class="{{ catchy_style('select.arrow_wrapper', 'pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500 dark:text-slate-400') }}">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -73,8 +62,8 @@
     </div>
 
     @if ($helper)
-        <p id="{{ $name }}-helper" class="{{ $helperClass }}">{{ $helper }}</p>
+        <p id="{{ $name }}-helper" class="{{ catchy_style('select.helper', 'text-xs text-slate-500 dark:text-slate-400') }}">{{ $helper }}</p>
     @endif
 
-    <x-catchy-error :field="$name" class="{{ $errorClass }}" />
+    <x-catchy-error :field="$name" class="{{ catchy_style('select.error', 'text-rose-500 text-xs mt-1') }}" />
 </div>
