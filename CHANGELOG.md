@@ -5,6 +5,11 @@ All notable changes to `Laravel Catchy` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-06-20
+
+### Changed
+- Expanded PHP and Laravel framework compatibility. The package now supports Laravel 10, 11, 12, and 13 natively, and is fully compatible with PHP 8.2 through PHP 8.5.
+
 ## [1.5.0] - 2026-06-20
 
 ### Added
