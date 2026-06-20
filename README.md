@@ -68,9 +68,24 @@ php artisan vendor:publish --tag=catchy-assets
 
 ---
 
-## 🎨 Tailwind CSS Integration & Customization
+## 🎨 Styling Presets & Customization
 
-### 1. Register Tailwind Content Path
+Catchy is completely styling-agnostic. It features built-in style presets for **Tailwind CSS**, **Bootstrap 5**, and **Vanilla/Custom CSS**, controllable via a single configuration option.
+
+### 1. Choosing a Style Preset
+You can set your preferred styling framework in the published `config/catchy.php`:
+
+```php
+// config/catchy.php
+'preset' => 'tailwind', // Options: 'tailwind', 'bootstrap', 'vanilla', or 'custom'
+```
+
+- **tailwind**: Component templates compile with standard Tailwind classes.
+- **bootstrap**: Component templates compile with Bootstrap 5 utility classes and structure.
+- **vanilla**: Component templates use standard CSS class prefixes (e.g. `catchy-btn`, `catchy-card`). Ideal if you write your own stylesheets.
+- **custom**: Disables all default styles, allowing you to supply custom class names for each element.
+
+### 2. Register Tailwind Content Path
 To prevent Tailwind from purging classes used inside Catchy components, add the vendor folder to the `content` array of your `tailwind.config.js`:
 ```javascript
 module.exports = {
@@ -86,8 +101,8 @@ module.exports = {
 }
 ```
 
-### 2. Customizing Styles Globally
-All component styles are fully decoupled. You can override visual styles (colors, sizing, padding, active states) by editing the `styles` array inside your published `config/catchy.php`. This allows Catchy components to integrate seamlessly with your project's custom Tailwind color palettes:
+### 3. Customizing Styles Globally
+All component styles are fully decoupled. You can override visual styles (colors, sizing, padding, active states) by editing the `styles` array inside your published `config/catchy.php`. This allows Catchy components to integrate seamlessly with your project's custom design system:
 
 ```php
 // config/catchy.php
