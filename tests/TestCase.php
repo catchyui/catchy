@@ -13,6 +13,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
  * Class TestCase
  *
  * Base test case class integrating Orchestra Testbench to bootstrap the Laravel application environment.
+ * Pair programmed with Antigravity AI assistant.
  */
 abstract class TestCase extends Orchestra
 {
