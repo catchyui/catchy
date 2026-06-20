@@ -11,28 +11,109 @@
 
 
 <style>
-    /* Catchy Default View Transitions CSS */
-    @keyframes catchy-fade-out { from { opacity: 1; } to { opacity: 0; } }
-    @keyframes catchy-fade-in { from { opacity: 0; } to { opacity: 1; } }
-    
-    html[data-catchy-transition="fade"]::view-transition-old(root) {
-        animation: 0.15s ease both catchy-fade-out;
-    }
-    html[data-catchy-transition="fade"]::view-transition-new(root) {
-        animation: 0.2s ease both catchy-fade-in;
-    }
-    
-    @keyframes catchy-slide-out { from { transform: translateX(0); } to { transform: translateX(-100%); } }
-    @keyframes catchy-slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    
-    html[data-catchy-transition="slide"]::view-transition-old(root) {
-        animation: 0.2s ease both catchy-slide-out;
-    }
-    html[data-catchy-transition="slide"]::view-transition-new(root) {
-        animation: 0.25s ease both catchy-slide-in;
+    /* ============================================================
+     * Catchy — Premium View Transition CSS
+     * Smooth cross-fade transitions with proper overlap and easing.
+     * ============================================================ */
+
+    /* --- "none" transition: instant swap, no animation --- */
+    html[data-catchy-transition="none"]::view-transition-old(root),
+    html[data-catchy-transition="none"]::view-transition-new(root) {
+        animation: none;
     }
 
-    /* Catchy Dynamic Modal styles */
+    /* --- "fade" transition: smooth cross-dissolve with overlap --- */
+    @keyframes catchy-fade-out {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+    }
+    @keyframes catchy-fade-in {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    html[data-catchy-transition="fade"]::view-transition-old(root) {
+        animation: 0.2s cubic-bezier(0.4, 0, 0.2, 1) both catchy-fade-out;
+        z-index: 1;
+    }
+    html[data-catchy-transition="fade"]::view-transition-new(root) {
+        animation: 0.25s cubic-bezier(0.4, 0, 0.2, 1) both catchy-fade-in;
+        z-index: 2;
+    }
+    /* Allow both snapshots to render simultaneously for a true cross-fade */
+    html[data-catchy-transition="fade"]::view-transition-image-pair(root) {
+        isolation: auto;
+    }
+
+    /* --- "slide" transition: subtle horizontal slide with fade --- */
+    @keyframes catchy-slide-out {
+        from { opacity: 1; transform: translateX(0); }
+        to   { opacity: 0; transform: translateX(-30px); }
+    }
+    @keyframes catchy-slide-in {
+        from { opacity: 0; transform: translateX(30px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    html[data-catchy-transition="slide"]::view-transition-old(root) {
+        animation: 0.25s cubic-bezier(0.4, 0, 0.2, 1) both catchy-slide-out;
+        z-index: 1;
+    }
+    html[data-catchy-transition="slide"]::view-transition-new(root) {
+        animation: 0.3s cubic-bezier(0.0, 0, 0.2, 1) both catchy-slide-in;
+        z-index: 2;
+    }
+    html[data-catchy-transition="slide"]::view-transition-image-pair(root) {
+        isolation: auto;
+    }
+
+    /* --- "slide-up" transition: vertical entrance from below --- */
+    @keyframes catchy-slide-up-out {
+        from { opacity: 1; transform: translateY(0); }
+        to   { opacity: 0; transform: translateY(-20px); }
+    }
+    @keyframes catchy-slide-up-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    html[data-catchy-transition="slide-up"]::view-transition-old(root) {
+        animation: 0.2s cubic-bezier(0.4, 0, 0.2, 1) both catchy-slide-up-out;
+        z-index: 1;
+    }
+    html[data-catchy-transition="slide-up"]::view-transition-new(root) {
+        animation: 0.3s cubic-bezier(0.0, 0, 0.2, 1) both catchy-slide-up-in;
+        z-index: 2;
+    }
+    html[data-catchy-transition="slide-up"]::view-transition-image-pair(root) {
+        isolation: auto;
+    }
+
+    /* --- "scale" transition: subtle scale with fade --- */
+    @keyframes catchy-scale-out {
+        from { opacity: 1; transform: scale(1); }
+        to   { opacity: 0; transform: scale(0.97); }
+    }
+    @keyframes catchy-scale-in {
+        from { opacity: 0; transform: scale(1.02); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+
+    html[data-catchy-transition="scale"]::view-transition-old(root) {
+        animation: 0.2s cubic-bezier(0.4, 0, 0.2, 1) both catchy-scale-out;
+        z-index: 1;
+    }
+    html[data-catchy-transition="scale"]::view-transition-new(root) {
+        animation: 0.28s cubic-bezier(0.0, 0, 0.2, 1) both catchy-scale-in;
+        z-index: 2;
+    }
+    html[data-catchy-transition="scale"]::view-transition-image-pair(root) {
+        isolation: auto;
+    }
+
+    /* ============================================================
+     * Catchy — Dynamic Modal Styles
+     * ============================================================ */
     .catchy-modal-backdrop {
         position: fixed;
         inset: 0;
@@ -110,6 +191,7 @@
         'loadingBar' => config('catchy.loading_bar.enabled', true),
         'loadingBarHeight' => config('catchy.loading_bar.height', '3px'),
         'loadingBarColor' => config('catchy.loading_bar.color', 'linear-gradient(to right, #4f46e5, #06b6d4)'),
+        'viewTransitions' => config('catchy.view_transitions', 'fade'),
     ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};
 </script>
 

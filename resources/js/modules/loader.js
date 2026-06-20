@@ -7,6 +7,8 @@
 let loaderElement = null;
 let loaderTimer = null;
 let progressInterval = null;
+let fadeOutTimer = null;
+let resetTimer = null;
 
 /**
  * Initialize the loading bar DOM element and CSS styles.
@@ -45,8 +47,12 @@ export function startLoading() {
     document.body.classList.add('catchy-loading');
     document.documentElement.classList.add('catchy-loading');
     if (!loaderElement) return;
+
+    // Clear ALL pending timers to prevent race conditions with rapid navigation
     clearTimeout(loaderTimer);
     clearInterval(progressInterval);
+    clearTimeout(fadeOutTimer);
+    clearTimeout(resetTimer);
 
     loaderTimer = setTimeout(() => {
         loaderElement.style.width = '0%';
@@ -71,12 +77,14 @@ export function stopLoading() {
     if (!loaderElement) return;
     clearTimeout(loaderTimer);
     clearInterval(progressInterval);
+    clearTimeout(fadeOutTimer);
+    clearTimeout(resetTimer);
 
     loaderElement.style.width = '100%';
 
-    setTimeout(() => {
+    fadeOutTimer = setTimeout(() => {
         loaderElement.style.opacity = '0';
-        setTimeout(() => {
+        resetTimer = setTimeout(() => {
             loaderElement.style.width = '0%';
         }, 400);
     }, 100);
@@ -91,6 +99,9 @@ export function resetLoading() {
     if (!loaderElement) return;
     clearTimeout(loaderTimer);
     clearInterval(progressInterval);
+    clearTimeout(fadeOutTimer);
+    clearTimeout(resetTimer);
     loaderElement.style.opacity = '0';
     loaderElement.style.width = '0%';
 }
+

@@ -52,7 +52,7 @@ class HandleRedirectResponse implements PipelineStageInterface
             $redirectResponse->headers->set('X-Catchy-Request', 'true');
             $redirectResponse->headers->remove('Location');
 
-            $flash = FlashExtractor::extract($request, false);
+            $flash = FlashExtractor::extract($request, true);
             if (! empty($flash)) {
                 $redirectResponse->headers->set('X-Catchy-Flash', base64_encode((string) json_encode($flash)));
             }

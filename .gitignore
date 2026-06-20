@@ -5,3 +5,4 @@ composer.lock
 .php-cs-fixer.cache
 /tests/fixtures/
 /node_modules/
+/playground

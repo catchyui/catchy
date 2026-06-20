@@ -214,15 +214,22 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
             manageHistory(finalUrl, trigger, isGet, response);
         }
 
-        applyScroll(trigger, targetId, finalUrl, oldPathname, options, config);
+        // Skip scroll restoration and lifecycle events on background SWR revalidation
+        if (!isRevalidation) {
+            applyScroll(trigger, targetId, finalUrl, oldPathname, options, config);
 
-        stopLoading();
-        executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
-        handleLifecycleTriggers(trigger, 'success');
-        cleanUpUi();
+            stopLoading();
+            executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
+            handleLifecycleTriggers(trigger, 'success');
+            cleanUpUi();
 
-        emit('end', { url: finalUrl, trigger }, trigger);
-        emit('after-visit', { url: finalUrl, trigger }, trigger);
+            emit('end', { url: finalUrl, trigger }, trigger);
+            emit('after-visit', { url: finalUrl, trigger }, trigger);
+        } else {
+            // Silent revalidation: just stop loading without emitting events
+            stopLoading();
+            cleanUpUi();
+        }
 
     } catch (error) {
         resetLoading();
@@ -408,15 +415,15 @@ function renderResponseData(data, targetId, config, Alpine, trigger) {
         const transition = document.startViewTransition(() => performDomUpdates());
         transition.finished.then(() => {
             document.documentElement.removeAttribute('data-catchy-transition');
+            emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
         }).catch(() => {
             document.documentElement.removeAttribute('data-catchy-transition');
+            emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
         });
     } else {
         performDomUpdates();
+        emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
     }
-
-    // Emit catchy:after-morph
-    emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
 }
 
 /**
