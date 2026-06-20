@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace Hamzi\Catchy\Tests;
 
-use Hamzi\Catchy\Http\Middleware\CatchySPAMiddleware;
+use Hamzi\Catchy\Http\Middleware\CatchyMiddleware;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 
 /**
  * Class MiddlewareTest
  *
- * Tests the CatchySPAMiddleware behaviour including HTML extraction, status codes,
+ * Tests the CatchyMiddleware behaviour including HTML extraction, status codes,
  * and asset version validation checks via the pipeline.
  */
 class MiddlewareTest extends TestCase
 {
     /**
-     * Set up tests, registering test routes with the CatchySPAMiddleware applied.
+     * Set up tests, registering test routes with the CatchyMiddleware applied.
      */
     protected function setUp(): void
     {
         parent::setUp();
 
-        Route::middleware(CatchySPAMiddleware::class)->group(function () {
+        Route::middleware(CatchyMiddleware::class)->group(function () {
             Route::get('/html-page', function () {
                 return '<!DOCTYPE html><html><head><title>My Catchy Page 🚀</title></head><body><header>Nav</header><main id="catchy-app" class="p-4"><h1>Hello World</h1><p>Test</p></main><footer>Footer</footer></body></html>';
             });
@@ -47,7 +47,7 @@ class MiddlewareTest extends TestCase
     }
 
     /**
-     * Verify that standard requests (without X-Catchy-SPA header) receive full HTML.
+     * Verify that standard requests (without X-Catchy-Request header) receive full HTML.
      */
     public function test_normal_request_returns_full_html(): void
     {
@@ -62,12 +62,12 @@ class MiddlewareTest extends TestCase
     }
 
     /**
-     * Verify that SPA requests (with X-Catchy-SPA header) receive only the outer HTML of the container.
+     * Verify that Catchy requests (with X-Catchy-Request header) receive only the outer HTML of the container.
      */
     public function test_spa_request_returns_only_container_and_title_header(): void
     {
         $response = $this->get('/html-page', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
         ]);
 
         $response->assertStatus(200);
@@ -91,7 +91,7 @@ class MiddlewareTest extends TestCase
     public function test_json_responses_are_not_intercepted(): void
     {
         $response = $this->get('/json-response', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
         ]);
 
         $response->assertStatus(200);
@@ -105,7 +105,7 @@ class MiddlewareTest extends TestCase
     public function test_non_200_responses_are_not_intercepted(): void
     {
         $response = $this->get('/error-page', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
         ]);
 
         $response->assertStatus(500);
@@ -120,7 +120,7 @@ class MiddlewareTest extends TestCase
     public function test_missing_container_fallback_returns_full_page(): void
     {
         $response = $this->get('/no-container', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
         ]);
 
         $response->assertStatus(200);
@@ -138,7 +138,7 @@ class MiddlewareTest extends TestCase
         config(['catchy.version' => '1.0.0']);
 
         $response = $this->get('/html-page', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
             'X-Catchy-Version' => '1.0.0',
         ]);
 
@@ -155,7 +155,7 @@ class MiddlewareTest extends TestCase
         config(['catchy.version' => '2.0.0']);
 
         $response = $this->get('/html-page', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
             'X-Catchy-Version' => '1.0.0', // Outdated version from client
         ]);
 
@@ -170,7 +170,7 @@ class MiddlewareTest extends TestCase
      */
     public function test_session_flash_messages_are_injected_in_header(): void
     {
-        Route::middleware([StartSession::class, CatchySPAMiddleware::class])->get('/flash-route', function () {
+        Route::middleware([StartSession::class, CatchyMiddleware::class])->get('/flash-route', function () {
             session()->flash('success', 'Operation completed successfully!');
             session()->flash('error', 'Something went wrong!');
 
@@ -178,7 +178,7 @@ class MiddlewareTest extends TestCase
         });
 
         $response = $this->get('/flash-route', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
         ]);
 
         $this->assertTrue($response->headers->has('X-Catchy-Flash'));
@@ -193,7 +193,7 @@ class MiddlewareTest extends TestCase
     public function test_spa_redirect_returns_200_with_redirect_header(): void
     {
         $response = $this->get('/redirect-route', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
         ]);
 
         $response->assertStatus(200);
@@ -210,7 +210,7 @@ class MiddlewareTest extends TestCase
         config(['catchy.except' => ['html-page']]);
 
         $response = $this->get('/html-page', [
-            'X-Catchy-SPA' => 'true',
+            'X-Catchy-Request' => 'true',
         ]);
 
         // The response should NOT be intercepted (so it will return full HTML instead of just main container)
@@ -227,7 +227,7 @@ class MiddlewareTest extends TestCase
     {
         config(['catchy.auto_inject' => true]);
 
-        // Request standard HTML page without X-Catchy-SPA header
+        // Request standard HTML page without X-Catchy-Request header
         $response = $this->get('/html-page');
 
         $response->assertStatus(200);

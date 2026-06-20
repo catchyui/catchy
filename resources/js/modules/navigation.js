@@ -151,7 +151,7 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
             // Setup headers, appending dynamic targets
             const fetchHeaders = {
                 ...(options.headers || {}),
-                'X-Catchy-SPA': 'true',
+                'X-Catchy-Request': 'true',
                 'X-Catchy-Target': targetId
             };
             if (currentVersion) {

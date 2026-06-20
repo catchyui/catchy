@@ -49,7 +49,7 @@ async function processQueue(config, currentVersion) {
  */
 async function performPrefetch(url, config, currentVersion) {
     try {
-        const headers = { 'X-Catchy-SPA': 'true' };
+        const headers = { 'X-Catchy-Request': 'true' };
         if (currentVersion) {
             headers['X-Catchy-Version'] = currentVersion;
         }

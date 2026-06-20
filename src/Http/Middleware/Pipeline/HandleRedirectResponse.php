@@ -46,7 +46,7 @@ class HandleRedirectResponse implements PipelineStageInterface
 
             $headers = [
                 'X-Catchy-Redirect' => $response->headers->get('Location'),
-                'X-Catchy-SPA' => 'true',
+                'X-Catchy-Request' => 'true',
             ];
 
             $flash = FlashExtractor::extract($request, false);

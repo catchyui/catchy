@@ -12,12 +12,12 @@ use Illuminate\Pipeline\Pipeline;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class CatchySPAMiddleware
+ * Class CatchyMiddleware
  *
  * Coordinates SPA request filtering by sending incoming request-response flows
- * through a configurable pipeline of clean architecture stages.
+ * through a configurable pipeline of clean architecture stages when X-Catchy-Request is present.
  */
-class CatchySPAMiddleware
+class CatchyMiddleware
 {
     /**
      * The IoC container instance.
@@ -25,7 +25,7 @@ class CatchySPAMiddleware
     protected Container $container;
 
     /**
-     * CatchySPAMiddleware constructor.
+     * CatchyMiddleware constructor.
      */
     public function __construct(Container $container)
     {
@@ -44,8 +44,8 @@ class CatchySPAMiddleware
             return $next($request);
         }
 
-        // 2. Detect if this is NOT an SPA request from Catchy
-        if (! $request->headers->has('X-Catchy-SPA')) {
+        // 2. Detect if this is NOT a Catchy request
+        if (! $request->headers->has('X-Catchy-Request')) {
             $response = $next($request);
 
             if (config('catchy.auto_inject', true) && $this->isHtmlResponse($response)) {

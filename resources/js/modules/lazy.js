@@ -21,7 +21,7 @@ export function registerLazyDirective(Alpine, config) {
             emit('start', { trigger: el });
 
             fetch(url, {
-                headers: { 'X-Catchy-SPA': 'true' }
+                headers: { 'X-Catchy-Request': 'true' }
             })
             .then(response => {
                 if (!response.ok) throw new Error('Lazy load failed');

@@ -89,7 +89,7 @@ class PipelineTest extends TestCase
 
         $this->assertEquals(200, $result->getResponse()->getStatusCode());
         $this->assertEquals(url('/target-url'), $result->getResponse()->headers->get('X-Catchy-Redirect'));
-        $this->assertEquals('true', $result->getResponse()->headers->get('X-Catchy-SPA'));
+        $this->assertEquals('true', $result->getResponse()->headers->get('X-Catchy-Request'));
         $this->assertEquals('1.0.0', $result->getResponse()->headers->get('X-Catchy-Version'));
     }
 

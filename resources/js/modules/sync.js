@@ -38,7 +38,7 @@ export function registerSyncDirective(Alpine, config) {
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const headers = { 'X-Catchy-SPA': 'true' };
+                const headers = { 'X-Catchy-Request': 'true' };
                 if (csrfToken) {
                     headers['X-CSRF-TOKEN'] = csrfToken;
                 }
