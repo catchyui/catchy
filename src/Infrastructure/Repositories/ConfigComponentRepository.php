@@ -11,8 +11,6 @@ use Hamzi\Catchy\Domain\Contracts\ComponentRepositoryInterface;
  *
  * Resolves registered dynamic Blade UI components mapping directly from
  * application configurations, providing highly customizable UI layers.
- *
- * @package Hamzi\Catchy\Infrastructure\Repositories
  */
 class ConfigComponentRepository implements ComponentRepositoryInterface
 {
@@ -44,9 +42,6 @@ class ConfigComponentRepository implements ComponentRepositoryInterface
 
     /**
      * Check if a component is registered.
-     *
-     * @param  string  $name
-     * @return bool
      */
     public function has(string $name): bool
     {
@@ -55,9 +50,6 @@ class ConfigComponentRepository implements ComponentRepositoryInterface
 
     /**
      * Get the alias for a specific component.
-     *
-     * @param  string  $name
-     * @return string|null
      */
     public function get(string $name): ?string
     {

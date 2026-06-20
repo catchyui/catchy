@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace Hamzi\Catchy\Tests;
 
 use Hamzi\Catchy\CatchyServiceProvider;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 /**
  * Class TestCase
  *
  * Base test case class integrating Orchestra Testbench to bootstrap the Laravel application environment.
- *
- * @package Hamzi\Catchy\Tests
  */
 abstract class TestCase extends Orchestra
 {
     /**
      * Define the package service providers.
      *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return array<int, class-string<\Illuminate\Support\ServiceProvider>>
+     * @param  Application  $app
+     * @return array<int, class-string<ServiceProvider>>
      */
     protected function getPackageProviders($app): array
     {
@@ -38,8 +38,7 @@ abstract class TestCase extends Orchestra
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return void
+     * @param  Application  $app
      */
     protected function getEnvironmentSetUp($app): void
     {

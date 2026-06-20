@@ -11,8 +11,6 @@ use Hamzi\Catchy\Infrastructure\Repositories\ConfigComponentRepository;
  * Class RepositoryTest
  *
  * Verifies that the clean repositories fetch version metadata and Blade component layouts correctly.
- *
- * @package Hamzi\Catchy\Tests
  */
 class RepositoryTest extends TestCase
 {
@@ -22,8 +20,8 @@ class RepositoryTest extends TestCase
     public function test_version_repository_resolves_config_version(): void
     {
         config(['catchy.version' => '1.2.3-test']);
-        
-        $repository = new AssetVersionRepository();
+
+        $repository = new AssetVersionRepository;
         $this->assertEquals('1.2.3-test', $repository->getVersion());
     }
 
@@ -36,14 +34,14 @@ class RepositoryTest extends TestCase
 
         // Mock Vite build manifest path structure
         $manifestDir = public_path('build');
-        if (!is_dir($manifestDir)) {
+        if (! is_dir($manifestDir)) {
             mkdir($manifestDir, 0755, true);
         }
         $manifestPath = public_path('build/manifest.json');
         file_put_contents($manifestPath, json_encode(['app.js' => ['file' => 'app-hash123.js']]));
 
         try {
-            $repository = new AssetVersionRepository();
+            $repository = new AssetVersionRepository;
             $expectedHash = md5_file($manifestPath);
             $this->assertEquals($expectedHash, $repository->getVersion());
         } finally {
@@ -63,7 +61,7 @@ class RepositoryTest extends TestCase
         file_put_contents($hotPath, 'http://localhost:5173');
 
         try {
-            $repository = new AssetVersionRepository();
+            $repository = new AssetVersionRepository;
             $this->assertEquals('hot', $repository->getVersion());
         } finally {
             unlink($hotPath);
@@ -79,10 +77,10 @@ class RepositoryTest extends TestCase
             'catchy.components' => [
                 'my-custom-spinner' => 'app-spinner',
                 'my-custom-toast' => 'app-toast',
-            ]
+            ],
         ]);
 
-        $repository = new ConfigComponentRepository();
+        $repository = new ConfigComponentRepository;
 
         $this->assertTrue($repository->has('my-custom-spinner'));
         $this->assertFalse($repository->has('non-existent-component'));

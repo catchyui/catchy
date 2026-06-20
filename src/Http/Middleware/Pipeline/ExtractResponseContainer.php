@@ -7,28 +7,23 @@ namespace Hamzi\Catchy\Http\Middleware\Pipeline;
 use Closure;
 use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
 use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class ExtractResponseContainer
  *
  * Pipeline stage intercepting successful HTML responses to extract only the target SPA container,
  * page title, and head updates, updating the response body and appending headers.
- *
- * @package Hamzi\Catchy\Http\Middleware\Pipeline
  */
 class ExtractResponseContainer
 {
     /**
      * The response extractor instance.
-     *
-     * @var \Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface
      */
     protected ResponseExtractorInterface $extractor;
 
     /**
      * ExtractResponseContainer constructor.
-     *
-     * @param  \Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface  $extractor
      */
     public function __construct(ResponseExtractorInterface $extractor)
     {
@@ -38,9 +33,7 @@ class ExtractResponseContainer
     /**
      * Handle the pipeline stage.
      *
-     * @param  \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData  $data
-     * @param  \Closure(\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData): (\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData)  $next
-     * @return \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData
+     * @param  Closure(CatchyPipelineData): (CatchyPipelineData)  $next
      */
     public function handle(CatchyPipelineData $data, Closure $next): CatchyPipelineData
     {
@@ -84,8 +77,7 @@ class ExtractResponseContainer
     /**
      * Determine if the response should be intercepted and trimmed.
      *
-     * @param  \Symfony\Component\HttpFoundation\Response  $response
-     * @return bool
+     * @param  Response  $response
      */
     protected function shouldIntercept($response): bool
     {
@@ -96,11 +88,10 @@ class ExtractResponseContainer
 
         // Must be a standard HTML response
         $contentType = $response->headers->get('Content-Type');
-        if (!$contentType || !str_contains($contentType, 'text/html')) {
+        if (! $contentType || ! str_contains($contentType, 'text/html')) {
             return false;
         }
 
         return true;
     }
 }
-

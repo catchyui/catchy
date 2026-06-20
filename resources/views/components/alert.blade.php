@@ -4,7 +4,10 @@
 ])
 
 @php
-    $types = [
+    $baseClass = config('catchy.styles.alert.base', 'flex p-4 rounded-xl border');
+    $dismissBtnClass = config('catchy.styles.alert.dismiss_btn', 'inline-flex rounded-lg p-1.5 hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none transition-colors');
+
+    $types = array_merge([
         'success' => [
             'bg' => 'bg-emerald-50 dark:bg-emerald-950/20',
             'border' => 'border-emerald-200 dark:border-emerald-900/30',
@@ -29,7 +32,7 @@
             'text' => 'text-sky-800 dark:text-sky-400',
             'icon' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
         ],
-    ];
+    ], config('catchy.styles.alert.types', []));
 
     $cfg = $types[$type] ?? $types['info'];
 @endphp
@@ -41,7 +44,7 @@
     x-transition:leave-start="opacity-100 scale-100"
     x-transition:leave-end="opacity-0 scale-95"
     {{ $attributes->merge([
-        'class' => "flex p-4 rounded-xl border {$cfg['bg']} {$cfg['border']} {$cfg['text']}",
+        'class' => "{$baseClass} {$cfg['bg']} {$cfg['border']} {$cfg['text']}",
         'role' => 'alert',
     ]) }}
 >
@@ -64,7 +67,7 @@
                 <button 
                     type="button" 
                     @click="show = false"
-                    class="inline-flex rounded-lg p-1.5 hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none transition-colors"
+                    class="{{ $dismissBtnClass }}"
                     aria-label="Dismiss alert"
                 >
                     <span class="sr-only">Dismiss</span>

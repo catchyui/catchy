@@ -10,21 +10,17 @@ use Illuminate\Http\Request;
  * Class FlashExtractor
  *
  * Extracts flash messages and validation errors from the session.
- *
- * @package Hamzi\Catchy\Support
  */
 final class FlashExtractor
 {
     /**
      * Extract flash messages and validation errors from the session.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  bool  $clear
      * @return array<string, mixed>
      */
     public static function extract(Request $request, bool $clear = false): array
     {
-        if (!$request->hasSession()) {
+        if (! $request->hasSession()) {
             return [];
         }
 

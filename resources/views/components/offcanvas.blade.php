@@ -6,7 +6,15 @@
 ])
 
 @php
-    $directions = [
+    $baseClass = config('catchy.styles.offcanvas.base', 'fixed inset-0 z-50 overflow-hidden');
+    $backdropClass = config('catchy.styles.offcanvas.backdrop', 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity');
+    $headerClass = config('catchy.styles.offcanvas.header', 'flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4');
+    $titleClass = config('catchy.styles.offcanvas.title', 'text-lg font-semibold text-slate-900 dark:text-slate-100');
+    $closeBtnClass = config('catchy.styles.offcanvas.close_btn', 'rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500');
+    $bodyClass = config('catchy.styles.offcanvas.body', 'flex-1 overflow-y-auto px-6 py-4 text-slate-600 dark:text-slate-300');
+    $footerClass = config('catchy.styles.offcanvas.footer', 'border-t border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3');
+
+    $directions = array_merge([
         'left' => [
             'position' => 'top-0 left-0 bottom-0 w-80 border-r',
             'enter_start' => '-translate-x-full',
@@ -49,7 +57,7 @@
             'leave_start' => 'translate-y-0',
             'leave_end' => 'translate-y-full',
         ],
-    ];
+    ], config('catchy.styles.offcanvas.directions', []));
 
     $cfg = $directions[$direction] ?? $directions['right'];
 @endphp
@@ -57,7 +65,7 @@
 <div
     {{ $attributes->merge([
         'id' => $id,
-        'class' => 'fixed inset-0 z-50 overflow-hidden',
+        'class' => $baseClass,
         'style' => 'display: none;',
         'role' => 'dialog',
         'aria-modal' => 'true',
@@ -83,7 +91,7 @@
         x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+        class="{{ $backdropClass }}"
         @if($closeOnOutsideClick) @click="close()" @endif
         aria-hidden="true"
     ></div>
@@ -101,13 +109,12 @@
         role="document"
     >
         <!-- Header -->
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4">
-            <h3 id="{{ $id }}-title" class="text-lg font-semibold text-slate-900 dark:text-slate-100" x-text="title"></h3>
+        <div class="{{ $headerClass }}">
+            <h3 id="{{ $id }}-title" class="{{ $titleClass }}" x-text="title"></h3>
             <button
                 type="button"
                 @click="close()"
-                class="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                aria-label="{{ __('catchy::messages.close') }}"
+                class="{{ $closeBtnClass }}"
             >
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -116,7 +123,7 @@
         </div>
 
         <!-- Body -->
-        <div class="flex-1 overflow-y-auto px-6 py-4 text-slate-600 dark:text-slate-300">
+        <div class="{{ $bodyClass }}">
             <template x-if="content">
                 <div x-html="content"></div>
             </template>
@@ -127,7 +134,7 @@
 
         <!-- Footer (optional slot) -->
         @if(isset($footer))
-            <div class="border-t border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3">
+            <div class="{{ $footerClass }}">
                 {{ $footer }}
             </div>
         @endif

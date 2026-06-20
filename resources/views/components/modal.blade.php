@@ -6,7 +6,17 @@
 ])
 
 @php
-    $sizes = [
+    $baseClass = config('catchy.styles.modal.base', 'fixed inset-0 z-50 overflow-y-auto');
+    $backdropClass = config('catchy.styles.modal.backdrop', 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity');
+    $wrapperClass = config('catchy.styles.modal.wrapper', 'flex min-h-screen items-center justify-center p-4 text-center sm:p-0');
+    $contentClass = config('catchy.styles.modal.content', 'relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-start shadow-2xl transition-all w-full flex flex-col max-h-[90vh]');
+    $headerClass = config('catchy.styles.modal.header', 'flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4');
+    $titleClass = config('catchy.styles.modal.title', 'text-lg font-semibold text-slate-900 dark:text-slate-100');
+    $closeBtnClass = config('catchy.styles.modal.close_btn', 'rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500');
+    $bodyClass = config('catchy.styles.modal.body', 'flex-1 overflow-y-auto px-6 py-4 text-slate-600 dark:text-slate-300');
+    $footerClass = config('catchy.styles.modal.footer', 'border-t border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3');
+
+    $sizes = array_merge([
         'sm' => 'sm:max-w-sm',
         'md' => 'sm:max-w-md',
         'lg' => 'sm:max-w-lg',
@@ -16,14 +26,15 @@
         '4xl' => 'sm:max-w-4xl',
         '5xl' => 'sm:max-w-5xl',
         'full' => 'sm:max-w-full m-4',
-    ];
+    ], config('catchy.styles.modal.sizes', []));
+
     $sizeClass = $sizes[$size] ?? $sizes['md'];
 @endphp
 
 <div
     {{ $attributes->merge([
         'id' => $id,
-        'class' => 'fixed inset-0 z-50 overflow-y-auto',
+        'class' => $baseClass,
         'style' => 'display: none;',
         'role' => 'dialog',
         'aria-modal' => 'true',
@@ -49,13 +60,13 @@
         x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+        class="{{ $backdropClass }}"
         @if($closeOnOutsideClick) @click="close()" @endif
         aria-hidden="true"
     ></div>
 
     <!-- Modal Wrapper -->
-    <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+    <div class="{{ $wrapperClass }}">
         <div
             x-show="isOpen"
             x-transition:enter="ease-out duration-300"
@@ -64,16 +75,16 @@
             x-transition:leave="ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-start shadow-2xl transition-all w-full {{ $sizeClass }} flex flex-col max-h-[90vh]"
+            class="{{ $contentClass }} {{ $sizeClass }}"
             role="document"
         >
             <!-- Header -->
-            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4">
-                <h3 id="{{ $id }}-title" class="text-lg font-semibold text-slate-900 dark:text-slate-100" x-text="title"></h3>
+            <div class="{{ $headerClass }}">
+                <h3 id="{{ $id }}-title" class="{{ $titleClass }}" x-text="title"></h3>
                 <button
                     type="button"
                     @click="close()"
-                    class="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    class="{{ $closeBtnClass }}"
                     aria-label="{{ __('catchy::messages.close') }}"
                 >
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -83,7 +94,7 @@
             </div>
 
             <!-- Body -->
-            <div class="flex-1 overflow-y-auto px-6 py-4 text-slate-600 dark:text-slate-300">
+            <div class="{{ $bodyClass }}">
                 <template x-if="content">
                     <div x-html="content"></div>
                 </template>
@@ -94,7 +105,7 @@
 
             <!-- Footer (optional slot) -->
             @if(isset($footer))
-                <div class="border-t border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3">
+                <div class="{{ $footerClass }}">
                     {{ $footer }}
                 </div>
             @endif

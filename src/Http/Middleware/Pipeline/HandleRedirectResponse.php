@@ -14,22 +14,16 @@ use Hamzi\Catchy\Support\FlashExtractor;
  *
  * Pipeline stage intercepting redirect responses and rewriting them to
  * standard 200 OK headers for client-side SPA routing redirection.
- *
- * @package Hamzi\Catchy\Http\Middleware\Pipeline
  */
 class HandleRedirectResponse
 {
     /**
      * The asset version repository instance.
-     *
-     * @var \Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface
      */
     protected VersionRepositoryInterface $versionRepository;
 
     /**
      * HandleRedirectResponse constructor.
-     *
-     * @param  \Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface  $versionRepository
      */
     public function __construct(VersionRepositoryInterface $versionRepository)
     {
@@ -39,9 +33,7 @@ class HandleRedirectResponse
     /**
      * Handle the pipeline stage.
      *
-     * @param  \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData  $data
-     * @param  \Closure(\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData): (\Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData)  $next
-     * @return \Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData
+     * @param  Closure(CatchyPipelineData): (CatchyPipelineData)  $next
      */
     public function handle(CatchyPipelineData $data, Closure $next): CatchyPipelineData
     {
@@ -57,7 +49,7 @@ class HandleRedirectResponse
             ];
 
             $flash = FlashExtractor::extract($request, false);
-            if (!empty($flash)) {
+            if (! empty($flash)) {
                 $headers['X-Catchy-Flash'] = base64_encode((string) json_encode($flash));
             }
 
@@ -73,4 +65,3 @@ class HandleRedirectResponse
         return $next($data);
     }
 }
-

@@ -9,8 +9,6 @@ namespace Hamzi\Catchy\Domain\Contracts;
  *
  * Defines the contract for fetching and listing registered Blade components.
  * Enables customizable component lists stored outside hard-coded mappings.
- *
- * @package Hamzi\Catchy\Domain\Contracts
  */
 interface ComponentRepositoryInterface
 {
@@ -24,17 +22,11 @@ interface ComponentRepositoryInterface
 
     /**
      * Check if a component is registered.
-     *
-     * @param  string  $name
-     * @return bool
      */
     public function has(string $name): bool;
 
     /**
      * Get the alias for a specific component.
-     *
-     * @param  string  $name
-     * @return string|null
      */
     public function get(string $name): ?string;
 }

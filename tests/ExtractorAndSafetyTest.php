@@ -7,14 +7,13 @@ namespace Hamzi\Catchy\Tests;
 use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
 use Hamzi\Catchy\Support\FlashExtractor;
 use Illuminate\Http\Request;
+use Illuminate\Session\Store;
 
 /**
  * Class ExtractorAndSafetyTest
  *
  * Verifies HtmlResponseExtractor XPath injection protection, DOM extraction correctness,
  * and FlashExtractor session processing.
- *
- * @package Hamzi\Catchy\Tests
  */
 class ExtractorAndSafetyTest extends TestCase
 {
@@ -24,7 +23,7 @@ class ExtractorAndSafetyTest extends TestCase
     public function test_extractor_can_extract_head_title_and_fragment(): void
     {
         $html = '<!DOCTYPE html><html><head><title>Test Title</title><link rel="stylesheet" href="style.css"></head><body><div id="catchy-app"><h1>Hello Catchy</h1></div></body></html>';
-        $extractor = new HtmlResponseExtractor();
+        $extractor = new HtmlResponseExtractor;
 
         $result = $extractor->extractAll($html, 'catchy-app');
 
@@ -39,7 +38,7 @@ class ExtractorAndSafetyTest extends TestCase
      */
     public function test_extractor_escapes_xpath_container_ids(): void
     {
-        $extractor = new HtmlResponseExtractor();
+        $extractor = new HtmlResponseExtractor;
 
         // 1. Double quotes in ID
         $html1 = '<html><body><div id="foo&quot;bar">Double Quote Content</div></body></html>';
@@ -62,7 +61,7 @@ class ExtractorAndSafetyTest extends TestCase
      */
     public function test_extractor_preserves_libxml_errors_state(): void
     {
-        $extractor = new HtmlResponseExtractor();
+        $extractor = new HtmlResponseExtractor;
 
         // Set state to false
         libxml_use_internal_errors(false);
@@ -83,29 +82,29 @@ class ExtractorAndSafetyTest extends TestCase
      */
     public function test_flash_extractor_reads_and_clears(): void
     {
-        $session = $this->createMock(\Illuminate\Session\Store::class);
+        $session = $this->createMock(Store::class);
         $session->expects($this->any())->method('has')->willReturnMap([
             ['success', true],
             ['error', true],
             ['warning', false],
             ['info', false],
             ['status', false],
-            ['errors', false]
+            ['errors', false],
         ]);
 
         // Expect get to be called in read-only mode
         $session->expects($this->any())->method('get')->willReturnMap([
             ['success', 'Success message'],
-            ['error', 'Error message']
+            ['error', 'Error message'],
         ]);
 
         // Expect pull to be called in clear mode
         $session->expects($this->any())->method('pull')->willReturnMap([
             ['success', 'Success message cleared'],
-            ['error', 'Error message cleared']
+            ['error', 'Error message cleared'],
         ]);
 
-        $request = new Request();
+        $request = new Request;
         $request->setLaravelSession($session);
 
         // 1. Test read-only mode
