@@ -62,7 +62,9 @@ class CatchyServiceProvider extends ServiceProvider
         // Automatically append the middleware to the 'web' group for ease of installation
         if ($this->app->bound(Kernel::class)) {
             $kernel = $this->app->make(Kernel::class);
-            $kernel->appendMiddlewareToGroup('web', CatchyMiddleware::class);
+            if (method_exists($kernel, 'appendMiddlewareToGroup')) {
+                $kernel->appendMiddlewareToGroup('web', CatchyMiddleware::class);
+            }
         }
     }
 

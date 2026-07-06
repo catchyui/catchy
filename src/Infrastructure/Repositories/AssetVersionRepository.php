@@ -40,6 +40,17 @@ class AssetVersionRepository implements VersionRepositoryInterface
             return $this->cachedVersion = (md5_file($manifestPath) ?: '');
         }
 
+        // Fallback to alternative production manifest paths (e.g. root public or Mix)
+        $altManifestPath = public_path('manifest.json');
+        if (file_exists($altManifestPath)) {
+            return $this->cachedVersion = (md5_file($altManifestPath) ?: '');
+        }
+
+        $mixManifestPath = public_path('mix-manifest.json');
+        if (file_exists($mixManifestPath)) {
+            return $this->cachedVersion = (md5_file($mixManifestPath) ?: '');
+        }
+
         // 3. Detect if Vite is running in development hot mode
         $hotPath = public_path('hot');
         if (file_exists($hotPath)) {
