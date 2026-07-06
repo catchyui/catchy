@@ -15,15 +15,15 @@ const MAX_CACHE_SIZE = 50;
  * @returns {Object|null}
  */
 export function getCachedResponse(url, ttl) {
-    const entry = cache.get(url);
-    if (!entry) return null;
+ const entry = cache.get(url);
+ if (!entry) return null;
 
-    if (Date.now() - entry.timestamp > ttl) {
-        cache.delete(url);
-        return null;
-    }
+ if (Date.now() - entry.timestamp > ttl) {
+ cache.delete(url);
+ return null;
+ }
 
-    return entry;
+ return entry;
 }
 
 /**
@@ -33,20 +33,20 @@ export function getCachedResponse(url, ttl) {
  * @param {Object} data
  */
 export function setCachedResponse(url, data) {
-    if (cache.has(url)) {
-        cache.delete(url);
-    } else if (cache.size >= MAX_CACHE_SIZE) {
-        const firstKey = cache.keys().next().value;
-        cache.delete(firstKey);
-    }
-    cache.set(url, { ...data, timestamp: Date.now() });
+ if (cache.has(url)) {
+ cache.delete(url);
+ } else if (cache.size >= MAX_CACHE_SIZE) {
+ const firstKey = cache.keys().next().value;
+ cache.delete(firstKey);
+ }
+ cache.set(url, { ...data, timestamp: Date.now() });
 }
 
 /**
  * Clear the cache Map.
  */
 export function clearCache() {
-    cache.clear();
+ cache.clear();
 }
 
 /**
@@ -55,5 +55,5 @@ export function clearCache() {
  * @returns {Map}
  */
 export function getCache() {
-    return cache;
+ return cache;
 }

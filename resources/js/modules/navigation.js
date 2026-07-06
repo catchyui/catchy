@@ -15,13 +15,14 @@ import { getActiveRequests } from './prefetch.js';
 import { resolveModal, resolveOffcanvas, handleLifecycleTriggers } from './events.js';
 
 let currentVersion = '';
+let activeAbortController = null;
 
 /**
  * Get the current asset version string.
  * @returns {string}
  */
 export function getCurrentVersion() {
-    return currentVersion;
+ return currentVersion;
 }
 
 /**
@@ -29,7 +30,7 @@ export function getCurrentVersion() {
  * @param {string} version
  */
 export function setCurrentVersion(version) {
-    currentVersion = version;
+ currentVersion = version;
 }
 
 /**
@@ -42,537 +43,557 @@ export function setCurrentVersion(version) {
  * @param {Object} Alpine
  */
 export async function visit(url, options = {}, updateHistory = true, config = {}, Alpine = null) {
-    if (navigator.onLine === false) {
-        emit('flash', { message: 'Cannot navigate. You are currently offline.', type: 'warning' });
-        return;
-    }
+ if (navigator.onLine === false) {
+ emit('flash', { message: 'Cannot navigate. You are currently offline.', type: 'warning' });
+ return;
+ }
 
-    const oldPathname = window.location.pathname;
+ // Abort any active visit/fetch in progress to prevent page overlapping & race conditions
+ if (activeAbortController) {
+ activeAbortController.abort();
+ }
+ activeAbortController = new AbortController();
+ const { signal } = activeAbortController;
 
-    // Cache current scroll coordinates before navigating away
-    try {
-        window.history.replaceState({
-            ...window.history.state,
-            scrollX: window.scrollX,
-            scrollY: window.scrollY
-        }, '');
-    } catch (e) {}
+ const oldPathname = window.location.pathname;
 
-    const trigger = options.trigger || document;
+ // Cache current scroll coordinates before navigating away
+ try {
+ window.history.replaceState({
+ ...window.history.state,
+ scrollX: window.scrollX,
+ scrollY: window.scrollY
+ }, '');
+ } catch (e) {}
 
-    // 1. Dispatch catchy:before-visit event, cancel if prevented by user
-    if (!emit('before-visit', { url, options, trigger }, trigger, { cancelable: true })) {
-        return;
-    }
+ const trigger = options.trigger || document;
 
-    if (executeCallback(trigger, 'data-catchy-beforesend', { url, options, trigger }) === false) {
-        return;
-    }
+ // 1. Dispatch catchy:before-visit event, cancel if prevented by user
+ if (!emit('before-visit', { url, options, trigger }, trigger, { cancelable: true })) {
+ return;
+ }
 
-    if (!emit('start', { url, options, trigger }, trigger, { cancelable: true })) {
-        return;
-    }
+ if (executeCallback(trigger, 'data-catchy-beforesend', { url, options, trigger }) === false) {
+ return;
+ }
 
-    // 2. Optimistic UI Updates / Spinner Loader
-    const submitBtn = setupSubmitSpinner(trigger);
-    const optimisticClasses = trigger && typeof trigger.getAttribute === 'function'
-        ? trigger.getAttribute('data-catchy-optimistic-class')
-        : null;
+ if (!emit('start', { url, options, trigger }, trigger, { cancelable: true })) {
+ return;
+ }
 
-    if (optimisticClasses && trigger) {
-        trigger.classList.add(...optimisticClasses.split(' ').filter(Boolean));
-    }
+ // 2. Optimistic UI Updates / Spinner Loader
+ const submitBtn = setupSubmitSpinner(trigger);
+ const optimisticClasses = trigger && typeof trigger.getAttribute === 'function'
+ ? trigger.getAttribute('data-catchy-optimistic-class')
+ : null;
 
-    const cleanUpUi = () => {
-        restoreSubmitButton(submitBtn);
-        if (optimisticClasses && trigger) {
-            trigger.classList.remove(...optimisticClasses.split(' ').filter(Boolean));
-        }
-    };
+ if (optimisticClasses && trigger) {
+ trigger.classList.add(...optimisticClasses.split(' ').filter(Boolean));
+ }
 
-    const isGet = !options.method || options.method.toUpperCase() === 'GET';
-    const targetId = getTargetContainerId(trigger, options, config);
+ const cleanUpUi = () => {
+ restoreSubmitButton(submitBtn);
+ if (optimisticClasses && trigger) {
+ trigger.classList.remove(...optimisticClasses.split(' ').filter(Boolean));
+ }
+ };
 
-    // 3. Stale-While-Revalidate (SWR) Cache check
-    const cached = isGet && config.swr ? getCachedResponse(url, config.cacheTTL) : null;
+ const isGet = !options.method || options.method.toUpperCase() === 'GET';
+ const targetId = getTargetContainerId(trigger, options, config);
 
-    if (cached) {
-        try {
-            renderResponseData(cached, targetId, config, Alpine, trigger);
-            applyScroll(trigger, targetId, cached.finalUrl, oldPathname, options, config);
+ // 3. Stale-While-Revalidate (SWR) Cache check
+ const cached = isGet && config.swr ? getCachedResponse(url, config.cacheTTL) : null;
 
-            if (updateHistory) {
-                manageHistory(cached.finalUrl, trigger, isGet, null);
-            }
+ if (cached) {
+ try {
+ renderResponseData(cached, targetId, config, Alpine, trigger, false);
+ applyScroll(trigger, targetId, cached.finalUrl, oldPathname, options, config);
 
-            cleanUpUi();
-            emit('end', { url: cached.finalUrl, trigger, fromCache: true }, trigger);
-            emit('after-visit', { url: cached.finalUrl, trigger, fromCache: true }, trigger);
-        } catch (e) {
-            console.error('Catchy: SWR instant render failed, falling back to network.', e);
-        }
+ if (updateHistory) {
+ manageHistory(cached.finalUrl, trigger, isGet, null);
+ }
 
-        // Revalidate silently in the background, passing the original updateHistory and isRevalidation = true
-        fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, true);
-        return;
-    }
+ cleanUpUi();
+ emit('end', { url: cached.finalUrl, trigger, fromCache: true }, trigger);
+ emit('after-visit', { url: cached.finalUrl, trigger, fromCache: true }, trigger);
+ } catch (e) {
+ console.error('Catchy: SWR instant render failed, falling back to network.', e);
+ }
 
-    // No SWR cache found -> Full fetch visit
-    startLoading();
-    fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, false);
+ // Revalidate silently in the background, passing the original updateHistory and isRevalidation = true
+ fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, true, signal);
+ return;
+ }
+
+ // No SWR cache found -> Full fetch visit
+ startLoading();
+ fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, false, signal);
 }
 
 /**
  * Perform network request to fetch fresh HTML page.
  */
-async function fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, isRevalidation = false) {
-    const isGet = !options.method || options.method.toUpperCase() === 'GET';
-    const oldPathname = window.location.pathname;
+async function fetchFreshContent(url, options, targetId, config, Alpine, trigger, cleanUpUi, updateHistory, isRevalidation = false, signal = null) {
+ const isGet = !options.method || options.method.toUpperCase() === 'GET';
+ const oldPathname = window.location.pathname;
 
-    try {
-        let response = null;
+ try {
+ let response = null;
 
-        // Check if there is an active prefetch running for this URL
-        const activeRequests = getActiveRequests();
-        let responseData = null;
-        if (isGet && activeRequests.has(url)) {
-            responseData = await activeRequests.get(url);
-        }
+ // Check if there is an active prefetch running for this URL
+ const activeRequests = getActiveRequests();
+ let responseData = null;
+ if (isGet && activeRequests.has(url)) {
+ responseData = await activeRequests.get(url);
+ }
 
-        let html, finalUrl, version, headContent, title;
+ let html, finalUrl, version, headContent, title;
 
-        if (responseData) {
-            html = responseData.html;
-            finalUrl = responseData.finalUrl;
-            version = responseData.version;
-            headContent = responseData.head || null;
-            title = responseData.title || '';
-        } else {
-            // Setup headers, appending dynamic targets
-            const fetchHeaders = {
-                ...(options.headers || {}),
-                'X-Catchy-Request': 'true',
-                'X-Catchy-Target': targetId
-            };
-            if (currentVersion) {
-                fetchHeaders['X-Catchy-Version'] = currentVersion;
-            }
+ if (responseData) {
+ html = responseData.html;
+ finalUrl = responseData.finalUrl;
+ version = responseData.version;
+ headContent = responseData.head || null;
+ title = responseData.title || '';
+ } else {
+ // Setup headers, appending dynamic targets
+ const fetchHeaders = {
+ ...(options.headers || {}),
+ 'X-Catchy-Request': 'true',
+ 'X-Catchy-Target': targetId
+ };
+ if (currentVersion) {
+ fetchHeaders['X-Catchy-Version'] = currentVersion;
+ }
 
-            const fetchOptions = { ...options, headers: fetchHeaders };
+ const fetchOptions = { ...options, headers: fetchHeaders, signal };
 
-            if (options.method && options.method.toUpperCase() !== 'GET') {
-                response = await xhrRequest(url, fetchOptions);
-            } else {
-                response = await fetch(url, fetchOptions);
-            }
+ if (options.method && options.method.toUpperCase() !== 'GET') {
+ response = await xhrRequest(url, fetchOptions);
+ } else {
+ response = await fetch(url, fetchOptions);
+ }
 
-            if (response.status === 409) {
-                window.location.href = url;
-                return;
-            }
+ if (response.status === 409) {
+ window.location.href = url;
+ return;
+ }
 
-            if (!response.ok) {
-                handleFetchError(response, trigger);
-                throw new Error(`Catchy: Request failed with status ${response.status}`);
-            }
+ if (!response.ok) {
+ handleFetchError(response, trigger);
+ throw new Error(`Catchy: Request failed with status ${response.status}`);
+ }
 
-            const redirectUrl = response.headers.get('X-Catchy-Redirect');
-            if (redirectUrl) {
-                handleRedirect(redirectUrl, trigger, config, Alpine, updateHistory);
-                return;
-            }
+ const redirectUrl = response.headers.get('X-Catchy-Redirect');
+ if (redirectUrl) {
+ handleRedirect(redirectUrl, trigger, config, Alpine, updateHistory);
+ return;
+ }
 
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('text/html')) {
-                window.location.href = response.url || url;
-                return;
-            }
+ const contentType = response.headers.get('content-type');
+ if (!contentType || !contentType.includes('text/html')) {
+ window.location.href = response.url || url;
+ return;
+ }
 
-            html = await response.text();
-            finalUrl = response.url || url;
-            version = response.headers.get('X-Catchy-Version') || '';
-            headContent = response.headers.get('X-Catchy-Head') || null;
+ html = await response.text();
+ finalUrl = response.url || url;
+ version = response.headers.get('X-Catchy-Version') || '';
+ headContent = response.headers.get('X-Catchy-Head') || null;
 
-            processFlashHeader(response, trigger);
+ processFlashHeader(response, trigger);
 
-            const titleHeader = response.headers.get('X-Catchy-Title');
-            title = titleHeader ? decodeBase64Utf8(titleHeader) : '';
-        }
+ const titleHeader = response.headers.get('X-Catchy-Title');
+ title = titleHeader ? decodeBase64Utf8(titleHeader) : '';
+ }
 
-        const dataToRender = { html, version, title, head: headContent, finalUrl };
+ const dataToRender = { html, version, title, head: headContent, finalUrl };
 
-        if (isGet) {
-            setCachedResponse(url, dataToRender);
-        }
+ if (isGet) {
+ setCachedResponse(url, dataToRender);
+ }
 
-        if (version) currentVersion = version;
+ if (version) currentVersion = version;
+ if (activeAbortController && activeAbortController.signal === signal) {
+ activeAbortController = null;
+ }
 
-        // Render fresh updates
-        renderResponseData(dataToRender, targetId, config, Alpine, trigger);
+ // Render fresh updates
+ renderResponseData(dataToRender, targetId, config, Alpine, trigger, isRevalidation);
 
-        if (updateHistory && !isRevalidation) {
-            manageHistory(finalUrl, trigger, isGet, response);
-        }
+ if (updateHistory && !isRevalidation) {
+ manageHistory(finalUrl, trigger, isGet, response);
+ }
 
-        // Skip scroll restoration and lifecycle events on background SWR revalidation
-        if (!isRevalidation) {
-            applyScroll(trigger, targetId, finalUrl, oldPathname, options, config);
+ // Skip scroll restoration and lifecycle events on background SWR revalidation
+ if (!isRevalidation) {
+ applyScroll(trigger, targetId, finalUrl, oldPathname, options, config);
 
-            stopLoading();
-            executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
-            handleLifecycleTriggers(trigger, 'success');
-            cleanUpUi();
+ stopLoading();
+ executeCallback(trigger, 'data-catchy-success', { url: finalUrl, trigger });
+ handleLifecycleTriggers(trigger, 'success');
+ cleanUpUi();
 
-            emit('end', { url: finalUrl, trigger }, trigger);
-            emit('after-visit', { url: finalUrl, trigger }, trigger);
-        } else {
-            // Silent revalidation: just stop loading without emitting events
-            stopLoading();
-            cleanUpUi();
-        }
+ emit('end', { url: finalUrl, trigger }, trigger);
+ emit('after-visit', { url: finalUrl, trigger }, trigger);
+ } else {
+ // Silent revalidation: just stop loading without emitting events
+ stopLoading();
+ cleanUpUi();
+ }
 
-    } catch (error) {
-        resetLoading();
-        cleanUpUi();
-        console.error('Catchy: AJAX request error, falling back to full load.', error);
+ } catch (error) {
+ if (error.name === 'AbortError') {
+ // Silently ignore aborted requests from concurrency guards
+ return;
+ }
+ resetLoading();
+ cleanUpUi();
+ console.error('Catchy: AJAX request error, falling back to full load.', error);
 
-        executeCallback(trigger, 'data-catchy-error', { url, error, trigger });
-        handleLifecycleTriggers(trigger, 'error');
-        emit('error', { url, error, trigger }, trigger);
+ executeCallback(trigger, 'data-catchy-error', { url, error, trigger });
+ handleLifecycleTriggers(trigger, 'error');
+ emit('error', { url, error, trigger }, trigger);
 
-        if (isGet) {
-            window.location.href = url;
-        }
-    }
+ if (isGet) {
+ window.location.href = url;
+ }
+ }
 }
 
 /**
  * Render HTML fragment, handling Modals, Offcanvas, and standard morphing.
  */
-function renderResponseData(data, targetId, config, Alpine, trigger) {
-    if (data.title) {
-        document.title = data.title;
-    }
+function renderResponseData(data, targetId, config, Alpine, trigger, isRevalidation = false) {
+ if (data.title) {
+ document.title = data.title;
+ }
 
-    if (data.head) {
-        mergeHeadFromHeader(data.head);
-    }
+ if (data.head) {
+ mergeHeadFromHeader(data.head);
+ }
 
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(data.html, 'text/html');
+ const parser = new DOMParser();
+ const doc = parser.parseFromString(data.html, 'text/html');
 
-    if (doc.head) {
-        mergeHead(doc.head);
-    }
+ if (doc.head) {
+ mergeHead(doc.head);
+ }
 
-    const isModalTarget = trigger && typeof trigger.hasAttribute === 'function' && (trigger.hasAttribute('data-catchy-modal') || trigger.hasAttribute('catchy-modal'));
-    if (isModalTarget) {
-        const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
-        const modal = resolveModal(trigger);
-        if (modal) {
-            emit('modal-load', { html: incomingContent.innerHTML, title: doc.title || '' }, modal);
-            emit('modal-open', {}, modal);
-            return;
-        }
-    }
+ const isModalTarget = trigger && typeof trigger.hasAttribute === 'function' && (trigger.hasAttribute('data-catchy-modal') || trigger.hasAttribute('catchy-modal'));
+ if (isModalTarget) {
+ const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
+ const modal = resolveModal(trigger);
+ if (modal) {
+ emit('modal-load', { html: incomingContent.innerHTML, title: doc.title || '' }, modal);
+ emit('modal-open', {}, modal);
+ return;
+ }
+ }
 
-    const isOffcanvasTarget = trigger && typeof trigger.hasAttribute === 'function' && (trigger.hasAttribute('data-catchy-offcanvas') || trigger.hasAttribute('catchy-offcanvas'));
-    if (isOffcanvasTarget) {
-        const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
-        const offcanvas = resolveOffcanvas(trigger);
-        if (offcanvas) {
-            emit('offcanvas-load', { html: incomingContent.innerHTML, title: doc.title || '' }, offcanvas);
-            emit('offcanvas-open', {}, offcanvas);
-            return;
-        }
-    }
+ const isOffcanvasTarget = trigger && typeof trigger.hasAttribute === 'function' && (trigger.hasAttribute('data-catchy-offcanvas') || trigger.hasAttribute('catchy-offcanvas'));
+ if (isOffcanvasTarget) {
+ const incomingContent = doc.getElementById(targetId) || doc.getElementById(config.containerId) || doc.body;
+ const offcanvas = resolveOffcanvas(trigger);
+ if (offcanvas) {
+ emit('offcanvas-load', { html: incomingContent.innerHTML, title: doc.title || '' }, offcanvas);
+ emit('offcanvas-open', {}, offcanvas);
+ return;
+ }
+ }
 
-    const isTriggerInOffcanvas = trigger && typeof trigger.closest === 'function' && (trigger.closest('[catchy-offcanvas]') || trigger.closest('#catchy-offcanvas'));
-    const isFormPost = trigger && trigger.tagName === 'FORM' && trigger.getAttribute('method')?.toUpperCase() !== 'GET';
-    if (isTriggerInOffcanvas && isFormPost) {
-        const offcanvas = resolveOffcanvas(trigger);
-        if (offcanvas) emit('offcanvas-close', {}, offcanvas);
-    }
+ const isTriggerInOffcanvas = trigger && typeof trigger.closest === 'function' && (trigger.closest('[catchy-offcanvas]') || trigger.closest('#catchy-offcanvas'));
+ const isFormPost = trigger && trigger.tagName === 'FORM' && trigger.getAttribute('method')?.toUpperCase() !== 'GET';
+ if (isTriggerInOffcanvas && isFormPost) {
+ const offcanvas = resolveOffcanvas(trigger);
+ if (offcanvas) emit('offcanvas-close', {}, offcanvas);
+ }
 
-    const isTriggerInModal = trigger && typeof trigger.closest === 'function' && (trigger.closest('[catchy-modal]') || trigger.closest('#catchy-modal'));
-    if (isTriggerInModal && isFormPost) {
-        const modal = resolveModal(trigger);
-        if (modal) emit('modal-close', {}, modal);
-    }
+ const isTriggerInModal = trigger && typeof trigger.closest === 'function' && (trigger.closest('[catchy-modal]') || trigger.closest('#catchy-modal'));
+ if (isTriggerInModal && isFormPost) {
+ const modal = resolveModal(trigger);
+ if (modal) emit('modal-close', {}, modal);
+ }
 
-    // Standard DOM Morphing target
-    const appContainer = document.getElementById(targetId);
-    if (!appContainer) {
-        window.location.href = data.finalUrl;
-        return;
-    }
+ // Standard DOM Morphing target
+ const appContainer = document.getElementById(targetId);
+ if (!appContainer) {
+ window.location.href = data.finalUrl;
+ return;
+ }
 
-    const incomingApp = doc.getElementById(targetId) || doc.getElementById(config.containerId);
-    if (!incomingApp) {
-        window.location.href = data.finalUrl;
-        return;
-    }
+ const incomingApp = doc.getElementById(targetId) || doc.getElementById(config.containerId);
+ if (!incomingApp) {
+ window.location.href = data.finalUrl;
+ return;
+ }
 
-    // Emit catchy:before-morph
-    emit('before-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
-    emit('morphing', { url: data.finalUrl, html: data.html, element: appContainer, trigger }, trigger);
+ // Emit catchy:before-morph
+ emit('before-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
+ emit('morphing', { url: data.finalUrl, html: data.html, element: appContainer, trigger }, trigger);
 
-    if (!Alpine.morph) {
-        console.error('Catchy: Alpine.morph is not defined. Ensure @alpinejs/morph is loaded.');
-        window.location.href = data.finalUrl;
-        return;
-    }
+ if (!Alpine.morph) {
+ console.error('Catchy: Alpine.morph is not defined. Ensure @alpinejs/morph is loaded.');
+ window.location.href = data.finalUrl;
+ return;
+ }
 
-    // Extract Out-of-Band (OOB) elements before morph
-    const oobElements = doc.querySelectorAll('[data-catchy-swap-oob], [catchy-swap-oob]');
+ // Extract Out-of-Band (OOB) elements before morph
+ const oobElements = doc.querySelectorAll('[data-catchy-swap-oob], [catchy-swap-oob]');
 
-    // Resolve transition type
-    const transitionType = trigger && typeof trigger.getAttribute === 'function'
-        ? (trigger.getAttribute('data-catchy-transition') || trigger.getAttribute('catchy-transition') || config.viewTransitions)
-        : config.viewTransitions;
+ // Resolve transition type (disable transitions during background SWR revalidation or same-page navigations)
+ let defaultTransition = config.viewTransitions;
+ try {
+ const currentUrlObj = new URL(window.location.href);
+ const targetUrlObj = new URL(data.finalUrl, window.location.href);
+ if (currentUrlObj.pathname === targetUrlObj.pathname) {
+ defaultTransition = 'none';
+ }
+ } catch (e) {}
 
-    const performDomUpdates = () => {
-        // Morph the main container, supporting persistent elements (catchy-persist)
-        Alpine.morph(appContainer, incomingApp.outerHTML, {
-            updating(el, toEl, childrenOnly, skip) {
-                if (el.nodeType === Node.ELEMENT_NODE && (
-                    el.hasAttribute('catchy-persist') || 
-                    el.hasAttribute('data-catchy-persist') || 
-                    el.closest('[catchy-persist], [data-catchy-persist]')
-                )) {
-                    skip();
-                }
-            }
-        });
-        
-        executeScriptsInContainer(appContainer);
-        focusAutofocusElements(appContainer);
+ const transitionType = isRevalidation ? 'none' : (trigger && typeof trigger.getAttribute === 'function'
+ ? (trigger.getAttribute('data-catchy-transition') || trigger.getAttribute('catchy-transition') || defaultTransition)
+ : defaultTransition);
 
-        // Hydrate Alpine tree for main container
-        if (typeof Alpine.initTree === 'function') {
-            Alpine.initTree(appContainer);
-        }
+ const performDomUpdates = () => {
+ // Morph the main container, supporting persistent elements (catchy-persist)
+ Alpine.morph(appContainer, incomingApp.outerHTML, {
+ updating(el, toEl, childrenOnly, skip) {
+ if (el.nodeType === Node.ELEMENT_NODE && (
+ el.hasAttribute('catchy-persist') || 
+ el.hasAttribute('data-catchy-persist') || 
+ el.closest('[catchy-persist], [data-catchy-persist]')
+ )) {
+ skip();
+ }
+ }
+ });
+ 
+ executeScriptsInContainer(appContainer);
+ focusAutofocusElements(appContainer);
 
-        // Process Out-of-Band (OOB) updates
-        oobElements.forEach(incomingOob => {
-            const id = incomingOob.id;
-            if (!id) {
-                console.warn('Catchy: Out-of-band element is missing an ID.', incomingOob);
-                return;
-            }
-            const activeOob = document.getElementById(id);
-            if (!activeOob) return;
+ // Process Out-of-Band (OOB) updates
+ oobElements.forEach(incomingOob => {
+ const id = incomingOob.id;
+ if (!id) {
+ console.warn('Catchy: Out-of-band element is missing an ID.', incomingOob);
+ return;
+ }
+ const activeOob = document.getElementById(id);
+ if (!activeOob) return;
 
-            const strategy = incomingOob.getAttribute('data-catchy-swap-oob') || incomingOob.getAttribute('catchy-swap-oob');
-            
-            if (strategy === 'innerHTML') {
-                if (Alpine.morph) {
-                    const temp = document.createElement(activeOob.tagName);
-                    temp.innerHTML = incomingOob.innerHTML;
-                    Alpine.morph(activeOob, temp.outerHTML, {
-                        childrenOnly: true,
-                        updating(el, toEl, childrenOnly, skip) {
-                            if (el.nodeType === Node.ELEMENT_NODE && (
-                                el.hasAttribute('catchy-persist') || 
-                                el.hasAttribute('data-catchy-persist') || 
-                                el.closest('[catchy-persist], [data-catchy-persist]')
-                            )) {
-                                skip();
-                            }
-                        }
-                    });
-                } else {
-                    activeOob.innerHTML = incomingOob.innerHTML;
-                }
-            } else {
-                if (Alpine.morph) {
-                    Alpine.morph(activeOob, incomingOob.outerHTML, {
-                        updating(el, toEl, childrenOnly, skip) {
-                            if (el.nodeType === Node.ELEMENT_NODE && (
-                                el.hasAttribute('catchy-persist') || 
-                                el.hasAttribute('data-catchy-persist') || 
-                                el.closest('[catchy-persist], [data-catchy-persist]')
-                            )) {
-                                skip();
-                            }
-                        }
-                    });
-                } else {
-                    activeOob.outerHTML = incomingOob.outerHTML;
-                }
-            }
-            
-            const reloadedOob = document.getElementById(id) || activeOob;
-            executeScriptsInContainer(reloadedOob);
-            if (typeof Alpine.initTree === 'function') {
-                Alpine.initTree(reloadedOob);
-            }
-        });
-    };
+ const strategy = incomingOob.getAttribute('data-catchy-swap-oob') || incomingOob.getAttribute('catchy-swap-oob');
+ 
+ if (strategy === 'innerHTML') {
+ if (Alpine.morph) {
+ const temp = document.createElement(activeOob.tagName);
+ temp.innerHTML = incomingOob.innerHTML;
+ Alpine.morph(activeOob, temp.outerHTML, {
+ childrenOnly: true,
+ updating(el, toEl, childrenOnly, skip) {
+ if (el.nodeType === Node.ELEMENT_NODE && (
+ el.hasAttribute('catchy-persist') || 
+ el.hasAttribute('data-catchy-persist') || 
+ el.closest('[catchy-persist], [data-catchy-persist]')
+ )) {
+ skip();
+ }
+ }
+ });
+ } else {
+ activeOob.innerHTML = incomingOob.innerHTML;
+ }
+ } else {
+ if (Alpine.morph) {
+ Alpine.morph(activeOob, incomingOob.outerHTML, {
+ updating(el, toEl, childrenOnly, skip) {
+ if (el.nodeType === Node.ELEMENT_NODE && (
+ el.hasAttribute('catchy-persist') || 
+ el.hasAttribute('data-catchy-persist') || 
+ el.closest('[catchy-persist], [data-catchy-persist]')
+ )) {
+ skip();
+ }
+ }
+ });
+ } else {
+ activeOob.outerHTML = incomingOob.outerHTML;
+ }
+ }
+ 
+ const reloadedOob = document.getElementById(id) || activeOob;
+ executeScriptsInContainer(reloadedOob);
+ });
+ };
 
-    if (transitionType && document.startViewTransition) {
-        document.documentElement.setAttribute('data-catchy-transition', transitionType);
-        const transition = document.startViewTransition(() => performDomUpdates());
-        transition.finished.then(() => {
-            document.documentElement.removeAttribute('data-catchy-transition');
-            emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
-        }).catch(() => {
-            document.documentElement.removeAttribute('data-catchy-transition');
-            emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
-        });
-    } else {
-        performDomUpdates();
-        emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
-    }
+ if (transitionType && transitionType !== 'none' && document.startViewTransition) {
+ document.documentElement.setAttribute('data-catchy-transition', transitionType);
+ const transition = document.startViewTransition(() => performDomUpdates());
+ 
+ // Prevent unhandled promise rejections if the transition is aborted/skipped
+ transition.ready.catch(() => {});
+ transition.updateCallbackDone.catch(() => {});
+ 
+ transition.finished.then(() => {
+ document.documentElement.removeAttribute('data-catchy-transition');
+ emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
+ }).catch(() => {
+ document.documentElement.removeAttribute('data-catchy-transition');
+ emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
+ });
+ } else {
+ performDomUpdates();
+ emit('after-morph', { url: data.finalUrl, element: appContainer, trigger }, trigger);
+ }
 }
 
 /**
  * Apply scroll positions based on trigger attributes or options.
  */
 function applyScroll(trigger, targetId, finalUrl, oldPathname, options, config) {
-    if (options.state && typeof options.state.scrollX === 'number' && typeof options.state.scrollY === 'number') {
-        window.scrollTo({ left: options.state.scrollX, top: options.state.scrollY, behavior: 'instant' });
-        return;
-    }
+ if (options.state && typeof options.state.scrollX === 'number' && typeof options.state.scrollY === 'number') {
+ window.scrollTo({ left: options.state.scrollX, top: options.state.scrollY, behavior: 'instant' });
+ return;
+ }
 
-    const scrollSetting = trigger && typeof trigger.getAttribute === 'function'
-        ? trigger.getAttribute('data-catchy-scroll')
-        : null;
+ const scrollSetting = trigger && typeof trigger.getAttribute === 'function'
+ ? trigger.getAttribute('data-catchy-scroll')
+ : null;
 
-    if (
-        scrollSetting === 'preserve' ||
-        scrollSetting === 'keep' ||
-        options.scroll === 'preserve' ||
-        options.scroll === 'keep'
-    ) {
-        return;
-    }
+ if (
+ scrollSetting === 'preserve' ||
+ scrollSetting === 'keep' ||
+ options.scroll === 'preserve' ||
+ options.scroll === 'keep'
+ ) {
+ return;
+ }
 
-    if (scrollSetting === 'top' || options.scroll === 'top') {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        return;
-    }
+ if (scrollSetting === 'top' || options.scroll === 'top') {
+ window.scrollTo({ top: 0, behavior: 'instant' });
+ return;
+ }
 
-    const finalURLObj = new URL(finalUrl);
-    if (finalURLObj.hash) {
-        const el = document.querySelector(finalURLObj.hash);
-        if (el) el.scrollIntoView();
-        return;
-    }
+ const finalURLObj = new URL(finalUrl);
+ if (finalURLObj.hash) {
+ const el = document.querySelector(finalURLObj.hash);
+ if (el) el.scrollIntoView();
+ return;
+ }
 
-    const isFormSubmit = trigger && trigger.tagName === 'FORM';
-    const isGet = !options.method || options.method.toUpperCase() === 'GET';
-    if (isGet && targetId === config.containerId && (!isFormSubmit || finalURLObj.pathname !== oldPathname)) {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-    }
+ const isFormSubmit = trigger && trigger.tagName === 'FORM';
+ const isGet = !options.method || options.method.toUpperCase() === 'GET';
+ if (isGet && targetId === config.containerId && (!isFormSubmit || finalURLObj.pathname !== oldPathname)) {
+ window.scrollTo({ top: 0, behavior: 'instant' });
+ }
 }
 
 /**
  * Append redirects internally.
  */
 function handleRedirect(redirectUrl, trigger, config, Alpine, updateHistory) {
-    try {
-        const targetUrl = new URL(redirectUrl, window.location.href);
-        if (targetUrl.origin !== window.location.origin) {
-            window.location.href = redirectUrl;
-            return;
-        }
-    } catch (e) {
-        window.location.href = redirectUrl;
-        return;
-    }
+ try {
+ const targetUrl = new URL(redirectUrl, window.location.href);
+ if (targetUrl.origin !== window.location.origin) {
+ window.location.href = redirectUrl;
+ return;
+ }
+ } catch (e) {
+ window.location.href = redirectUrl;
+ return;
+ }
 
-    visit(redirectUrl, { trigger, targetId: config.containerId }, updateHistory, config, Alpine);
+ visit(redirectUrl, { trigger, targetId: config.containerId }, updateHistory, config, Alpine);
 }
 
 /**
  * Parse errors on failed requests.
  */
 function handleFetchError(response, trigger) {
-    if (response.status === 422 || response.status === 400) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            response.text().then(text => {
-                try {
-                    const json = JSON.parse(text);
-                    if (json.errors) {
-                        emit('validation-errors', json.errors);
-                        if (trigger) emit('validation-errors', json.errors, trigger);
-                    }
-                } catch (e) {}
-            });
-        }
-    }
+ if (response.status === 422 || response.status === 400) {
+ const contentType = response.headers.get('content-type');
+ if (contentType && contentType.includes('application/json')) {
+ response.text().then(text => {
+ try {
+ const json = JSON.parse(text);
+ if (json.errors) {
+ emit('validation-errors', json.errors);
+ if (trigger) emit('validation-errors', json.errors, trigger);
+ }
+ } catch (e) {}
+ });
+ }
+ }
 }
 
 /**
  * Process base64 encoded flash headers.
  */
 function processFlashHeader(response, trigger) {
-    const flashHeader = response.headers.get('X-Catchy-Flash');
-    if (!flashHeader) return;
+ const flashHeader = response.headers.get('X-Catchy-Flash');
+ if (!flashHeader) return;
 
-    try {
-        const flashJson = decodeBase64Utf8(flashHeader);
-        const flash = JSON.parse(flashJson);
-        emit('flash', flash);
+ try {
+ const flashJson = decodeBase64Utf8(flashHeader);
+ const flash = JSON.parse(flashJson);
+ emit('flash', flash);
 
-        if (flash.validation_errors) {
-            emit('validation-errors', flash.validation_errors);
-            if (trigger) emit('validation-errors', flash.validation_errors, trigger);
-        }
-    } catch (e) {
-        console.error('Catchy: Failed to decode X-Catchy-Flash header', e);
-    }
+ if (flash.validation_errors) {
+ emit('validation-errors', flash.validation_errors);
+ if (trigger) emit('validation-errors', flash.validation_errors, trigger);
+ }
+ } catch (e) {
+ console.error('Catchy: Failed to decode X-Catchy-Flash header', e);
+ }
 }
 
 /**
  * Setup inline submit SVG spin animation.
  */
 function setupSubmitSpinner(trigger) {
-    if (trigger && (trigger.tagName === 'FORM' || trigger instanceof HTMLFormElement) && !trigger.hasAttribute('data-catchy-no-loader')) {
-        const submitBtn = trigger.querySelector('[type="submit"]') || trigger.querySelector('button:not([type="button"])');
-        if (submitBtn && !submitBtn.dataset.originalHtml) {
-            submitBtn.dataset.originalHtml = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.classList.add('pointer-events-none');
-            const spinnerHtml = `<svg class="animate-spin -ms-1 me-2 h-4 w-4 text-current inline-block align-text-bottom" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="vertical-align: middle;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> `;
-            submitBtn.innerHTML = spinnerHtml + submitBtn.innerHTML;
-            return submitBtn;
-        }
-    }
-    return null;
+ if (trigger && (trigger.tagName === 'FORM' || trigger instanceof HTMLFormElement) && !trigger.hasAttribute('data-catchy-no-loader')) {
+ const submitBtn = trigger.querySelector('[type="submit"]') || trigger.querySelector('button:not([type="button"])');
+ if (submitBtn && !submitBtn.dataset.originalHtml) {
+ submitBtn.dataset.originalHtml = submitBtn.innerHTML;
+ submitBtn.disabled = true;
+ submitBtn.classList.add('pointer-events-none');
+ const spinnerHtml = `<svg class="animate-spin -ms-1 me-2 h-4 w-4 text-current inline-block align-text-bottom" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="vertical-align: middle;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> `;
+ submitBtn.innerHTML = spinnerHtml + submitBtn.innerHTML;
+ return submitBtn;
+ }
+ }
+ return null;
 }
 
 /**
  * Remove spinner from submit button.
  */
 function restoreSubmitButton(submitBtn) {
-    if (submitBtn && submitBtn.dataset.originalHtml) {
-        submitBtn.innerHTML = submitBtn.dataset.originalHtml;
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('pointer-events-none');
-        delete submitBtn.dataset.originalHtml;
-    }
+ if (submitBtn && submitBtn.dataset.originalHtml) {
+ submitBtn.innerHTML = submitBtn.dataset.originalHtml;
+ submitBtn.disabled = false;
+ submitBtn.classList.remove('pointer-events-none');
+ delete submitBtn.dataset.originalHtml;
+ }
 }
 
 function getTargetContainerId(trigger, options, config) {
-    return options.targetId ||
-        (trigger && typeof trigger.getAttribute === 'function' ? trigger.getAttribute('data-catchy-target') : null) ||
-        config.containerId;
+ return options.targetId ||
+ (trigger && typeof trigger.getAttribute === 'function' ? trigger.getAttribute('data-catchy-target') : null) ||
+ config.containerId;
 }
 
 function manageHistory(finalUrl, trigger, isGet, response) {
-    const shouldUpdateHistory = isGet || (response && response.redirected);
-    const hasHistoryAttr = trigger && typeof trigger.getAttribute === 'function' && trigger.getAttribute('data-catchy-history') === 'false';
-    const isModalOrOffcanvas = trigger && typeof trigger.hasAttribute === 'function' && (
-        trigger.hasAttribute('data-catchy-modal') || 
-        trigger.hasAttribute('catchy-modal') || 
-        trigger.hasAttribute('data-catchy-offcanvas') ||
-        trigger.hasAttribute('catchy-offcanvas')
-    );
+ const shouldUpdateHistory = isGet || (response && response.redirected);
+ const hasHistoryAttr = trigger && typeof trigger.getAttribute === 'function' && trigger.getAttribute('data-catchy-history') === 'false';
+ const isModalOrOffcanvas = trigger && typeof trigger.hasAttribute === 'function' && (
+ trigger.hasAttribute('data-catchy-modal') || 
+ trigger.hasAttribute('catchy-modal') || 
+ trigger.hasAttribute('data-catchy-offcanvas') ||
+ trigger.hasAttribute('catchy-offcanvas')
+ );
 
-    if (shouldUpdateHistory && !hasHistoryAttr && !isModalOrOffcanvas) {
-        window.history.pushState({ catchy: true, url: finalUrl }, '', finalUrl);
-    }
+ if (shouldUpdateHistory && !hasHistoryAttr && !isModalOrOffcanvas) {
+ window.history.pushState({ catchy: true, url: finalUrl }, '', finalUrl);
+ }
 }

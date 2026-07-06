@@ -89,7 +89,7 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
 
         // Enforce UTF-8 parsing to avoid encoding issues with Arabic/special characters
         $loaded = $dom->loadHTML(
-            '<?xml encoding="utf-8" ?>'.$html,
+            '<?xml encoding="utf-8" ?>'.mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'),
             LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
         );
 

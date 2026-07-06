@@ -1,21 +1,21 @@
 {
-  "name": "hamzi-catchy",
-  "version": "1.5.1",
-  "description": "Alpine.js SPA plugin for the Laravel Catchy package.",
-  "main": "resources/js/catchy.js",
-  "module": "resources/js/catchy-modular.js",
-  "author": "Hamzi",
-  "license": "MIT",
-  "scripts": {
-    "build": "node build.js",
-    "build:min": "node build.js --minify",
-    "dev": "node build.js --watch"
-  },
-  "devDependencies": {
-    "esbuild": "^0.21.5"
-  },
-  "peerDependencies": {
-    "@alpinejs/morph": "^3.0.0",
-    "alpinejs": "^3.0.0"
-  }
+ "name": "hamzi-catchy",
+ "version": "1.5.1",
+ "description": "Alpine.js SPA plugin for the Laravel Catchy package.",
+ "main": "resources/js/catchy.js",
+ "module": "resources/js/catchy-modular.js",
+ "author": "Hamzi",
+ "license": "MIT",
+ "scripts": {
+ "build": "node build.js",
+ "build:min": "node build.js --minify",
+ "dev": "node build.js --watch"
+ },
+ "devDependencies": {
+ "esbuild": "^0.21.5"
+ },
+ "peerDependencies": {
+ "@alpinejs/morph": "^3.0.0",
+ "alpinejs": "^3.0.0"
+ }
 }
