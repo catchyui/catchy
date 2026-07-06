@@ -44,7 +44,7 @@ php artisan catchy:install
 ```
 
 ### 3. Setup Your Layout
-Add the `@catchyScripts` Blade directive before the closing `</body>` tag of your application layout:
+Add the `<x-catchy-scripts />` Blade component (or the `@catchyScripts` directive) before the closing `</body>` tag of your application layout:
 ```html
 <!DOCTYPE html>
 <html>
@@ -60,7 +60,7 @@ Add the `@catchyScripts` Blade directive before the closing `</body>` tag of you
  </div>
 
  <!-- Injects Catchy SPA scripts and configuration -->
- @catchyScripts
+ <x-catchy-scripts />
 </body>
 </html>
 ```
@@ -133,6 +133,17 @@ You can chain multiple operations on link/form success or error states using `da
 
 <!-- Feed gets reloaded automatically -->
 <div id="posts-feed" x-catchy-lazy="/posts/feed"></div>
+```
+
+### 5. Automatic Validation Errors (Plug & Play)
+Starting from version `1.5.2`, Catchy automatically highlights validation errors returned by Laravel (both from 422 JSON responses and session redirects):
+* **Class Injection**: Toggles the `.is-invalid` class on the form input.
+* **Error Text**: Appends a `<span class="catchy-error text-red-500 text-xs mt-1 block">` directly underneath the input element.
+* **Opt-out**: To handle errors manually via custom events/Alpine.js, add `data-catchy-no-validation-errors` to your `<form>` tag:
+```html
+<form action="/submit" method="POST" data-catchy-no-validation-errors>
+ <!-- Custom verification styles -->
+</form>
 ```
 
 ---
