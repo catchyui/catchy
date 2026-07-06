@@ -4,9 +4,9 @@
 
 We actively support the latest release of Laravel Catchy. Security vulnerabilities will be patched on the `main` branch and released as a new version.
 
-| Version | Supported          |
+| Version | Supported |
 | ------- | ------------------ |
-| v1.x    | :white_check_mark: |
+| v1.x | :white_check_mark: |
 
 ## Reporting a Vulnerability
 

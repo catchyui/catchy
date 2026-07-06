@@ -28,7 +28,7 @@ class PipelineTest extends TestCase
      */
     public function test_verify_asset_version_does_not_abort_when_versions_match(): void
     {
-        $versionRepo = $this->createMock(VersionRepositoryInterface::class);
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('1.0.0');
 
         $request = new Request;
@@ -51,7 +51,7 @@ class PipelineTest extends TestCase
      */
     public function test_verify_asset_version_aborts_with_409_on_mismatch(): void
     {
-        $versionRepo = $this->createMock(VersionRepositoryInterface::class);
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('2.0.0');
 
         $request = new Request;
@@ -75,7 +75,7 @@ class PipelineTest extends TestCase
      */
     public function test_handle_redirect_rewrites_to_200_spa_redirect(): void
     {
-        $versionRepo = $this->createMock(VersionRepositoryInterface::class);
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('1.0.0');
 
         $request = new Request;
@@ -99,7 +99,7 @@ class PipelineTest extends TestCase
      */
     public function test_handle_redirect_preserves_cookies_and_custom_headers(): void
     {
-        $versionRepo = $this->createMock(VersionRepositoryInterface::class);
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('1.0.0');
 
         $request = new Request;
@@ -129,7 +129,7 @@ class PipelineTest extends TestCase
      */
     public function test_append_response_headers_sets_correct_headers(): void
     {
-        $versionRepo = $this->createMock(VersionRepositoryInterface::class);
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
         $versionRepo->method('getVersion')->willReturn('3.2.1');
 
         $session = $this->createMock(Store::class);
@@ -141,7 +141,7 @@ class PipelineTest extends TestCase
             ['status', false],
             ['errors', false],
         ]);
-        $session->method('pull')->with('success')->willReturn('Done successfully!');
+        $session->expects($this->once())->method('pull')->with('success')->willReturn('Done successfully!');
 
         $request = new Request;
         $request->setLaravelSession($session);
@@ -167,7 +167,7 @@ class PipelineTest extends TestCase
      */
     public function test_extract_response_container_trims_html_content(): void
     {
-        $extractor = $this->createMock(ResponseExtractorInterface::class);
+        $extractor = $this->createStub(ResponseExtractorInterface::class);
         $extractor->method('extractAll')->willReturn([
             'title' => 'Page Title',
             'head' => '<link rel="stylesheet">',
@@ -233,19 +233,110 @@ class PipelineTest extends TestCase
     {
         $this->assertInstanceOf(
             PipelineStageInterface::class,
-            new VerifyAssetVersion($this->createMock(VersionRepositoryInterface::class))
+            new VerifyAssetVersion($this->createStub(VersionRepositoryInterface::class))
         );
         $this->assertInstanceOf(
             PipelineStageInterface::class,
-            new HandleRedirectResponse($this->createMock(VersionRepositoryInterface::class))
+            new HandleRedirectResponse($this->createStub(VersionRepositoryInterface::class))
         );
         $this->assertInstanceOf(
             PipelineStageInterface::class,
-            new AppendResponseHeaders($this->createMock(VersionRepositoryInterface::class))
+            new AppendResponseHeaders($this->createStub(VersionRepositoryInterface::class))
         );
         $this->assertInstanceOf(
             PipelineStageInterface::class,
-            new ExtractResponseContainer($this->createMock(ResponseExtractorInterface::class))
+            new ExtractResponseContainer($this->createStub(ResponseExtractorInterface::class))
         );
+    }
+
+    /**
+     * Test VerifyAssetVersion does nothing if server version is empty.
+     */
+    public function test_verify_asset_version_does_nothing_if_server_version_is_empty(): void
+    {
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
+        $versionRepo->method('getVersion')->willReturn('');
+
+        $request = new Request;
+        $response = new Response('Hello content');
+
+        $data = new CatchyPipelineData($request, $response);
+        $stage = new VerifyAssetVersion($versionRepo);
+
+        $result = $stage->handle($data, function (CatchyPipelineData $d) {
+            return $d;
+        });
+
+        $this->assertEquals(200, $result->getResponse()->getStatusCode());
+        $this->assertEquals('Hello content', $result->getResponse()->getContent());
+    }
+
+    /**
+     * Test HandleRedirectResponse does nothing if response is not a redirection.
+     */
+    public function test_handle_redirect_does_nothing_if_response_is_not_redirection(): void
+    {
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
+        $versionRepo->method('getVersion')->willReturn('1.0.0');
+
+        $request = new Request;
+        $response = new Response('Hello content');
+
+        $data = new CatchyPipelineData($request, $response);
+        $stage = new HandleRedirectResponse($versionRepo);
+
+        $result = $stage->handle($data, function (CatchyPipelineData $d) {
+            return $d;
+        });
+
+        $this->assertEquals(200, $result->getResponse()->getStatusCode());
+        $this->assertEquals('Hello content', $result->getResponse()->getContent());
+    }
+
+    /**
+     * Test HandleRedirectResponse redirection intercept when no session store is attached.
+     */
+    public function test_handle_redirect_without_session(): void
+    {
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
+        $versionRepo->method('getVersion')->willReturn('1.0.0');
+
+        $request = new Request; // No session attached
+        $response = redirect('/target-url');
+
+        $data = new CatchyPipelineData($request, $response);
+        $stage = new HandleRedirectResponse($versionRepo);
+
+        $result = $stage->handle($data, function (CatchyPipelineData $d) {
+            return $d;
+        });
+
+        $resp = $result->getResponse();
+        $this->assertEquals(200, $resp->getStatusCode());
+        $this->assertEquals(url('/target-url'), $resp->headers->get('X-Catchy-Redirect'));
+        $this->assertFalse($resp->headers->has('X-Catchy-Flash')); // No session -> no flash header
+    }
+
+    /**
+     * Test AppendResponseHeaders when both version is empty and session is absent.
+     */
+    public function test_append_response_headers_without_version_or_session(): void
+    {
+        $versionRepo = $this->createStub(VersionRepositoryInterface::class);
+        $versionRepo->method('getVersion')->willReturn('');
+
+        $request = new Request; // No session
+        $response = new Response('Hello');
+
+        $data = new CatchyPipelineData($request, $response);
+        $stage = new AppendResponseHeaders($versionRepo);
+
+        $result = $stage->handle($data, function (CatchyPipelineData $d) {
+            return $d;
+        });
+
+        $resp = $result->getResponse();
+        $this->assertFalse($resp->headers->has('X-Catchy-Version'));
+        $this->assertFalse($resp->headers->has('X-Catchy-Flash'));
     }
 }

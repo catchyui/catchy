@@ -139,4 +139,64 @@ class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(HtmlResponseExtractor::class, $extractor);
         $this->assertInstanceOf(AssetVersionRepository::class, $versionRepository);
     }
+
+    /**
+     * Test AssetVersionRepository resolves correct versions in all scenarios.
+     */
+    public function test_asset_version_repository_resolves_correct_versions(): void
+    {
+        $repo = new AssetVersionRepository;
+
+        // 1. Config version overrides everything
+        config(['catchy.version' => 'custom-config-version']);
+        $this->assertEquals('custom-config-version', $repo->getVersion());
+
+        // Reset config version to test other lookups
+        config(['catchy.version' => null]);
+
+        $reflection = new \ReflectionClass(AssetVersionRepository::class);
+        $cachedProperty = $reflection->getProperty('cachedVersion');
+        $cachedProperty->setAccessible(true);
+
+        // 2. Standard Vite manifest
+        $buildDir = public_path('build');
+        if (! is_dir($buildDir)) {
+            mkdir($buildDir, 0755, true);
+        }
+        $manifestPath = $buildDir.'/manifest.json';
+        file_put_contents($manifestPath, '{"main.js":"main.hash.js"}');
+
+        $cachedProperty->setValue($repo, null); // Clear cache
+        $this->assertEquals(md5_file($manifestPath), $repo->getVersion());
+        unlink($manifestPath);
+        rmdir($buildDir);
+
+        // 3. Fallback manifest
+        $altManifestPath = public_path('manifest.json');
+        file_put_contents($altManifestPath, '{"main.js":"main.alt.js"}');
+
+        $cachedProperty->setValue($repo, null); // Clear cache
+        $this->assertEquals(md5_file($altManifestPath), $repo->getVersion());
+        unlink($altManifestPath);
+
+        // 4. Mix manifest
+        $mixManifestPath = public_path('mix-manifest.json');
+        file_put_contents($mixManifestPath, '{"main.js":"main.mix.js"}');
+
+        $cachedProperty->setValue($repo, null); // Clear cache
+        $this->assertEquals(md5_file($mixManifestPath), $repo->getVersion());
+        unlink($mixManifestPath);
+
+        // 5. Hot file
+        $hotPath = public_path('hot');
+        file_put_contents($hotPath, 'http://localhost:5173');
+
+        $cachedProperty->setValue($repo, null); // Clear cache
+        $this->assertEquals('hot', $repo->getVersion());
+        unlink($hotPath);
+
+        // 6. Default fallback
+        $cachedProperty->setValue($repo, null); // Clear cache
+        $this->assertEquals('', $repo->getVersion());
+    }
 }
