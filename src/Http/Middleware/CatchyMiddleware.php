@@ -21,17 +21,11 @@ use Symfony\Component\HttpFoundation\Response;
 class CatchyMiddleware
 {
     /**
-     * The IoC container instance.
-     */
-    protected Container $container;
-
-    /**
      * CatchyMiddleware constructor.
      */
-    public function __construct(Container $container)
-    {
-        $this->container = $container;
-    }
+    public function __construct(
+        protected readonly Container $container
+    ) {}
 
     /**
      * Handle an incoming request.

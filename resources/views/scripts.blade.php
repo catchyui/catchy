@@ -35,11 +35,11 @@
  }
 
  /* Assign view-transition-name to the Catchy SPA main content area and apply theme backgrounds */
- #catchy-content {
+ #{{ config('catchy.container_id', 'catchy-app') }} {
  view-transition-name: catchy-content;
  background-color: #f8fafc; /* light: bg-slate-50 */
  }
- html.dark #catchy-content {
+ html.dark #{{ config('catchy.container_id', 'catchy-app') }} {
  background-color: #0f172a; /* dark: bg-slate-900 */
  }
 
@@ -271,6 +271,7 @@
  'loadingBarHeight' => config('catchy.loading_bar.height', '3px'),
  'loadingBarColor' => config('catchy.loading_bar.color', 'linear-gradient(to right, #4f46e5, #06b6d4)'),
  'viewTransitions' => config('catchy.view_transitions', 'fade'),
+ 'debug' => (bool) config('app.debug', false),
  ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};
 </script>
 

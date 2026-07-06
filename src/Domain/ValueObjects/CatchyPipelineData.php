@@ -16,23 +16,12 @@ use Symfony\Component\HttpFoundation\Response;
 final class CatchyPipelineData
 {
     /**
-     * The active HTTP request.
-     */
-    private Request $request;
-
-    /**
-     * The active HTTP response.
-     */
-    private Response $response;
-
-    /**
      * CatchyPipelineData constructor.
      */
-    public function __construct(Request $request, Response $response)
-    {
-        $this->request = $request;
-        $this->response = $response;
-    }
+    public function __construct(
+        private readonly Request $request,
+        private readonly Response $response
+    ) {}
 
     /**
      * Get the active HTTP request.

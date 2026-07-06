@@ -19,17 +19,11 @@ use Symfony\Component\HttpFoundation\Response;
 class ExtractResponseContainer implements PipelineStageInterface
 {
     /**
-     * The response extractor instance.
-     */
-    protected ResponseExtractorInterface $extractor;
-
-    /**
      * ExtractResponseContainer constructor.
      */
-    public function __construct(ResponseExtractorInterface $extractor)
-    {
-        $this->extractor = $extractor;
-    }
+    public function __construct(
+        protected readonly ResponseExtractorInterface $extractor
+    ) {}
 
     /**
      * Handle the pipeline stage.

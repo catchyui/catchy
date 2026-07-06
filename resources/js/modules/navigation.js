@@ -179,7 +179,26 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
  return;
  }
 
+ if (response.status === 419) {
+ window.location.reload();
+ return;
+ }
+
  if (!response.ok) {
+ const isHtml = response.headers.get('content-type')?.includes('text/html');
+ if (isHtml) {
+ const htmlText = await response.text();
+ if (config.debug) {
+ showErrorModal(htmlText);
+ cleanUpUi();
+ stopLoading();
+ return;
+ } else {
+ window.location.href = response.url || url;
+ return;
+ }
+ }
+
  handleFetchError(response, trigger);
  throw new Error(`Catchy: Request failed with status ${response.status}`);
  }
@@ -584,16 +603,118 @@ function getTargetContainerId(trigger, options, config) {
 }
 
 function manageHistory(finalUrl, trigger, isGet, response) {
- const shouldUpdateHistory = isGet || (response && response.redirected);
- const hasHistoryAttr = trigger && typeof trigger.getAttribute === 'function' && trigger.getAttribute('data-catchy-history') === 'false';
- const isModalOrOffcanvas = trigger && typeof trigger.hasAttribute === 'function' && (
- trigger.hasAttribute('data-catchy-modal') || 
- trigger.hasAttribute('catchy-modal') || 
- trigger.hasAttribute('data-catchy-offcanvas') ||
- trigger.hasAttribute('catchy-offcanvas')
- );
+  const shouldUpdateHistory = isGet || (response && response.redirected);
+  const hasHistoryAttr = trigger && typeof trigger.getAttribute === 'function' && trigger.getAttribute('data-catchy-history') === 'false';
+  const isModalOrOffcanvas = trigger && typeof trigger.hasAttribute === 'function' && (
+  trigger.hasAttribute('data-catchy-modal') || 
+  trigger.hasAttribute('catchy-modal') || 
+  trigger.hasAttribute('data-catchy-offcanvas') ||
+  trigger.hasAttribute('catchy-offcanvas')
+  );
 
- if (shouldUpdateHistory && !hasHistoryAttr && !isModalOrOffcanvas) {
- window.history.pushState({ catchy: true, url: finalUrl }, '', finalUrl);
- }
+  if (shouldUpdateHistory && !hasHistoryAttr && !isModalOrOffcanvas) {
+  window.history.pushState({ catchy: true, url: finalUrl }, '', finalUrl);
+  }
+}
+
+/**
+ * Show a full screen iframe modal displaying server error response page.
+ * Useful for debugging Laravel errors (e.g. Ignition stack trace) in SPA context.
+ *
+ * @param {string} htmlContent
+ */
+function showErrorModal(htmlContent) {
+  let overlay = document.getElementById('catchy-error-overlay');
+  if (overlay) overlay.remove();
+
+  overlay = document.createElement('div');
+  overlay.id = 'catchy-error-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.inset = '0';
+  overlay.style.zIndex = '999999';
+  overlay.style.background = 'rgba(15, 23, 42, 0.6)';
+  overlay.style.backdropFilter = 'blur(4px)';
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.padding = '20px';
+
+  const modal = document.createElement('div');
+  modal.style.width = '100%';
+  modal.style.maxWidth = '1200px';
+  modal.style.height = '90vh';
+  modal.style.background = 'white';
+  modal.style.borderRadius = '12px';
+  modal.style.overflow = 'hidden';
+  modal.style.display = 'flex';
+  modal.style.flexDirection = 'column';
+  modal.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+  modal.style.border = '1px solid rgba(226, 232, 240, 0.8)';
+
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'center';
+  header.style.padding = '14px 20px';
+  header.style.borderBottom = '1px solid #e2e8f0';
+  header.style.background = '#f8fafc';
+
+  const title = document.createElement('h3');
+  title.textContent = 'Server Error Response';
+  title.style.margin = '0';
+  title.style.fontSize = '16px';
+  title.style.fontWeight = '600';
+  title.style.color = '#0f172a';
+  title.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>Close
+  `;
+  closeBtn.style.background = '#ef4444';
+  closeBtn.style.color = 'white';
+  closeBtn.style.border = 'none';
+  closeBtn.style.padding = '6px 14px';
+  closeBtn.style.borderRadius = '6px';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.style.fontWeight = '600';
+  closeBtn.style.fontSize = '13px';
+  closeBtn.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+  closeBtn.style.display = 'flex';
+  closeBtn.style.alignItems = 'center';
+  closeBtn.style.transition = 'background-color 0.2s';
+  closeBtn.addEventListener('mouseenter', () => { closeBtn.style.background = '#dc2626'; });
+  closeBtn.addEventListener('mouseleave', () => { closeBtn.style.background = '#ef4444'; });
+
+  closeBtn.addEventListener('click', () => {
+    overlay.remove();
+  });
+
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+
+  const iframe = document.createElement('iframe');
+  iframe.style.width = '100%';
+  iframe.style.flex = '1';
+  iframe.style.border = 'none';
+
+  modal.appendChild(header);
+  modal.appendChild(iframe);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  iframe.contentWindow.document.open();
+  iframe.contentWindow.document.write(htmlContent);
+  iframe.contentWindow.document.close();
 }

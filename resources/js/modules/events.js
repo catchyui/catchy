@@ -170,6 +170,34 @@ export function initEventListeners(config, visitFn, submitFormFn) {
  pendingAction = null;
  }
  });
+
+ // Handle validation errors automatically
+ document.addEventListener('catchy:validation-errors', (event) => {
+ const errors = event.detail;
+ const form = event.target instanceof HTMLFormElement
+ ? event.target
+ : (event.target && typeof event.target.closest === 'function' ? event.target.closest('form') : null);
+
+ if (!form || form.hasAttribute('data-catchy-no-validation-errors')) return;
+
+ // Clear existing errors first
+ form.querySelectorAll('.catchy-error').forEach(el => el.remove());
+ form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+ // Inject new validation errors
+ Object.entries(errors).forEach(([fieldName, messages]) => {
+ const input = form.querySelector(`[name="${fieldName}"], [name="${fieldName}[]"], #${fieldName}`);
+ if (input) {
+ input.classList.add('is-invalid');
+
+ const errorEl = document.createElement('span');
+ errorEl.className = 'catchy-error text-red-500 text-xs mt-1 block';
+ errorEl.textContent = Array.isArray(messages) ? messages[0] : messages;
+
+ input.after(errorEl);
+ }
+ });
+ });
 }
 
 /**

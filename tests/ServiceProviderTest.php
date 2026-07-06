@@ -199,4 +199,52 @@ class ServiceProviderTest extends TestCase
         $cachedProperty->setValue($repo, null); // Clear cache
         $this->assertEquals('', $repo->getVersion());
     }
+
+    /**
+     * Test that the @catchy directive uses the configured container ID by default.
+     */
+    public function test_catchy_directive_resolves_config_container_id(): void
+    {
+        config(['catchy.container_id' => 'custom-app-id']);
+        
+        $html = Blade::render('@catchy');
+        $this->assertEquals('<div id="custom-app-id">', $html);
+    }
+
+    /**
+     * Test that <x-catchy-scripts /> component is registered and works.
+     */
+    public function test_catchy_scripts_blade_component_resolves(): void
+    {
+        $html = Blade::render('<x-catchy-scripts />');
+        
+        $this->assertStringContainsString('window.CatchyConfig =', $html);
+        $this->assertStringContainsString('CatchyPlugin', $html);
+    }
+
+    /**
+     * Test that catchy middleware is not registered on web group when auto_register is false.
+     */
+    public function test_middleware_not_auto_registered_when_disabled(): void
+    {
+        // Mock app and kernel to test registerMiddleware logic with config value false
+        $this->app['config']->set('catchy.middleware_auto_register', false);
+        
+        // Let's create service provider instance and invoke boot
+        $provider = new CatchyServiceProvider($this->app);
+        
+        // We will mock Kernel
+        $kernel = $this->getMockBuilder(\Illuminate\Foundation\Http\Kernel::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['appendMiddlewareToGroup'])
+            ->getMock();
+        $kernel->expects($this->never())->method('appendMiddlewareToGroup');
+        
+        $this->app->instance(\Illuminate\Contracts\Http\Kernel::class, $kernel);
+        
+        $reflector = new \ReflectionClass(CatchyServiceProvider::class);
+        $method = $reflector->getMethod('registerMiddleware');
+        $method->setAccessible(true);
+        $method->invoke($provider);
+    }
 }

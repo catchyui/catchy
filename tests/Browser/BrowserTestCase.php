@@ -4,11 +4,34 @@ declare(strict_types=1);
 
 namespace Hamzi\Catchy\Tests\Browser;
 
+use Facebook\WebDriver\Chrome\ChromeOptions;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Hamzi\Catchy\CatchyServiceProvider;
 use Orchestra\Testbench\Dusk\TestCase as OrchestraDuskTestCase;
 
 abstract class BrowserTestCase extends OrchestraDuskTestCase
 {
+    /**
+     * Create the RemoteWebDriver instance.
+     */
+    protected function driver(): RemoteWebDriver
+    {
+        $options = (new ChromeOptions)->addArguments([
+            '--disable-gpu',
+            '--headless=new',
+            '--no-sandbox',
+            '--window-size=1920,1080',
+            '--disable-dev-shm-usage',
+        ]);
+
+        return RemoteWebDriver::create(
+            $_ENV['DUSK_DRIVER_URL'] ?? 'http://localhost:9515',
+            DesiredCapabilities::chrome()->setCapability(
+                ChromeOptions::CAPABILITY, $options
+            )
+        );
+    }
     /**
      * Get package providers.
      */

@@ -1,5 +1,5 @@
 /**
- * Hamzi/Catchy - Alpine.js SPA Plugin v1.5.1
+ * Hamzi/Catchy - Alpine.js SPA Plugin v1.5.2
  * (c) 2026 Hamzi
  * Released under the MIT License.
  */
@@ -489,10 +489,13 @@
  prefetchFn(link.href);
  }, config.prefetchDelay);
  }, true);
- document.addEventListener("mouseleave", (event) => {
- const link = event.target && typeof event.target.closest === "function" ? event.target.closest("a") : null;
- if (link) clearTimeout(hoverTimeout);
- }, true);
+  document.addEventListener("mouseleave", (event) => {
+  const link = event.target && typeof event.target.closest === "function" ? event.target.closest("a") : null;
+  if (!link) return;
+  const relatedLink = event.relatedTarget && typeof event.relatedTarget.closest === "function" ? event.relatedTarget.closest("a") : null;
+  if (relatedLink === link) return;
+  clearTimeout(hoverTimeout);
+  }, true);
  }
  function initViewportPrefetch(config, prefetchFn) {
  if (typeof IntersectionObserver === "undefined") return;
@@ -650,11 +653,28 @@
  pendingAction = null;
  }
  });
- document.addEventListener("catchy-modal-closed", (event) => {
- if (pendingAction && pendingAction.modalId === event.target.id) {
- pendingAction = null;
- }
- });
+  document.addEventListener("catchy-modal-closed", (event) => {
+  if (pendingAction && pendingAction.modalId === event.target.id) {
+  pendingAction = null;
+  }
+  });
+  document.addEventListener("catchy:validation-errors", (event) => {
+  const errors = event.detail;
+  const form = event.target instanceof HTMLFormElement ? event.target : (event.target && typeof event.target.closest === "function" ? event.target.closest("form") : null);
+  if (!form || form.hasAttribute("data-catchy-no-validation-errors")) return;
+  form.querySelectorAll(".catchy-error").forEach((el) => el.remove());
+  form.querySelectorAll(".is-invalid").forEach((el) => el.classList.remove("is-invalid"));
+  Object.entries(errors).forEach(([fieldName, messages]) => {
+  const input = form.querySelector(`[name="${fieldName}"], [name="${fieldName}[]"], #${fieldName}`);
+  if (input) {
+  input.classList.add("is-invalid");
+  const errorEl = document.createElement("span");
+  errorEl.className = "catchy-error text-red-500 text-xs mt-1 block";
+  errorEl.textContent = Array.isArray(messages) ? messages[0] : messages;
+  input.after(errorEl);
+  }
+  });
+  });
  }
  function createDynamicModal(id = "catchy-dynamic-modal") {
  let modal = document.getElementById(id);
@@ -991,7 +1011,24 @@
  window.location.href = url;
  return;
  }
+ if (response.status === 419) {
+ window.location.reload();
+ return;
+ }
  if (!response.ok) {
+ const isHtml = response.headers.get("content-type")?.includes("text/html");
+ if (isHtml) {
+ const htmlText = await response.text();
+ if (config.debug) {
+ showErrorModal(htmlText);
+ cleanUpUi();
+ stopLoading();
+ return;
+ } else {
+ window.location.href = response.url || url;
+ return;
+ }
+ }
  handleFetchError(response, trigger);
  throw new Error(`Catchy: Request failed with status ${response.status}`);
  }

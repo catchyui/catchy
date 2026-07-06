@@ -134,10 +134,18 @@ export function initHoverPrefetch(config, prefetchFn) {
  }, config.prefetchDelay);
  }, true);
 
- document.addEventListener('mouseleave', (event) => {
- const link = event.target && typeof event.target.closest === 'function' ? event.target.closest('a') : null;
- if (link) clearTimeout(hoverTimeout);
- }, true);
+  document.addEventListener('mouseleave', (event) => {
+    const link = event.target && typeof event.target.closest === 'function' ? event.target.closest('a') : null;
+    if (!link) return;
+
+    const relatedLink = event.relatedTarget && typeof event.relatedTarget.closest === 'function'
+      ? event.relatedTarget.closest('a')
+      : null;
+
+    if (relatedLink === link) return;
+
+    clearTimeout(hoverTimeout);
+  }, true);
 }
 
 /**

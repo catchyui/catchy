@@ -18,17 +18,11 @@ use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
 class VerifyAssetVersion implements PipelineStageInterface
 {
     /**
-     * The asset version repository instance.
-     */
-    protected VersionRepositoryInterface $versionRepository;
-
-    /**
      * VerifyAssetVersion constructor.
      */
-    public function __construct(VersionRepositoryInterface $versionRepository)
-    {
-        $this->versionRepository = $versionRepository;
-    }
+    public function __construct(
+        protected readonly VersionRepositoryInterface $versionRepository
+    ) {}
 
     /**
      * Handle the pipeline stage.

@@ -37,6 +37,19 @@ return [
     'auto_inject' => true,
 
     /*
+  |--------------------------------------------------------------------------
+  | Auto Register Middleware
+  |--------------------------------------------------------------------------
+  |
+  | When enabled, Catchy will automatically append CatchyMiddleware to the
+  | 'web' middleware group, enabling SPA routing for all web routes.
+  | Disable this if you want to register the middleware manually.
+  |
+  */
+
+    'middleware_auto_register' => true,
+
+    /*
  |--------------------------------------------------------------------------
  | Catchy Asset Version
  |--------------------------------------------------------------------------

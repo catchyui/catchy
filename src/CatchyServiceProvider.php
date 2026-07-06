@@ -60,7 +60,7 @@ class CatchyServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('catchy', CatchyMiddleware::class);
 
         // Automatically append the middleware to the 'web' group for ease of installation
-        if ($this->app->bound(Kernel::class)) {
+        if (config('catchy.middleware_auto_register', true) && $this->app->bound(Kernel::class)) {
             $kernel = $this->app->make(Kernel::class);
             if (method_exists($kernel, 'appendMiddlewareToGroup')) {
                 $kernel->appendMiddlewareToGroup('web', CatchyMiddleware::class);
@@ -75,7 +75,7 @@ class CatchyServiceProvider extends ServiceProvider
     {
         // Register the @catchy wrapper directive
         Blade::directive('catchy', function ($expression) {
-            $id = $expression ?: "'catchy-app'";
+            $id = $expression ?: "config('catchy.container_id', 'catchy-app')";
 
             return "<div id=\"<?php echo e({$id}); ?>\">";
         });
@@ -89,6 +89,9 @@ class CatchyServiceProvider extends ServiceProvider
         Blade::directive('catchyScripts', function () {
             return "<?php echo view('catchy::scripts', ['jsPath' => \\Hamzi\\Catchy\\CatchyServiceProvider::getJsPath()])->render(); ?>";
         });
+
+        // Register x-catchy-scripts component alias
+        Blade::component('catchy::scripts', 'catchy-scripts');
     }
 
     /**
