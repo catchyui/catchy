@@ -35,7 +35,15 @@ final class FlashExtractor
 
         if ($session->has('errors')) {
             $errorBag = $session->get('errors');
-            if (method_exists($errorBag, 'getBag')) {
+            if (method_exists($errorBag, 'getBags')) {
+                $errors = [];
+                foreach ($errorBag->getBags() as $bag) {
+                    foreach ($bag->toArray() as $field => $messages) {
+                        $errors[$field] = array_merge($errors[$field] ?? [], (array) $messages);
+                    }
+                }
+                $flash['validation_errors'] = $errors;
+            } elseif (method_exists($errorBag, 'getBag')) {
                 $flash['validation_errors'] = $errorBag->getBag('default')->toArray();
             } elseif (method_exists($errorBag, 'toArray')) {
                 $flash['validation_errors'] = $errorBag->toArray();
