@@ -1,15 +1,15 @@
-<h1 align="center">Catchy ⚡</h1>
+<h1 align="center">Catchy </h1>
 
 <p align="center">
-  <strong>A lightweight, headless Single Page Application (SPA) adapter for Laravel 11, 12 & 13</strong>
+ <strong>A lightweight, headless Single Page Application (SPA) adapter for Laravel 11, 12 & 13</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/hamdyelbatal122/catchy/releases"><img src="https://img.shields.io/github/v/release/hamdyelbatal122/catchy?style=flat-square&color=blue" alt="Latest Version"></a>
-  <a href="https://github.com/hamdyelbatal122/catchy/actions/workflows/run-tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamdyelbatal122/catchy/run-tests.yml?branch=main&style=flat-square&label=tests" alt="GitHub Tests Action Status"></a>
-  <a href="https://packagist.org/packages/hamzi/catchy"><img src="https://img.shields.io/packagist/dt/hamzi/catchy?style=flat-square&color=goldenrod" alt="Total Downloads"></a>
-  <img src="https://img.shields.io/badge/php-%5E8.2%20%7C%20%5E8.3%20%7C%20%5E8.4-blue?style=flat-square" alt="PHP Version">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License"></a>
+ <a href="https://github.com/hamdyelbatal122/catchy/releases"><img src="https://img.shields.io/github/v/release/hamdyelbatal122/catchy?style=flat-square&color=blue" alt="Latest Version"></a>
+ <a href="https://github.com/hamdyelbatal122/catchy/actions/workflows/run-tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamdyelbatal122/catchy/run-tests.yml?branch=main&style=flat-square&label=tests" alt="GitHub Tests Action Status"></a>
+ <a href="https://packagist.org/packages/hamzi/catchy"><img src="https://img.shields.io/packagist/dt/hamzi/catchy?style=flat-square&color=goldenrod" alt="Total Downloads"></a>
+ <img src="https://img.shields.io/badge/php-%5E8.2%20%7C%20%5E8.3%20%7C%20%5E8.4-blue?style=flat-square" alt="PHP Version">
+ <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License"></a>
 </p>
 
 ---
@@ -18,7 +18,7 @@
 
 ---
 
-## ⚡ Core Features
+## Core Features
 
 - **HTML-over-the-wire**: Only modified page body fragments are exchanged, saving bandwidth and rendering instantly.
 - **Zero-Configuration**: Standard links and forms are intercepted automatically. Plug and play out-of-the-box.
@@ -30,7 +30,7 @@
 
 ---
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### 1. Install Package
 ```bash
@@ -49,25 +49,25 @@ Add the `@catchyScripts` Blade directive before the closing `</body>` tag of you
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Laravel App</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+ <title>My Laravel App</title>
+ @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
 
-    <!-- Main SPA Container (Must match your container ID, default: catchy-app) -->
-    <div id="catchy-app">
-        @yield('content')
-    </div>
+ <!-- Main SPA Container (Must match your container ID, default: catchy-app) -->
+ <div id="catchy-app">
+ @yield('content')
+ </div>
 
-    <!-- Injects Catchy SPA scripts and configuration -->
-    @catchyScripts
+ <!-- Injects Catchy SPA scripts and configuration -->
+ @catchyScripts
 </body>
 </html>
 ```
 
 ---
 
-## 🛠️ Usage & Directives
+## ️ Usage & Directives
 
 ### 1. Headless Lazy Loading (`x-catchy-lazy`)
 You can lazy-load any standard HTML container immediately or when it scrolls into view (using the `.intersect` modifier). Catchy will fetch the HTML from the backend and morph it into place.
@@ -75,12 +75,12 @@ You can lazy-load any standard HTML container immediately or when it scrolls int
 ```html
 <!-- Load immediately on page load -->
 <div x-catchy-lazy="/comments">
-    <p>Loading comments...</p> <!-- Your custom unstyled loader -->
+ <p>Loading comments...</p> <!-- Your custom unstyled loader -->
 </div>
 
 <!-- Load only when scrolled into view -->
 <div x-catchy-lazy.intersect="/recommended-products">
-    <p>Loading recommendations...</p>
+ <p>Loading recommendations...</p>
 </div>
 ```
 
@@ -96,11 +96,11 @@ Perfect for live search queries, filtering, or auto-saving drafts. This directiv
 ```html
 <!-- Live search: fires key-up query (debounced) and morphs the #results-box -->
 <input type="text" name="query" 
-       x-catchy-sync.input.debounce.300ms.target.results-box="/search" 
-       placeholder="Search...">
+ x-catchy-sync.input.debounce.300ms.target.results-box="/search" 
+ placeholder="Search...">
 
 <div id="results-box">
-    <!-- Results list will morph here -->
+ <!-- Results list will morph here -->
 </div>
 ```
 - **Modifiers**: `.input` (fires on input/keystrokes), `.debounce.Xms` (delay), `.form` (serializes parent form), `.target.element-id` (identifies morph target).
@@ -118,17 +118,17 @@ You can chain multiple operations on link/form success or error states using `da
 
 - **Shorthand Actions**: `reset` (clears form), `reload:lazy-id` (triggers lazy component reload), `toast:message` (fires a toast notification event).
 - **Available Events**: Catchy dispatches standard custom events on the window/trigger element:
-  - `catchy:start` / `catchy:end` (starts/stops loading)
-  - `catchy:error` (request failed)
-  - `catchy:flash` (contains flash message session payloads)
-  - `catchy:validation-errors` (contains form validation errors)
+ - `catchy:start` / `catchy:end` (starts/stops loading)
+ - `catchy:error` (request failed)
+ - `catchy:flash` (contains flash message session payloads)
+ - `catchy:validation-errors` (contains form validation errors)
 
 ```html
 <!-- Automatically resets inputs and reloads the feed on successful post -->
 <form action="/posts" method="POST" 
-      data-catchy-on-success="reset;reload:posts-feed;toast:Post published successfully!">
-    <textarea name="content" required></textarea>
-    <button type="submit">Publish</button>
+ data-catchy-on-success="reset;reload:posts-feed;toast:Post published successfully!">
+ <textarea name="content" required></textarea>
+ <button type="submit">Publish</button>
 </form>
 
 <!-- Feed gets reloaded automatically -->
@@ -137,7 +137,7 @@ You can chain multiple operations on link/form success or error states using `da
 
 ---
 
-## 🎨 NPM / Vite Integration (Optional)
+## NPM / Vite Integration (Optional)
 
 If you prefer bundling Catchy inside your primary compiled JS bundle:
 
@@ -166,6 +166,6 @@ Alpine.start();
 
 ---
 
-## 📄 License
+## License
 
 The MIT License (MIT). Please see [License File](LICENSE) for more details.

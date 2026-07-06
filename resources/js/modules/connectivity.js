@@ -11,11 +11,11 @@ import { emit } from './utils.js';
  * Fires toast notifications when online/offline state changes.
  */
 export function initConnectivity() {
-    window.addEventListener('offline', () => {
-        emit('flash', { message: 'No internet connection. Operating in offline mode.', type: 'danger' });
-    });
+ window.addEventListener('offline', () => {
+ emit('flash', { message: 'No internet connection. Operating in offline mode.', type: 'danger' });
+ });
 
-    window.addEventListener('online', () => {
-        emit('flash', { message: 'Connection restored. Back online!', type: 'success' });
-    });
+ window.addEventListener('online', () => {
+ emit('flash', { message: 'Connection restored. Back online!', type: 'success' });
+ });
 }

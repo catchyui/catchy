@@ -25,7 +25,7 @@ class MiddlewareTest extends TestCase
 
         Route::middleware(CatchyMiddleware::class)->group(function () {
             Route::get('/html-page', function () {
-                return '<!DOCTYPE html><html><head><title>My Catchy Page 🚀</title></head><body><header>Nav</header><main id="catchy-app" class="p-4"><h1>Hello World</h1><p>Test</p></main><footer>Footer</footer></body></html>';
+                return '<!DOCTYPE html><html><head><title>My Catchy Page</title></head><body><header>Nav</header><main id="catchy-app" class="p-4"><h1>Hello World</h1><p>Test</p></main><footer>Footer</footer></body></html>';
             });
 
             Route::get('/json-response', function () {
@@ -82,7 +82,7 @@ class MiddlewareTest extends TestCase
 
         // Assert title header is present and base64 encoded
         $this->assertTrue($response->headers->has('X-Catchy-Title'));
-        $this->assertEquals(base64_encode('My Catchy Page 🚀'), $response->headers->get('X-Catchy-Title'));
+        $this->assertEquals(base64_encode('My Catchy Page'), $response->headers->get('X-Catchy-Title'));
     }
 
     /**
