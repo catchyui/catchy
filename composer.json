@@ -1,55 +1,56 @@
 {
-    "name": "hamzi/catchy",
-    "description": "Convert standard Laravel applications into SPAs using Alpine.js and HTML-over-the-wire.",
-    "license": "MIT",
-    "type": "library",
-    "authors": [
-        {
-            "name": "Hamzi",
-            "email": "hamdyelbatal@hamzi.dev"
-        }
-    ],
-    "keywords": [
-        "laravel",
-        "spa",
-        "alpine",
-        "alpinejs",
-        "morph",
-        "html-over-the-wire",
-        "blade",
-        "pjax"
-    ],
-    "require": {
-        "php": "^8.2",
-        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
-        "illuminate/http": "^10.0 || ^11.0 || ^12.0 || ^13.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Hamzi\\Catchy\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Hamzi\\Catchy\\Tests\\": "tests/"
-        }
-    },
-    "require-dev": {
-        "laravel/pint": "^1.13",
-        "orchestra/testbench": "^8.0 || ^9.0 || ^10.0 || ^11.0",
-        "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0"
-    },
-    "scripts": {
-        "format": "vendor/bin/pint",
-        "test": "vendor/bin/phpunit"
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Hamzi\\Catchy\\CatchyServiceProvider"
-            ]
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+ "name": "hamzi/catchy",
+ "description": "Convert standard Laravel applications into SPAs using Alpine.js and HTML-over-the-wire.",
+ "license": "MIT",
+ "type": "library",
+ "authors": [
+ {
+ "name": "Hamzi",
+ "email": "hamdyelbatal@hamzi.dev"
+ }
+ ],
+ "keywords": [
+ "laravel",
+ "spa",
+ "alpine",
+ "alpinejs",
+ "morph",
+ "html-over-the-wire",
+ "blade",
+ "pjax"
+ ],
+ "require": {
+ "php": "^8.2",
+ "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+ "illuminate/http": "^10.0 || ^11.0 || ^12.0 || ^13.0"
+ },
+ "autoload": {
+ "psr-4": {
+ "Hamzi\\Catchy\\": "src/"
+ }
+ },
+ "autoload-dev": {
+ "psr-4": {
+ "Hamzi\\Catchy\\Tests\\": "tests/"
+ }
+ },
+ "require-dev": {
+ "laravel/pint": "^1.13",
+ "orchestra/testbench": "^8.0 || ^9.0 || ^10.0 || ^11.0",
+ "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0",
+ "orchestra/testbench-dusk": "^11.2"
+ },
+ "scripts": {
+ "format": "vendor/bin/pint",
+ "test": "vendor/bin/phpunit"
+ },
+ "extra": {
+ "laravel": {
+ "providers": [
+ "Hamzi\\Catchy\\CatchyServiceProvider"
+ ]
+ }
+ },
+ "minimum-stability": "dev",
+ "prefer-stable": true
 }

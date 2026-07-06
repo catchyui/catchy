@@ -13,9 +13,9 @@ If you find a bug:
 1. Search existing issues to ensure it hasn't already been reported.
 2. If it hasn't, open a new issue using the **Bug Report** template.
 3. Provide as much detail as possible, including:
-   - Your PHP and Laravel versions.
-   - A clear description of the expected vs. actual behavior.
-   - Code snippets, error stack traces, or step-by-step reproduction instructions.
+ - Your PHP and Laravel versions.
+ - A clear description of the expected vs. actual behavior.
+ - Code snippets, error stack traces, or step-by-step reproduction instructions.
 
 ### Suggesting Features
 We welcome feature ideas!
@@ -26,14 +26,14 @@ We welcome feature ideas!
 ### Submitting Pull Requests (PRs)
 1. Fork the repository and create your branch from `main`.
 2. Install dependencies:
-   ```bash
-   composer install
-   npm install
-   ```
+ ```bash
+ composer install
+ npm install
+ ```
 3. Run the existing test suite to make sure everything passes:
-   ```bash
-   ./vendor/bin/phpunit
-   ```
+ ```bash
+ ./vendor/bin/phpunit
+ ```
 4. Write clean, well-documented code adhering to PSR-12 coding standard.
 5. Add tests for any new features or bug fixes.
 6. Commit your changes with descriptive commit messages.

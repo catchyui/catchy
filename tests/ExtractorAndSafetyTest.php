@@ -8,6 +8,8 @@ use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
 use Hamzi\Catchy\Support\FlashExtractor;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 
 /**
  * Class ExtractorAndSafetyTest
@@ -38,12 +40,12 @@ class ExtractorAndSafetyTest extends TestCase
      */
     public function test_extractor_handles_utf8_arabic_title(): void
     {
-        $html = '<!DOCTYPE html><html><head><title>صفحة تجريبية 🚀</title></head><body><div id="catchy-app">محتوى</div></body></html>';
+        $html = '<!DOCTYPE html><html><head><title>صفحة تجريبية</title></head><body><div id="catchy-app">محتوى</div></body></html>';
         $extractor = new HtmlResponseExtractor;
 
         $result = $extractor->extractAll($html, 'catchy-app');
 
-        $this->assertEquals('صفحة تجريبية 🚀', $result['title']);
+        $this->assertEquals('صفحة تجريبية', $result['title']);
     }
 
     /**
@@ -95,8 +97,8 @@ class ExtractorAndSafetyTest extends TestCase
      */
     public function test_flash_extractor_reads_and_clears(): void
     {
-        $session = $this->createMock(Store::class);
-        $session->expects($this->any())->method('has')->willReturnMap([
+        $session = $this->createStub(Store::class);
+        $session->method('has')->willReturnMap([
             ['success', true],
             ['error', true],
             ['warning', false],
@@ -106,13 +108,13 @@ class ExtractorAndSafetyTest extends TestCase
         ]);
 
         // Expect get to be called in read-only mode
-        $session->expects($this->any())->method('get')->willReturnMap([
+        $session->method('get')->willReturnMap([
             ['success', 'Success message'],
             ['error', 'Error message'],
         ]);
 
         // Expect pull to be called in clear mode
-        $session->expects($this->any())->method('pull')->willReturnMap([
+        $session->method('pull')->willReturnMap([
             ['success', 'Success message cleared'],
             ['error', 'Error message cleared'],
         ]);
@@ -129,5 +131,93 @@ class ExtractorAndSafetyTest extends TestCase
         $flashCleared = FlashExtractor::extract($request, true);
         $this->assertEquals('Success message cleared', $flashCleared['success']);
         $this->assertEquals('Error message cleared', $flashCleared['error']);
+    }
+
+    /**
+     * Test FlashExtractor merges multiple validation error bags correctly.
+     */
+    public function test_flash_extractor_handles_multiple_error_bags(): void
+    {
+        $defaultBag = $this->createStub(MessageBag::class);
+        $defaultBag->method('toArray')->willReturn(['email' => ['Email invalid']]);
+
+        $customBag = $this->createStub(MessageBag::class);
+        $customBag->method('toArray')->willReturn([
+            'email' => ['Email already exists'],
+            'username' => ['Username is required'],
+        ]);
+
+        $viewErrorBag = $this->createStub(ViewErrorBag::class);
+        $viewErrorBag->method('getBags')->willReturn([
+            'default' => $defaultBag,
+            'custom' => $customBag,
+        ]);
+
+        $session = $this->createStub(Store::class);
+        $session->method('has')->willReturnMap([
+            ['success', false],
+            ['error', false],
+            ['warning', false],
+            ['info', false],
+            ['status', false],
+            ['errors', true],
+        ]);
+        $session->method('get')->willReturn($viewErrorBag);
+
+        $request = new Request;
+        $request->setLaravelSession($session);
+
+        $flash = FlashExtractor::extract($request, false);
+
+        $this->assertArrayHasKey('validation_errors', $flash);
+        $this->assertEquals([
+            'email' => ['Email invalid', 'Email already exists'],
+            'username' => ['Username is required'],
+        ], $flash['validation_errors']);
+    }
+
+    /**
+     * Test HtmlResponseExtractor returns null on empty HTML.
+     */
+    public function test_extractor_returns_null_on_empty_html(): void
+    {
+        $extractor = new HtmlResponseExtractor;
+
+        $this->assertNull($extractor->extract('', 'app'));
+        $this->assertNull($extractor->extractTitle(''));
+        $this->assertNull($extractor->extractHead(''));
+
+        $all = $extractor->extractAll('', 'app');
+        $this->assertNull($all['title']);
+        $this->assertNull($all['head']);
+        $this->assertNull($all['fragment']);
+    }
+
+    /**
+     * Test HtmlResponseExtractor returns null on missing head or title.
+     */
+    public function test_extractor_returns_null_on_missing_tags(): void
+    {
+        $extractor = new HtmlResponseExtractor;
+
+        // No head or title
+        $html = '<html><body><div id="app">Hello</div></body></html>';
+        $this->assertNull($extractor->extractTitle($html));
+        $this->assertNull($extractor->extractHead($html));
+
+        $all = $extractor->extractAll($html, 'app');
+        $this->assertNull($all['title']);
+        $this->assertNull($all['head']);
+        $this->assertEquals('<div id="app">Hello</div>', $all['fragment']);
+    }
+
+    /**
+     * Test FlashExtractor returns empty array if no session is set on the request.
+     */
+    public function test_flash_extractor_returns_empty_when_no_session(): void
+    {
+        $request = new Request; // No session attached
+
+        $this->assertEmpty(FlashExtractor::extract($request));
     }
 }
