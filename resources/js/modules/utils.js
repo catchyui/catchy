@@ -207,17 +207,3 @@ export function executeCallback(element, attrName, context) {
  console.error(`Catchy: Error in callback execution for "${callback}":`, e);
  }
 }
-
-/**
- * Initialize / hydrate Alpine.js tree inside a container.
- *
- * @param {HTMLElement} container
- * @param {Object} Alpine
- */
-export function hydrateAlpine(container, Alpine) {
- if (!container || !Alpine) return;
- if (typeof Alpine.initTree === 'function') {
- Alpine.initTree(container);
- }
-}
-
