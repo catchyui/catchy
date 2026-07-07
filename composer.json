@@ -3,6 +3,11 @@
  "description": "Convert standard Laravel applications into SPAs using Alpine.js and HTML-over-the-wire.",
  "license": "MIT",
  "type": "library",
+ "homepage": "https://github.com/catchyui/catchy",
+ "support": {
+  "issues": "https://github.com/catchyui/catchy/issues",
+  "source": "https://github.com/catchyui/catchy"
+ },
  "authors": [
  {
  "name": "CatchyUI",
