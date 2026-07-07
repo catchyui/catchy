@@ -177,6 +177,42 @@ class ExtractorAndSafetyTest extends TestCase
     }
 
     /**
+     * Test FlashExtractor clears validation errors from session in clear mode.
+     */
+    public function test_flash_extractor_clears_validation_errors(): void
+    {
+        $defaultBag = $this->createStub(MessageBag::class);
+        $defaultBag->method('toArray')->willReturn(['email' => ['Email invalid']]);
+
+        $viewErrorBag = $this->createStub(ViewErrorBag::class);
+        $viewErrorBag->method('getBags')->willReturn(['default' => $defaultBag]);
+
+        $session = $this->createMock(Store::class);
+        $session->method('has')->willReturnMap([
+            ['success', false],
+            ['error', false],
+            ['warning', false],
+            ['info', false],
+            ['status', false],
+            ['errors', true],
+        ]);
+        $session->method('get')->with('errors')->willReturn($viewErrorBag);
+
+        // Expect forget('errors') to be called
+        $session->expects($this->once())->method('forget')->with('errors');
+
+        $request = new Request;
+        $request->setLaravelSession($session);
+
+        $flash = FlashExtractor::extract($request, true);
+
+        $this->assertArrayHasKey('validation_errors', $flash);
+        $this->assertEquals([
+            'email' => ['Email invalid'],
+        ], $flash['validation_errors']);
+    }
+
+    /**
      * Test HtmlResponseExtractor returns null on empty HTML.
      */
     public function test_extractor_returns_null_on_empty_html(): void

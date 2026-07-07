@@ -113,6 +113,13 @@ export class CatchyHeadMerger {
         } else {
           document.head.appendChild(incomingStyle.cloneNode(true));
         }
+      } else {
+        const exists = Array.from(document.head.querySelectorAll('style')).some(
+          s => s.textContent.trim() === incomingStyle.textContent.trim()
+        );
+        if (!exists) {
+          document.head.appendChild(incomingStyle.cloneNode(true));
+        }
       }
     });
   }

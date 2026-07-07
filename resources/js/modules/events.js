@@ -16,6 +16,21 @@ export class CatchyEvents {
 export const eventsInstance = new CatchyEvents();
 
 /**
+ * Find a nested/array input element in a form by its dot-notated field name.
+ * Maps "items.0.name" to input "items[0][name]" or "items[0][name][]".
+ *
+ * @param {HTMLFormElement} form
+ * @param {string} fieldName
+ * @returns {HTMLElement|null}
+ */
+function findNestedInput(form, fieldName) {
+  if (!fieldName.includes('.')) return null;
+  const parts = fieldName.split('.');
+  const name = parts[0] + parts.slice(1).map(p => `[${p}]`).join('');
+  return form.querySelector(`[name="${name}"], [name="${name}[]"]`);
+}
+
+/**
  * Initialize all global event listeners.
  *
  * @param {Object} config
@@ -192,17 +207,18 @@ export function initEventListeners(config, visitFn, submitFormFn) {
 
  // Inject new validation errors
  Object.entries(errors).forEach(([fieldName, messages]) => {
- const input = form.querySelector(`[name="${fieldName}"], [name="${fieldName}[]"], #${fieldName}`);
- if (input) {
- input.classList.add('is-invalid');
+  const input = form.querySelector(`[name="${fieldName}"], [name="${fieldName}[]"], #${fieldName}`)
+                || findNestedInput(form, fieldName);
+  if (input) {
+  input.classList.add('is-invalid');
 
- const errorEl = document.createElement('span');
- errorEl.className = 'catchy-error text-red-500 text-xs mt-1 block';
- errorEl.textContent = Array.isArray(messages) ? messages[0] : messages;
+  const errorEl = document.createElement('span');
+  errorEl.className = 'catchy-error text-red-500 text-xs mt-1 block';
+  errorEl.textContent = Array.isArray(messages) ? messages[0] : messages;
 
- input.after(errorEl);
- }
- });
+  input.after(errorEl);
+  }
+  });
  });
 }
 

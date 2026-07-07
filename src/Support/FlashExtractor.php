@@ -48,6 +48,10 @@ final class FlashExtractor
             } elseif (method_exists($errorBag, 'toArray')) {
                 $flash['validation_errors'] = $errorBag->toArray();
             }
+
+            if ($clear) {
+                $session->forget('errors');
+            }
         }
 
         return $flash;

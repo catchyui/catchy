@@ -7,7 +7,7 @@
  */
 
 import { decodeBase64Utf8, emit, executeScriptsInContainer, focusAutofocusElements, executeCallback } from './utils.js';
-import { getCachedResponse, setCachedResponse } from './cache.js';
+import { getCachedResponse, setCachedResponse, clearCache } from './cache.js';
 import { startLoading, stopLoading, resetLoading } from './loader.js';
 import { mergeHead, mergeHeadFromHeader } from './head-merge.js';
 import { xhrRequest } from './forms.js';
@@ -202,6 +202,10 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
 
  handleFetchError(response, trigger);
  throw new Error(`Catchy: Request failed with status ${response.status}`);
+ }
+
+ if (!isGet) {
+   clearCache();
  }
 
  const redirectUrl = response.headers.get('X-Catchy-Redirect');

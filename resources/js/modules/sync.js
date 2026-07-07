@@ -34,33 +34,55 @@ export class CatchySync {
       const handler = async () => {
         const value = el.value;
         const name = el.name || el.id;
-        const url = expression;
+        let url = expression;
         const form = el.closest('form');
+        const isGet = modifiers.includes('get');
 
         try {
           const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
           const headers = { 'X-Catchy-Request': 'true' };
-          if (csrfToken) {
+          if (csrfToken && !isGet) {
             headers['X-CSRF-TOKEN'] = csrfToken;
           }
 
-          let body;
-          if (modifiers.includes('form') && form) {
-            body = new FormData(form);
-            if (!body.has('_token') && csrfToken) {
-              body.append('_token', csrfToken);
+          let body = null;
+          let method = isGet ? 'GET' : 'POST';
+
+          if (isGet) {
+            const urlObj = new URL(url, window.location.href);
+            if (modifiers.includes('form') && form) {
+              const formData = new FormData(form);
+              for (const [key, val] of formData.entries()) {
+                if (typeof val === 'string') {
+                  urlObj.searchParams.set(key, val);
+                }
+              }
+            } else {
+              if (!name) {
+                console.warn('Catchy: x-catchy-sync requires el to have a name or id attribute when not using .form modifier.');
+                return;
+              }
+              urlObj.searchParams.set(name, value);
             }
+            url = urlObj.toString();
           } else {
-            if (!name) {
-              console.warn('Catchy: x-catchy-sync requires el to have a name or id attribute when not using .form modifier.');
-              return;
+            if (modifiers.includes('form') && form) {
+              body = new FormData(form);
+              if (!body.has('_token') && csrfToken) {
+                body.append('_token', csrfToken);
+              }
+            } else {
+              if (!name) {
+                console.warn('Catchy: x-catchy-sync requires el to have a name or id attribute when not using .form modifier.');
+                return;
+              }
+              headers['Content-Type'] = 'application/json';
+              body = JSON.stringify({ [name]: value });
             }
-            headers['Content-Type'] = 'application/json';
-            body = JSON.stringify({ [name]: value });
           }
 
           const response = await fetch(url, {
-            method: 'POST',
+            method: method,
             headers: headers,
             body: body
           });
