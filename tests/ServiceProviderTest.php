@@ -69,13 +69,13 @@ class ServiceProviderTest extends TestCase
      */
     public function test_catchy_blade_directive_renders_wrapper(): void
     {
-        $html1 = Blade::render('@catchy');
-        $this->assertEquals('<div id="catchy-app">', $html1);
+        $html1 = Blade::compileString('@catchy');
+        $this->assertEquals('<div id="<?php echo e(config(\'catchy.container_id\', \'catchy-app\')); ?>">', $html1);
 
-        $html2 = Blade::render("@catchy('my-custom-app')");
-        $this->assertEquals('<div id="my-custom-app">', $html2);
+        $html2 = Blade::compileString("@catchy('my-custom-app')");
+        $this->assertEquals('<div id="<?php echo e(\'my-custom-app\'); ?>">', $html2);
 
-        $html3 = Blade::render('@endcatchy');
+        $html3 = Blade::compileString('@endcatchy');
         $this->assertEquals('</div>', $html3);
     }
 

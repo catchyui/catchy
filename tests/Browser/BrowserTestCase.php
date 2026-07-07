@@ -8,6 +8,8 @@ use Catchyui\Catchy\CatchyServiceProvider;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Orchestra\Testbench\Dusk\TestCase as OrchestraDuskTestCase;
 
 abstract class BrowserTestCase extends OrchestraDuskTestCase
@@ -79,6 +81,11 @@ abstract class BrowserTestCase extends OrchestraDuskTestCase
      */
     protected function defineRoutes($router): void
     {
+        $middleware = [
+            StartSession::class,
+            ShareErrorsFromSession::class,
+        ];
+
         $router->get('/catchy-test-1', function () {
             return $this->baseHtml('Page One', '
  <h1>Page One Content</h1>
@@ -89,14 +96,14 @@ abstract class BrowserTestCase extends OrchestraDuskTestCase
  <button type="submit" id="btn-submit">Submit</button>
  </form>
  ');
-        })->middleware('web');
+        })->middleware($middleware);
 
         $router->get('/catchy-test-2', function () {
             return $this->baseHtml('Page Two', '
  <h1>Page Two Content</h1>
  <a href="/catchy-test-1" id="link-page-one">Go to Page One</a>
  ');
-        })->middleware('web');
+        })->middleware($middleware);
 
         $router->post('/catchy-test-submit', function () {
             request()->validate([
@@ -104,13 +111,13 @@ abstract class BrowserTestCase extends OrchestraDuskTestCase
             ]);
 
             return redirect('/catchy-test-success?name='.urlencode(request('name')));
-        })->middleware('web');
+        })->middleware($middleware);
 
         $router->get('/catchy-test-success', function () {
             return $this->baseHtml('Submit Success', '
  <h1>Submitted Name: '.request('name').'</h1>
  <a href="/catchy-test-1" id="link-back">Back to Page One</a>
  ');
-        })->middleware('web');
+        })->middleware($middleware);
     }
 }
