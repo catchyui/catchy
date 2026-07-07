@@ -14,10 +14,10 @@
     
     $customAttributes = [];
     if ($onSuccess) {
-        $customAttributes['data-catchy-on-success'] = $onSuccess;
+        $customAttributes['data-catchy-success'] = $onSuccess;
     }
     if ($onError) {
-        $customAttributes['data-catchy-on-error'] = $onError;
+        $customAttributes['data-catchy-error'] = $onError;
     }
     if ($confirmModal) {
         $customAttributes['data-catchy-confirm-modal'] = ltrim($confirmModal, '#');

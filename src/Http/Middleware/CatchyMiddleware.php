@@ -34,6 +34,16 @@ class CatchyMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Dynamically override config based on session settings (for simulator/playground)
+        if ($request->hasSession()) {
+            if ($sessionVersion = $request->session()->get('catchy_simulated_version')) {
+                config(['catchy.version' => $sessionVersion]);
+            }
+            if ($sessionTransition = $request->session()->get('catchy_simulated_transition')) {
+                config(['catchy.view_transitions' => $sessionTransition]);
+            }
+        }
+
         // 1. Skip middleware if the route is explicitly excluded
         if ($this->shouldExclude($request)) {
             return $next($request);

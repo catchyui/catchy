@@ -274,11 +274,11 @@
     let callback = element.getAttribute(attrName);
     if (!callback) {
       if (attrName === "data-catchy-beforesend") {
-        callback = element.getAttribute("onbeforesend") || element.getAttribute("beforesend");
+        callback = element.getAttribute("data-catchy-on-beforesend") || element.getAttribute("onbeforesend") || element.getAttribute("beforesend");
       } else if (attrName === "data-catchy-success") {
-        callback = element.getAttribute("onsuccess") || element.getAttribute("success");
+        callback = element.getAttribute("data-catchy-on-success") || element.getAttribute("onsuccess") || element.getAttribute("success");
       } else if (attrName === "data-catchy-error") {
-        callback = element.getAttribute("onerror") || element.getAttribute("error");
+        callback = element.getAttribute("data-catchy-on-error") || element.getAttribute("onerror") || element.getAttribute("error");
       }
     }
     if (!callback) return;
