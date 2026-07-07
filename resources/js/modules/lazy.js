@@ -1,87 +1,95 @@
 /**
- * Catchy  Lazy Loading Directive
+ * CatchyUI  Lazy Loading Directive
  *
- * Register the x-catchy-lazy Alpine.js directive.
- * Usage:
- * <div x-catchy-lazy="/url">...</div>
- * <div x-catchy-lazy.intersect="/url">...</div>
+ * Class-based registerer for the x-catchy-lazy Alpine.js directive.
  */
+
 import { emit, executeScriptsInContainer } from './utils.js';
 
-export function registerLazyDirective(Alpine, config) {
- Alpine.directive('catchy-lazy', (el, { expression, modifiers }, { cleanup }) => {
- const url = expression;
- if (!url) return;
+export class CatchyLazy {
+  /**
+   * Register the x-catchy-lazy Alpine.js directive.
+   *
+   * @param {Object} Alpine
+   * @param {Object} config
+   */
+  register(Alpine, config) {
+    Alpine.directive('catchy-lazy', (el, { expression, modifiers }, { cleanup }) => {
+      const url = expression;
+      if (!url) return;
 
- let loaded = false;
+      let loaded = false;
 
- const loadContent = () => {
- if (loaded) return;
+      const loadContent = () => {
+        if (loaded) return;
 
- emit('start', { trigger: el });
+        emit('start', { trigger: el });
 
- fetch(url, {
- headers: { 'X-Catchy-Request': 'true' }
- })
- .then(response => {
- if (!response.ok) throw new Error('Lazy load failed');
- return response.text();
- })
- .then(html => {
- const parser = new DOMParser();
- const doc = parser.parseFromString(html, 'text/html');
- 
- // Extract either the specified target container or search for container ID
- const fragment = doc.getElementById(config.containerId) || doc.body;
+        fetch(url, {
+          headers: { 'X-Catchy-Request': 'true' }
+        })
+          .then(response => {
+            if (!response.ok) throw new Error('Lazy load failed');
+            return response.text();
+          })
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
 
- el.innerHTML = fragment.innerHTML;
- loaded = true;
+            const fragment = doc.getElementById(config.containerId) || doc.body;
 
- // Re-execute scripts within newly added content
- executeScriptsInContainer(el);
+            el.innerHTML = fragment.innerHTML;
+            loaded = true;
 
- emit('end', { trigger: el });
- })
- .catch(err => {
- console.error(err);
- emit('error', { error: err, trigger: el });
- });
- };
+            executeScriptsInContainer(el);
 
- const reloadContent = () => {
- loaded = false;
- loadContent();
- };
+            emit('end', { trigger: el });
+          })
+          .catch(err => {
+            console.error(err);
+            emit('error', { error: err, trigger: el });
+          });
+      };
 
- // Bind global reload listener
- const handleReloadEvent = (event) => {
- if (!event.detail || !event.detail.id || event.detail.id === el.id) {
- reloadContent();
- }
- };
+      const reloadContent = () => {
+        loaded = false;
+        loadContent();
+      };
 
- window.addEventListener('catchy:lazy-reload', handleReloadEvent);
- window.addEventListener('catchy-lazy-reload', handleReloadEvent);
+      const handleReloadEvent = (event) => {
+        if (!event.detail || !event.detail.id || event.detail.id === el.id) {
+          reloadContent();
+        }
+      };
 
- cleanup(() => {
- window.removeEventListener('catchy:lazy-reload', handleReloadEvent);
- window.removeEventListener('catchy-lazy-reload', handleReloadEvent);
- });
+      window.addEventListener('catchy:lazy-reload', handleReloadEvent);
+      window.addEventListener('catchy-lazy-reload', handleReloadEvent);
 
- // Initialize loading
- if (modifiers.includes('intersect')) {
- const observer = new IntersectionObserver((entries) => {
- entries.forEach(entry => {
- if (entry.isIntersecting) {
- loadContent();
- observer.disconnect();
- }
- });
- }, { threshold: 0.1 });
- observer.observe(el);
- cleanup(() => observer.disconnect());
- } else {
- loadContent();
- }
- });
+      cleanup(() => {
+        window.removeEventListener('catchy:lazy-reload', handleReloadEvent);
+        window.removeEventListener('catchy-lazy-reload', handleReloadEvent);
+      });
+
+      if (modifiers.includes('intersect')) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              loadContent();
+              observer.disconnect();
+            }
+          });
+        }, { threshold: 0.1 });
+        observer.observe(el);
+        cleanup(() => observer.disconnect());
+      } else {
+        loadContent();
+      }
+    });
+  }
 }
+
+// Export singleton instance for direct module imports
+export const lazyInstance = new CatchyLazy();
+
+// Maintain functional wrapper exports for backward compatibility & easy usage
+export const registerLazyDirective = (Alpine, config) => lazyInstance.register(Alpine, config);

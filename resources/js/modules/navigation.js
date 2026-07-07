@@ -14,24 +14,25 @@ import { xhrRequest } from './forms.js';
 import { getActiveRequests } from './prefetch.js';
 import { resolveModal, resolveOffcanvas, handleLifecycleTriggers } from './events.js';
 
-let currentVersion = '';
-let activeAbortController = null;
+export class CatchyRouter {
+  constructor() {
+    this.currentVersion = '';
+    this.activeAbortController = null;
+  }
 
-/**
- * Get the current asset version string.
- * @returns {string}
- */
-export function getCurrentVersion() {
- return currentVersion;
+  getCurrentVersion() {
+    return this.currentVersion;
+  }
+
+  setCurrentVersion(version) {
+    this.currentVersion = version;
+  }
 }
 
-/**
- * Set the current asset version string.
- * @param {string} version
- */
-export function setCurrentVersion(version) {
- currentVersion = version;
-}
+export const routerInstance = new CatchyRouter();
+
+export const getCurrentVersion = () => routerInstance.getCurrentVersion();
+export const setCurrentVersion = (version) => routerInstance.setCurrentVersion(version);
 
 /**
  * Fetch a page and update the DOM container via Alpine.morph.
@@ -49,11 +50,11 @@ export async function visit(url, options = {}, updateHistory = true, config = {}
  }
 
  // Abort any active visit/fetch in progress to prevent page overlapping & race conditions
- if (activeAbortController) {
- activeAbortController.abort();
+ if (routerInstance.activeAbortController) {
+ routerInstance.activeAbortController.abort();
  }
- activeAbortController = new AbortController();
- const { signal } = activeAbortController;
+ routerInstance.activeAbortController = new AbortController();
+ const { signal } = routerInstance.activeAbortController;
 
  const oldPathname = window.location.pathname;
 
@@ -162,8 +163,8 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
  'X-Catchy-Request': 'true',
  'X-Catchy-Target': targetId
  };
- if (currentVersion) {
- fetchHeaders['X-Catchy-Version'] = currentVersion;
+ if (routerInstance.currentVersion) {
+ fetchHeaders['X-Catchy-Version'] = routerInstance.currentVersion;
  }
 
  const fetchOptions = { ...options, headers: fetchHeaders, signal };
@@ -234,9 +235,9 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
  setCachedResponse(url, dataToRender);
  }
 
- if (version) currentVersion = version;
- if (activeAbortController && activeAbortController.signal === signal) {
- activeAbortController = null;
+ if (version) routerInstance.currentVersion = version;
+ if (routerInstance.activeAbortController && routerInstance.activeAbortController.signal === signal) {
+ routerInstance.activeAbortController = null;
  }
 
  // Render fresh updates

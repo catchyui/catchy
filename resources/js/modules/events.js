@@ -7,7 +7,13 @@
 import { shouldIgnoreLink, shouldIgnoreForm, emit } from './utils.js';
 import { submitForm } from './forms.js';
 
-let pendingAction = null;
+export class CatchyEvents {
+  constructor() {
+    this.pendingAction = null;
+  }
+}
+
+export const eventsInstance = new CatchyEvents();
 
 /**
  * Initialize all global event listeners.
@@ -36,13 +42,13 @@ export function initEventListeners(config, visitFn, submitFormFn) {
 
  // Handle Confirm Button click inside a modal
  const confirmBtn = target.closest('[data-catchy-confirm-button]');
- if (confirmBtn && pendingAction) {
+ if (confirmBtn && eventsInstance.pendingAction) {
  event.preventDefault();
  event.stopImmediatePropagation();
 
- const actionToRun = pendingAction.execute;
- const modalId = pendingAction.modalId;
- pendingAction = null;
+ const actionToRun = eventsInstance.pendingAction.execute;
+ const modalId = eventsInstance.pendingAction.modalId;
+ eventsInstance.pendingAction = null;
 
  const modal = document.getElementById(modalId);
  if (modal) emit('modal-close', {}, modal);
@@ -53,13 +59,13 @@ export function initEventListeners(config, visitFn, submitFormFn) {
 
  // Handle Declarative Confirm via Custom Modal
  const confirmModalEl = target.closest('[data-catchy-confirm-modal]');
- if (confirmModalEl && (!pendingAction || pendingAction.trigger !== confirmModalEl)) {
+ if (confirmModalEl && (!eventsInstance.pendingAction || eventsInstance.pendingAction.trigger !== confirmModalEl)) {
  const modalId = confirmModalEl.getAttribute('data-catchy-confirm-modal');
  const link = target.closest('a');
  if (link && !shouldIgnoreLink(link, event, config.ignoreAttribute)) {
  event.preventDefault();
  event.stopImmediatePropagation();
- pendingAction = {
+ eventsInstance.pendingAction = {
  trigger: confirmModalEl,
  modalId: modalId,
  execute: () => { visitFn(link.href, { trigger: link }); }
@@ -126,11 +132,11 @@ export function initEventListeners(config, visitFn, submitFormFn) {
 
  // Handle Confirm via Custom Modal
  const confirmModalId = form.getAttribute('data-catchy-confirm-modal');
- if (confirmModalId && (!pendingAction || pendingAction.trigger !== form)) {
+ if (confirmModalId && (!eventsInstance.pendingAction || eventsInstance.pendingAction.trigger !== form)) {
  event.preventDefault();
  event.stopImmediatePropagation();
 
- pendingAction = {
+ eventsInstance.pendingAction = {
  trigger: form,
  modalId: confirmModalId,
  execute: () => { submitFormFn(form); }
@@ -161,13 +167,13 @@ export function initEventListeners(config, visitFn, submitFormFn) {
 
  // Reset pending action when modal is closed
  document.addEventListener('catchy:modal-closed', (event) => {
- if (pendingAction && pendingAction.modalId === event.target.id) {
- pendingAction = null;
+ if (eventsInstance.pendingAction && eventsInstance.pendingAction.modalId === event.target.id) {
+ eventsInstance.pendingAction = null;
  }
  });
  document.addEventListener('catchy-modal-closed', (event) => {
- if (pendingAction && pendingAction.modalId === event.target.id) {
- pendingAction = null;
+ if (eventsInstance.pendingAction && eventsInstance.pendingAction.modalId === event.target.id) {
+ eventsInstance.pendingAction = null;
  }
  });
 
