@@ -1,5 +1,5 @@
 /**
- * Hamzi/Catchy - Alpine.js SPA Plugin v1.5.2
+ * Hamzi/Catchy - Alpine.js SPA Plugin v1.5.3
  * (c) 2026 Hamzi
  * Released under the MIT License.
  */
