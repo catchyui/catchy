@@ -718,35 +718,45 @@
  if (e.key === "Escape") closeModal();
  };
  closeBtn.addEventListener("click", closeModal);
- backdrop.addEventListener("click", (e) => {
- if (e.target === backdrop) closeModal();
- });
- document.addEventListener("keydown", handleEsc);
- backdrop.addEventListener("modal-open", () => {
- backdrop.offsetHeight;
- backdrop.classList.add("show");
- });
- backdrop.addEventListener("modal-close", closeModal);
- backdrop.addEventListener("modal-load", (e) => {
- if (e.detail) {
- if (e.detail.title) title.textContent = e.detail.title;
- body.innerHTML = e.detail.html;
- const scripts = body.querySelectorAll("script");
- scripts.forEach((oldScript) => {
- if (oldScript.hasAttribute("data-catchy-ignore")) return;
- const newScript = document.createElement("script");
- Array.from(oldScript.attributes).forEach((attr) => {
- newScript.setAttribute(attr.name, attr.value);
- });
- newScript.textContent = oldScript.textContent;
- oldScript.parentNode.replaceChild(newScript, oldScript);
- });
- if (window.Alpine && typeof window.Alpine.initTree === "function") {
- window.Alpine.initTree(body);
- }
- }
- });
- return backdrop;
+  backdrop.addEventListener("click", (e) => {
+  if (e.target === backdrop) closeModal();
+  });
+  document.addEventListener("keydown", handleEsc);
+  const openModal = () => {
+    backdrop.offsetHeight;
+    backdrop.classList.add("show");
+  };
+  backdrop.addEventListener("modal-open", openModal);
+  backdrop.addEventListener("catchy:modal-open", openModal);
+  backdrop.addEventListener("catchy-modal-open", openModal);
+  
+  backdrop.addEventListener("modal-close", closeModal);
+  backdrop.addEventListener("catchy:modal-close", closeModal);
+  backdrop.addEventListener("catchy-modal-close", closeModal);
+  
+  const loadModal = (e) => {
+    if (e.detail) {
+      if (e.detail.title) title.textContent = e.detail.title;
+      body.innerHTML = e.detail.html;
+      const scripts = body.querySelectorAll("script");
+      scripts.forEach((oldScript) => {
+        if (oldScript.hasAttribute("data-catchy-ignore")) return;
+        const newScript = document.createElement("script");
+        Array.from(oldScript.attributes).forEach((attr) => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        newScript.textContent = oldScript.textContent;
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+      });
+      if (window.Alpine && typeof window.Alpine.initTree === "function") {
+        window.Alpine.initTree(body);
+      }
+    }
+  };
+  backdrop.addEventListener("modal-load", loadModal);
+  backdrop.addEventListener("catchy:modal-load", loadModal);
+  backdrop.addEventListener("catchy-modal-load", loadModal);
+  return backdrop;
  }
  function resolveModal(triggerElement) {
  const modalAttr = triggerElement && typeof triggerElement.getAttribute === "function" ? triggerElement.getAttribute("data-catchy-modal") || triggerElement.getAttribute("catchy-modal") : null;

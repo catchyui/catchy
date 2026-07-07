@@ -269,38 +269,46 @@ export function createDynamicModal(id = 'catchy-dynamic-modal') {
  });
  document.addEventListener('keydown', handleEsc);
  
- // Register event listeners to show/hide/load
- backdrop.addEventListener('modal-open', () => {
- // Trigger layout reflow for CSS animation
- backdrop.offsetHeight;
- backdrop.classList.add('show');
- });
- 
- backdrop.addEventListener('modal-close', closeModal);
- 
- backdrop.addEventListener('modal-load', (e) => {
- if (e.detail) {
- if (e.detail.title) title.textContent = e.detail.title;
- body.innerHTML = e.detail.html;
- 
- // Re-evaluate script tags inside the modal body
- const scripts = body.querySelectorAll('script');
- scripts.forEach(oldScript => {
- if (oldScript.hasAttribute('data-catchy-ignore')) return;
- const newScript = document.createElement('script');
- Array.from(oldScript.attributes).forEach(attr => {
- newScript.setAttribute(attr.name, attr.value);
- });
- newScript.textContent = oldScript.textContent;
- oldScript.parentNode.replaceChild(newScript, oldScript);
- });
- 
- // Re-hydrate Alpine components
- if (window.Alpine && typeof window.Alpine.initTree === 'function') {
- window.Alpine.initTree(body);
- }
- }
- });
+ // Register event listeners to show/hide/load (supporting both prefixed and prefix-free event formats)
+ const openModal = () => {
+    // Trigger layout reflow for CSS animation
+    backdrop.offsetHeight;
+    backdrop.classList.add('show');
+  };
+  backdrop.addEventListener('modal-open', openModal);
+  backdrop.addEventListener('catchy:modal-open', openModal);
+  backdrop.addEventListener('catchy-modal-open', openModal);
+  
+  backdrop.addEventListener('modal-close', closeModal);
+  backdrop.addEventListener('catchy:modal-close', closeModal);
+  backdrop.addEventListener('catchy-modal-close', closeModal);
+  
+  const loadModal = (e) => {
+  if (e.detail) {
+  if (e.detail.title) title.textContent = e.detail.title;
+  body.innerHTML = e.detail.html;
+  
+  // Re-evaluate script tags inside the modal body
+  const scripts = body.querySelectorAll('script');
+  scripts.forEach(oldScript => {
+  if (oldScript.hasAttribute('data-catchy-ignore')) return;
+  const newScript = document.createElement('script');
+  Array.from(oldScript.attributes).forEach(attr => {
+  newScript.setAttribute(attr.name, attr.value);
+  });
+  newScript.textContent = oldScript.textContent;
+  oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+  
+  // Re-hydrate Alpine components
+  if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+  window.Alpine.initTree(body);
+  }
+  }
+  };
+  backdrop.addEventListener('modal-load', loadModal);
+  backdrop.addEventListener('catchy:modal-load', loadModal);
+  backdrop.addEventListener('catchy-modal-load', loadModal);
  
  return backdrop;
 }
