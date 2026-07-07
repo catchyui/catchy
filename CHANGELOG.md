@@ -5,6 +5,17 @@ All notable changes to `Laravel Catchy` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.4] - 2026-07-07
+
+### Added
+- Added custom events `catchy:prefetch-start` and `catchy:prefetch-end` to enable logging and integration of prefetch activity.
+- Created premium built-in confirmation modal support using `data-catchy-confirm-modal` and `data-catchy-confirm-button`.
+
+### Fixed
+- Fixed intermediate redirect responses clearing session flash messages prematurely, restoring forms and validation alerts fully.
+- Resolved styling issue for toggle switches and components by replacing deprecated/non-existent `indigo-650` classes with `indigo-600`.
+- Documented and showcased advanced Multipart file upload progress indicators.
+
 ## [1.5.3] - 2026-07-07
 
 ### Fixed

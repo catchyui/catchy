@@ -5,7 +5,7 @@
  */
 
 import { getCachedResponse, setCachedResponse } from './cache.js';
-import { decodeBase64Utf8, shouldIgnoreLink } from './utils.js';
+import { decodeBase64Utf8, shouldIgnoreLink, emit } from './utils.js';
 
 const activeRequests = new Map();
 let hoverTimeout = null;
@@ -49,6 +49,7 @@ async function processQueue(config, currentVersion) {
  */
 async function performPrefetch(url, config, currentVersion) {
  try {
+ emit('prefetch-start', { url });
  const headers = { 'X-Catchy-Request': 'true' };
  if (currentVersion) {
  headers['X-Catchy-Version'] = currentVersion;
@@ -61,10 +62,16 @@ async function performPrefetch(url, config, currentVersion) {
  return null;
  }
 
- if (!response.ok) return null;
+ if (!response.ok) {
+ emit('prefetch-end', { url, success: false });
+ return null;
+ }
 
  const contentType = response.headers.get('content-type');
- if (!contentType || !contentType.includes('text/html')) return null;
+ if (!contentType || !contentType.includes('text/html')) {
+ emit('prefetch-end', { url, success: false });
+ return null;
+ }
 
  const html = await response.text();
  const version = response.headers.get('X-Catchy-Version') || '';
@@ -81,8 +88,10 @@ async function performPrefetch(url, config, currentVersion) {
  };
 
  setCachedResponse(url, cacheEntry);
+ emit('prefetch-end', { url, success: true });
  return cacheEntry;
  } catch (e) {
+ emit('prefetch-end', { url, success: false });
  return null;
  } finally {
  activeRequests.delete(url);

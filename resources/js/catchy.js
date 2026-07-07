@@ -1,5 +1,5 @@
 /**
- * Hamzi/Catchy - Alpine.js SPA Plugin v1.5.3
+ * Hamzi/Catchy - Alpine.js SPA Plugin v1.5.4
  * (c) 2026 Hamzi
  * Released under the MIT License.
  */
@@ -1044,6 +1044,7 @@
  }
  const redirectUrl = response.headers.get("X-Catchy-Redirect");
  if (redirectUrl) {
+ processFlashHeader(response, trigger);
  handleRedirect(redirectUrl, trigger, config, Alpine, updateHistory);
  return;
  }
@@ -1060,7 +1061,8 @@
  const titleHeader = response.headers.get("X-Catchy-Title");
  title = titleHeader ? decodeBase64Utf8(titleHeader) : "";
  }
- const dataToRender = { html, version, title, head: headContent, finalUrl };
+ const flashHeader = response.headers.get("X-Catchy-Flash");
+  const dataToRender = { html, version, title, head: headContent, finalUrl, flash: flashHeader };
  if (isGet) {
  setCachedResponse(url, dataToRender);
  }
