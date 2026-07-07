@@ -1,5 +1,5 @@
 /**
- * Catchy — Shared Utilities Module
+ * Catchy  Shared Utilities Module
  *
  * Common helper functions used across all Catchy modules.
  */

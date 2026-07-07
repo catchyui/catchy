@@ -1,5 +1,5 @@
 /**
- * Catchy — Head Merge Module
+ * Catchy  Head Merge Module
  *
  * Merges incoming <head> metadata, styles, links, and scripts from SPA responses.
  */

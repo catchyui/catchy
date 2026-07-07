@@ -1,5 +1,5 @@
 /**
- * Catchy — Loading Bar Module
+ * Catchy  Loading Bar Module
  *
  * CSS-only top loading progress bar with smooth animation.
  */

@@ -1,5 +1,5 @@
 /**
- * Catchy — Lazy Loading Directive
+ * Catchy  Lazy Loading Directive
  *
  * Register the x-catchy-lazy Alpine.js directive.
  * Usage:

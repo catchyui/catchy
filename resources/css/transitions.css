@@ -1,0 +1,124 @@
+/* ============================================================
+ * Catchy - View Transitions CSS
+ * Smooth cross-fade transitions with proper overlap and easing.
+ * ============================================================ */
+
+/* Disable default full-page root transitions */
+:root {
+ view-transition-name: none;
+}
+
+/* Set explicit background-color on html and body to prevent white flash during transitions */
+html, body {
+ background-color: #f8fafc; /* bg-slate-50 */
+}
+@media (prefers-color-scheme: dark) {
+ html, body {
+  background-color: #0f172a; /* bg-slate-900 */
+ }
+}
+html.dark, html.dark body {
+ background-color: #0f172a;
+}
+
+/* --- "none" transition: instant swap, no animation --- */
+html[data-catchy-transition="none"]::view-transition-old(catchy-content),
+html[data-catchy-transition="none"]::view-transition-new(catchy-content) {
+ animation: none;
+}
+
+/* --- "fade" transition: smooth cross-dissolve --- */
+@keyframes catchy-fade-out {
+ from { opacity: 1; }
+ to { opacity: 0; }
+}
+@keyframes catchy-fade-in {
+ from { opacity: 0; }
+ to { opacity: 1; }
+}
+
+html[data-catchy-transition="fade"]::view-transition-old(catchy-content) {
+ animation: 0.15s cubic-bezier(0.4, 0, 1, 1) both catchy-fade-out;
+ z-index: 1;
+}
+html[data-catchy-transition="fade"]::view-transition-new(catchy-content) {
+ animation: 0.2s cubic-bezier(0, 0, 0.2, 1) both catchy-fade-in;
+ z-index: 2;
+}
+
+/* --- "slide" transition: subtle horizontal slide with fade --- */
+@keyframes catchy-slide-out {
+ from { opacity: 1; transform: translateX(0); }
+ to { opacity: 0; transform: translateX(-30px); }
+}
+@keyframes catchy-slide-in {
+ from { opacity: 0; transform: translateX(30px); }
+ to { opacity: 1; transform: translateX(0); }
+}
+
+html[data-catchy-transition="slide"]::view-transition-old(catchy-content) {
+ animation: 0.18s cubic-bezier(0.4, 0, 1, 1) both catchy-slide-out;
+ z-index: 1;
+}
+html[data-catchy-transition="slide"]::view-transition-new(catchy-content) {
+ animation: 0.22s cubic-bezier(0, 0, 0.2, 1) both catchy-slide-in;
+ z-index: 2;
+}
+
+/* --- "slide-up" transition: vertical entrance from below --- */
+@keyframes catchy-slide-up-out {
+ from { opacity: 1; transform: translateY(0); }
+ to { opacity: 0; transform: translateY(-20px); }
+}
+@keyframes catchy-slide-up-in {
+ from { opacity: 0; transform: translateY(20px); }
+ to { opacity: 1; transform: translateY(0); }
+}
+
+html[data-catchy-transition="slide-up"]::view-transition-old(catchy-content) {
+ animation: 0.15s cubic-bezier(0.4, 0, 1, 1) both catchy-fade-out;
+ z-index: 1;
+}
+html[data-catchy-transition="slide-up"]::view-transition-new(catchy-content) {
+ animation: 0.25s cubic-bezier(0, 0, 0.2, 1) both catchy-slide-up-in;
+ z-index: 2;
+}
+
+/* --- "scale" transition: subtle scale with fade --- */
+@keyframes catchy-scale-out {
+ from { opacity: 1; transform: scale(1); }
+ to { opacity: 0; transform: scale(0.97); }
+}
+@keyframes catchy-scale-in {
+ from { opacity: 0; transform: scale(1.02); }
+ to { opacity: 1; transform: scale(1); }
+}
+
+html[data-catchy-transition="scale"]::view-transition-old(catchy-content) {
+ animation: 0.15s cubic-bezier(0.4, 0, 1, 1) both catchy-scale-out;
+ z-index: 1;
+}
+html[data-catchy-transition="scale"]::view-transition-new(catchy-content) {
+ animation: 0.22s cubic-bezier(0, 0, 0.2, 1) both catchy-scale-in;
+ z-index: 2;
+}
+
+/* Prevent warping, aspect ratio distortion, and text stretching */
+::view-transition-old(catchy-content),
+::view-transition-new(catchy-content) {
+ mix-blend-mode: normal;
+ height: 100%;
+ width: 100%;
+ object-fit: none;
+ object-position: top right; /* Align start of RTL layout */
+ overflow: hidden;
+ background-color: #f8fafc;
+}
+html.dark ::view-transition-old(catchy-content),
+html.dark ::view-transition-new(catchy-content) {
+ background-color: #0f172a;
+}
+html[dir="ltr"] ::view-transition-old(catchy-content),
+html[dir="ltr"] ::view-transition-new(catchy-content) {
+ object-position: top left;
+}

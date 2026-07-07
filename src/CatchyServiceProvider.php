@@ -92,6 +92,16 @@ class CatchyServiceProvider extends ServiceProvider
 
         // Register x-catchy-scripts component alias
         Blade::component('catchy::scripts', 'catchy-scripts');
+
+        // Register new DX Blade components
+        Blade::component('catchy::components.link', 'catchy-link');
+        Blade::component('catchy::components.form', 'catchy-form');
+        Blade::component('catchy::components.toasts', 'catchy-toasts');
+        Blade::component('catchy::components.modal', 'catchy-modal');
+
+        // Register SVG Blade components
+        Blade::component('catchy::svg.close', 'catchy-svg-close');
+        Blade::component('catchy::svg.spinner', 'catchy-svg-spinner');
     }
 
     /**

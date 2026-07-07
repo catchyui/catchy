@@ -125,6 +125,9 @@ class InstallCommand extends Command
  </div>
 
  <!-- Injects Catchy SPA scripts & Alpine configuration -->
+ <!-- Drop-in Toast Notifications (auto-listens to flash events) -->
+ <x-catchy-toasts />
+
  @catchyScripts
 
 </body>

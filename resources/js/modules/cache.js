@@ -1,5 +1,5 @@
 /**
- * Catchy — Cache Module
+ * Catchy  Cache Module
  *
  * In-memory response cache with TTL-based invalidation.
  */

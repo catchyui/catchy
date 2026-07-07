@@ -1,5 +1,5 @@
 /**
- * Catchy — Connectivity Module
+ * Catchy  Connectivity Module
  *
  * Online/offline monitoring with toast notifications.
  */

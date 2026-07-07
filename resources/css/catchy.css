@@ -1,0 +1,8 @@
+/* ============================================================
+ * Catchy - Main Stylesheet
+ *
+ * Imports all Catchy CSS modules.
+ * ============================================================ */
+
+@import './transitions.css';
+@import './modal.css';

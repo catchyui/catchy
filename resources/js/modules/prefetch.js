@@ -1,5 +1,5 @@
 /**
- * Catchy — Prefetch Module
+ * Catchy  Prefetch Module
  *
  * Hover and viewport-based prefetching of same-origin links.
  */

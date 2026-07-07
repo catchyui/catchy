@@ -1,5 +1,5 @@
 /**
- * Catchy — Events Module
+ * Catchy  Events Module
  *
  * Global event listeners for click, submit, popstate, and confirmation dialogs.
  */
@@ -230,11 +230,9 @@ export function createDynamicModal(id = 'catchy-dynamic-modal') {
  const closeBtn = document.createElement('button');
  closeBtn.className = 'catchy-modal-close';
  closeBtn.setAttribute('aria-label', 'Close modal');
- closeBtn.innerHTML = `
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" style="width: 24px; height: 24px;">
- <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
- </svg>
- `;
+ closeBtn.innerHTML = (window.CatchyConfig && window.CatchyConfig.svg && window.CatchyConfig.svg.close)
+    ? window.CatchyConfig.svg.close
+    : '';
  
  header.appendChild(title);
  header.appendChild(closeBtn);

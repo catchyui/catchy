@@ -1,5 +1,5 @@
 /**
- * Catchy — Navigation Module
+ * Catchy  Navigation Module
  *
  * Core visit() function for SPA page transitions.
  * Fully refactored to support SWR caching, targeted element reloads,
@@ -205,7 +205,7 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
 
  const redirectUrl = response.headers.get('X-Catchy-Redirect');
  if (redirectUrl) {
- processFlashHeader(response, trigger);
+ 
  handleRedirect(redirectUrl, trigger, config, Alpine, updateHistory);
  return;
  }
@@ -221,13 +221,13 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
  version = response.headers.get('X-Catchy-Version') || '';
  headContent = response.headers.get('X-Catchy-Head') || null;
 
- processFlashHeader(response, trigger);
+ 
 
  const titleHeader = response.headers.get('X-Catchy-Title');
  title = titleHeader ? decodeBase64Utf8(titleHeader) : '';
  }
 
- const flashHeader = response.headers.get('X-Catchy-Flash');
+ const flashHeader = response ? response.headers.get('X-Catchy-Flash') : null;
   const dataToRender = { html, version, title, head: headContent, finalUrl, flash: flashHeader };
 
  if (isGet) {
@@ -308,7 +308,10 @@ function renderResponseData(data, targetId, config, Alpine, trigger, isRevalidat
  if (modal) {
  emit('modal-load', { html: incomingContent.innerHTML, title: doc.title || '' }, modal);
  emit('modal-open', {}, modal);
- return;
+      if (data.flash) {
+        processFlashHeader({ headers: { get: (name) => name.toLowerCase() === 'x-catchy-flash' ? data.flash : null } }, trigger);
+      }
+      return;
  }
  }
 
@@ -319,7 +322,10 @@ function renderResponseData(data, targetId, config, Alpine, trigger, isRevalidat
  if (offcanvas) {
  emit('offcanvas-load', { html: incomingContent.innerHTML, title: doc.title || '' }, offcanvas);
  emit('offcanvas-open', {}, offcanvas);
- return;
+      if (data.flash) {
+        processFlashHeader({ headers: { get: (name) => name.toLowerCase() === 'x-catchy-flash' ? data.flash : null } }, trigger);
+      }
+      return;
  }
  }
 
@@ -442,11 +448,23 @@ function renderResponseData(data, targetId, config, Alpine, trigger, isRevalidat
  }
  }
  
- const reloadedOob = document.getElementById(id) || activeOob;
- executeScriptsInContainer(reloadedOob);
- });
- };
-
+  const reloadedOob = document.getElementById(id) || activeOob;
+  executeScriptsInContainer(reloadedOob);
+  });
+  if (data.flash) {
+    let activeTrigger = null;
+    if (trigger && trigger.id) {
+      activeTrigger = document.getElementById(trigger.id);
+    }
+    if (!activeTrigger && trigger && trigger.tagName === 'FORM' && trigger.getAttribute('action')) {
+      activeTrigger = document.querySelector(`form[action="${trigger.getAttribute('action')}"]`);
+    }
+    if (!activeTrigger) {
+      activeTrigger = document.querySelector('form') || document.body;
+    }
+    processFlashHeader({ headers: { get: (name) => name.toLowerCase() === 'x-catchy-flash' ? data.flash : null } }, activeTrigger);
+  }
+};
  if (transitionType && transitionType !== 'none' && document.startViewTransition) {
  document.documentElement.setAttribute('data-catchy-transition', transitionType);
  const transition = document.startViewTransition(() => performDomUpdates());
@@ -551,13 +569,22 @@ function handleFetchError(response, trigger) {
  * Process base64 encoded flash headers.
  */
 function processFlashHeader(response, trigger) {
- const flashHeader = response.headers.get('X-Catchy-Flash');
+ const flashHeader = response ? response.headers.get('X-Catchy-Flash') : null;
  if (!flashHeader) return;
 
  try {
  const flashJson = decodeBase64Utf8(flashHeader);
  const flash = JSON.parse(flashJson);
- emit('flash', flash);
+ // Emit raw flash payload for advanced consumers
+ emit('flash-raw', flash);
+
+ // Emit individual typed flash events (compatible with x-catchy-toasts)
+ const flashTypes = ['success', 'error', 'warning', 'info', 'status'];
+ for (const type of flashTypes) {
+  if (flash[type]) {
+   emit('flash', { message: flash[type], type });
+  }
+ }
 
  if (flash.validation_errors) {
  emit('validation-errors', flash.validation_errors);
@@ -578,7 +605,9 @@ function setupSubmitSpinner(trigger) {
  submitBtn.dataset.originalHtml = submitBtn.innerHTML;
  submitBtn.disabled = true;
  submitBtn.classList.add('pointer-events-none');
- const spinnerHtml = `<svg class="animate-spin -ms-1 me-2 h-4 w-4 text-current inline-block align-text-bottom" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="vertical-align: middle;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> `;
+ const spinnerHtml = (window.CatchyConfig && window.CatchyConfig.svg && window.CatchyConfig.svg.spinner)
+  ? window.CatchyConfig.svg.spinner
+  : '';
  submitBtn.innerHTML = spinnerHtml + submitBtn.innerHTML;
  return submitBtn;
  }
@@ -671,11 +700,11 @@ function showErrorModal(htmlContent) {
   title.style.fontFamily = 'system-ui, -apple-system, sans-serif';
 
   const closeBtn = document.createElement('button');
-  closeBtn.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>Close
-  `;
+  const closeIcon = (window.CatchyConfig && window.CatchyConfig.svg && window.CatchyConfig.svg.close)
+    ? window.CatchyConfig.svg.close
+    : '';
+  const finalIcon = closeIcon ? closeIcon.replace('class="', 'style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px;" class="') : '';
+  closeBtn.innerHTML = `${finalIcon}Close`;
   closeBtn.style.background = '#ef4444';
   closeBtn.style.color = 'white';
   closeBtn.style.border = 'none';

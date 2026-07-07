@@ -32,6 +32,7 @@ abstract class BrowserTestCase extends OrchestraDuskTestCase
             )
         );
     }
+
     /**
      * Get package providers.
      */

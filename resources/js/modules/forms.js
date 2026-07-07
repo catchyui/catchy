@@ -1,5 +1,5 @@
 /**
- * Catchy — Forms Module
+ * Catchy  Forms Module
  *
  * XHR request wrapper with upload progress tracking.
  */

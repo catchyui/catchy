@@ -1,5 +1,5 @@
 /**
- * Catchy — Sync Directive Module
+ * Catchy  Sync Directive Module
  *
  * x-catchy-sync Alpine.js directive for real-time form/input syncing.
  */

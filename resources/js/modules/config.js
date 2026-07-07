@@ -1,5 +1,5 @@
 /**
- * Catchy — Configuration Module
+ * Catchy  Configuration Module
  *
  * Resolves and normalizes configuration from window.CatchyConfig.
  */

@@ -31,7 +31,7 @@ async function build() {
 
  const stats = fs.statSync(outFile);
  const sizeKB = (stats.size / 1024).toFixed(1);
- console.log(`Catchy: Built → ${outFile} (${sizeKB} KB${isMinify ? ', minified' : ''})`);
+ console.log(`Catchy: Built  ${outFile} (${sizeKB} KB${isMinify ? ', minified' : ''})`);
  }
 }
 

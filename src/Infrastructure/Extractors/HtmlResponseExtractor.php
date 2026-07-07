@@ -179,7 +179,7 @@ class HtmlResponseExtractor implements ResponseExtractorInterface
             if ($child->nodeName === 'meta') {
                 $charset = $child->getAttribute('charset');
                 $name = $child->getAttribute('name');
-                if ($charset !== '' || $name === 'viewport' || $name === 'csrf-token') {
+                if ($charset !== '' || $name === 'viewport') {
                     continue;
                 }
             }

@@ -11,6 +11,7 @@ use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
 use Hamzi\Catchy\Http\Middleware\CatchyMiddleware;
 use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
 use Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository;
+use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
 
@@ -206,7 +207,7 @@ class ServiceProviderTest extends TestCase
     public function test_catchy_directive_resolves_config_container_id(): void
     {
         config(['catchy.container_id' => 'custom-app-id']);
-        
+
         $html = Blade::render('@catchy');
         $this->assertEquals('<div id="custom-app-id">', $html);
     }
@@ -217,7 +218,7 @@ class ServiceProviderTest extends TestCase
     public function test_catchy_scripts_blade_component_resolves(): void
     {
         $html = Blade::render('<x-catchy-scripts />');
-        
+
         $this->assertStringContainsString('window.CatchyConfig =', $html);
         $this->assertStringContainsString('CatchyPlugin', $html);
     }
@@ -229,22 +230,54 @@ class ServiceProviderTest extends TestCase
     {
         // Mock app and kernel to test registerMiddleware logic with config value false
         $this->app['config']->set('catchy.middleware_auto_register', false);
-        
+
         // Let's create service provider instance and invoke boot
         $provider = new CatchyServiceProvider($this->app);
-        
+
         // We will mock Kernel
-        $kernel = $this->getMockBuilder(\Illuminate\Foundation\Http\Kernel::class)
+        $kernel = $this->getMockBuilder(Kernel::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['appendMiddlewareToGroup'])
             ->getMock();
         $kernel->expects($this->never())->method('appendMiddlewareToGroup');
-        
+
         $this->app->instance(\Illuminate\Contracts\Http\Kernel::class, $kernel);
-        
+
         $reflector = new \ReflectionClass(CatchyServiceProvider::class);
         $method = $reflector->getMethod('registerMiddleware');
         $method->setAccessible(true);
         $method->invoke($provider);
+    }
+
+    /**
+     * Test that the Blade components compile successfully.
+     */
+    public function test_blade_components_render_correctly(): void
+    {
+        // 1. Test catchy-link component
+        $htmlLink = Blade::render('<x-catchy-link href="/test-path" active="active-cls" inactive="inactive-cls" transition="slide" prefetch="hover" confirm="Are you sure?">Click</x-catchy-link>');
+        $this->assertStringContainsString('href="/test-path"', $htmlLink);
+        $this->assertStringContainsString('inactive-cls', $htmlLink);
+        $this->assertStringContainsString('data-catchy-transition="slide"', $htmlLink);
+        $this->assertStringContainsString('data-catchy-prefetch="hover"', $htmlLink);
+        $this->assertStringContainsString('data-catchy-confirm="Are you sure?"', $htmlLink);
+
+        // 2. Test catchy-form component
+        $htmlForm = Blade::render('<x-catchy-form action="/submit" method="PUT" confirm-modal="#my-modal">Form Body</x-catchy-form>');
+        $this->assertStringContainsString('action="/submit"', $htmlForm);
+        $this->assertStringContainsString('method="POST"', $htmlForm);
+        $this->assertStringContainsString('name="_method"', $htmlForm);
+        $this->assertStringContainsString('value="PUT"', $htmlForm);
+        $this->assertStringContainsString('data-catchy-confirm-modal="my-modal"', $htmlForm);
+        $this->assertStringContainsString('name="_token"', $htmlForm);
+
+        // 3. Test catchy-toasts component
+        $htmlToasts = Blade::render('<x-catchy-toasts />');
+        $this->assertStringContainsString('x-on:catchy-flash.window', $htmlToasts);
+
+        // 4. Test catchy-modal component
+        $htmlModal = Blade::render('<x-catchy-modal id="my-modal" title="Test Modal">Content</x-catchy-modal>');
+        $this->assertStringContainsString('id="my-modal"', $htmlModal);
+        $this->assertStringContainsString('Test Modal', $htmlModal);
     }
 }
