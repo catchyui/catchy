@@ -1,7 +1,7 @@
 /**
  * CatchyUI/Catchy - Alpine.js SPA Plugin
  *
- * HTML-over-the-wire navigation utilizing @alpinejs/morph,
+ * Class-based HTML-over-the-wire navigation utilizing @alpinejs/morph,
  * built-in viewport loaders, intelligent prefetching, and asset version protection.
  */
 import { resolveConfig } from './modules/config.js';
@@ -16,89 +16,116 @@ import { initEventListeners } from './modules/events.js';
 import { initConnectivity } from './modules/connectivity.js';
 
 /**
- * The Catchy Alpine.js Plugin definition.
+ * Clean, Object-Oriented Engine class orchestrating Catchy SPA features.
+ */
+export class CatchyUIEngine {
+  /**
+   * @param {Object} Alpine
+   * @param {Object} config
+   */
+  constructor(Alpine, config) {
+    this.Alpine = Alpine;
+    this.config = config;
+    this.cache = getCache();
+  }
+
+  /**
+   * Bootstrap and initialize all engine subsystems.
+   */
+  init() {
+    // 1. Initialize CSS loading bar progress element
+    initLoader(this.config);
+
+    // 2. Register Alpine x-catchy directives
+    registerLazyDirective(this.Alpine, this.config);
+    registerSyncDirective(this.Alpine, this.config);
+
+    // 3. Setup user interaction event listeners (clicks, submits)
+    initEventListeners(this.config, this.visit.bind(this), this.submitForm.bind(this));
+
+    // 4. Register hover/viewport prefetching logic
+    initHoverPrefetch(this.config, this.prefetch.bind(this));
+    initViewportPrefetch(this.config, this.prefetch.bind(this));
+
+    // 5. Monitor browser online/offline status
+    initConnectivity();
+
+    // 6. Bind public API to Alpine namespace
+    this.Alpine.catchy = {
+      visit: this.visit.bind(this),
+      prefetch: this.prefetch.bind(this),
+      cache: this.cache,
+      startLoading,
+      stopLoading
+    };
+  }
+
+  /**
+   * Trigger SPA navigation visit to a URL.
+   */
+  visit(url, options = {}, updateHistory = true) {
+    return visit(url, options, updateHistory, this.config, this.Alpine);
+  }
+
+  /**
+   * Prefetch a URL HTML content into SWR cache.
+   */
+  prefetch(url) {
+    return prefetch(url, this.config, getCurrentVersion());
+  }
+
+  /**
+   * Submit a form programmatically via Catchy SPA visitor.
+   */
+  submitForm(form) {
+    return submitForm(form, this.visit.bind(this));
+  }
+}
+
+/**
+ * The Catchy Alpine.js Plugin entry function.
  *
  * @param {Object} Alpine
  */
 function CatchyPlugin(Alpine) {
- "use strict";
+  "use strict";
 
- // Prevent duplicate registrations
- if (Alpine.catchy) {
- return;
- }
+  // Prevent duplicate registrations
+  if (Alpine.catchy) {
+    return;
+  }
 
- // Defer morph plugin warning check
- setTimeout(() => {
- if (!Alpine.morph) {
- console.error(
- 'Catchy: The Alpine.js Morph plugin is required but not loaded.\n' +
- 'Please ensure `@alpinejs/morph` is imported and registered:\n' +
- 'https://alpinejs.dev/plugins/morph'
- );
- }
- }, 50);
+  // Defer morph plugin warning check
+  setTimeout(() => {
+    if (!Alpine.morph) {
+      console.error(
+        'Catchy: The Alpine.js Morph plugin is required but not loaded.\n' +
+        'Please ensure `@alpinejs/morph` is imported and registered:\n' +
+        'https://alpinejs.dev/plugins/morph'
+      );
+    }
+  }, 50);
 
- // Resolve configuration
- const config = resolveConfig();
+  // Resolve current configuration
+  const config = resolveConfig();
 
- // Initialize loading bar
- initLoader(config);
-
- // Create bound visit function with config and Alpine injected
- const boundVisit = (url, options = {}, updateHistory = true) => {
- return visit(url, options, updateHistory, config, Alpine);
- };
-
- // Create bound prefetch function
- const boundPrefetch = (url) => {
- return prefetch(url, config, getCurrentVersion());
- };
-
- // Create bound submitForm function
- const boundSubmitForm = (form) => {
- return submitForm(form, boundVisit);
- };
-
- // Register x-catchy-lazy directive
- registerLazyDirective(Alpine, config);
-
- // Register x-catchy-sync directive
- registerSyncDirective(Alpine, config);
-
- // Initialize event listeners
- initEventListeners(config, boundVisit, boundSubmitForm);
-
- // Initialize prefetching
- initHoverPrefetch(config, boundPrefetch);
- initViewportPrefetch(config, boundPrefetch);
-
- // Initialize connectivity monitoring
- initConnectivity();
-
- // Expose public API
- Alpine.catchy = {
- visit: boundVisit,
- prefetch: boundPrefetch,
- cache: getCache(),
- startLoading,
- stopLoading
- };
+  // Instantiate and boot the OOP SPA engine
+  const engine = new CatchyUIEngine(Alpine, config);
+  engine.init();
 }
 
 // Auto-register when loaded via <script> tag (non-module)
 if (typeof window !== 'undefined') {
- window.CatchyPlugin = CatchyPlugin;
- if (window.Alpine) {
- window.Alpine.plugin(CatchyPlugin);
- } else {
- document.addEventListener('alpine:init', () => {
- if (window.Alpine) window.Alpine.plugin(CatchyPlugin);
- });
- }
- // Dispatch loaded event for the shim/interceptor
- document.dispatchEvent(new CustomEvent('catchy:loaded'));
+  window.CatchyPlugin = CatchyPlugin;
+  if (window.Alpine) {
+    window.Alpine.plugin(CatchyPlugin);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      if (window.Alpine) window.Alpine.plugin(CatchyPlugin);
+    });
+  }
+  // Dispatch loaded event for shims
+  document.dispatchEvent(new CustomEvent('catchy:loaded'));
 }
 
 export default CatchyPlugin;
-
