@@ -86,6 +86,7 @@
         'loadingBarHeight' => config('catchy.loading_bar.height', '3px'),
         'loadingBarColor' => config('catchy.loading_bar.color', 'linear-gradient(to right, #4f46e5, #06b6d4)'),
         'viewTransitions' => config('catchy.view_transitions', 'fade'),
+        'version' => app(\Catchyui\Catchy\Domain\Contracts\VersionRepositoryInterface::class)->getVersion(),
         'debug' => (bool) config('app.debug', false),
         'svg' => [
             'spinner' => view('catchy::svg.spinner', ['attributes' => new \Illuminate\View\ComponentAttributeBag(['class' => 'animate-spin -ms-1 me-2 h-4 w-4 text-current inline-block align-text-bottom', 'style' => 'vertical-align: middle;'])])->render(),

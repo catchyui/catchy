@@ -99,6 +99,7 @@ class ServiceProviderTest extends TestCase
 
         // Verify that the rendered HTML contains config settings, and inline plugin code
         $this->assertStringContainsString('window.CatchyConfig =', $html);
+        $this->assertStringContainsString('"version":', $html);
         $this->assertStringContainsString('CatchyUI/Catchy - Alpine.js SPA Plugin', $html);
         $this->assertStringContainsString('CatchyPlugin', $html);
         $this->assertStringContainsString('window.history.pushState', $html);

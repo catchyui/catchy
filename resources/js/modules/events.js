@@ -142,37 +142,39 @@ export function initEventListeners(config, visitFn, submitFormFn) {
 
  // Global Event: Form submit interceptor
  document.addEventListener('submit', (event) => {
- const form = event.target && typeof event.target.closest === 'function' ? event.target.closest('form') : null;
- if (!form || shouldIgnoreForm(form, config.ignoreAttribute)) return;
+  const form = event.target && typeof event.target.closest === 'function' ? event.target.closest('form') : null;
+  if (!form || shouldIgnoreForm(form, config.ignoreAttribute)) return;
 
- // Handle Confirm via Custom Modal
- const confirmModalId = form.getAttribute('data-catchy-confirm-modal');
- if (confirmModalId && (!eventsInstance.pendingAction || eventsInstance.pendingAction.trigger !== form)) {
- event.preventDefault();
- event.stopImmediatePropagation();
+  const submitter = event.submitter;
 
- eventsInstance.pendingAction = {
- trigger: form,
- modalId: confirmModalId,
- execute: () => { submitFormFn(form); }
- };
+  // Handle Confirm via Custom Modal
+  const confirmModalId = form.getAttribute('data-catchy-confirm-modal');
+  if (confirmModalId && (!eventsInstance.pendingAction || eventsInstance.pendingAction.trigger !== form)) {
+  event.preventDefault();
+  event.stopImmediatePropagation();
 
- const modal = document.getElementById(confirmModalId);
- if (modal) emit('modal-open', {}, modal);
- return;
- }
+  eventsInstance.pendingAction = {
+  trigger: form,
+  modalId: confirmModalId,
+  execute: () => { submitFormFn(form, submitter); }
+  };
 
- // Handle Declarative Confirmation
- const confirmMsg = form.getAttribute('data-catchy-confirm');
- if (confirmMsg && !confirm(confirmMsg)) {
- event.preventDefault();
- event.stopImmediatePropagation();
- return;
- }
+  const modal = document.getElementById(confirmModalId);
+  if (modal) emit('modal-open', {}, modal);
+  return;
+  }
 
- event.preventDefault();
- submitFormFn(form);
- });
+  // Handle Declarative Confirmation
+  const confirmMsg = form.getAttribute('data-catchy-confirm');
+  if (confirmMsg && !confirm(confirmMsg)) {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  return;
+  }
+
+  event.preventDefault();
+  submitFormFn(form, submitter);
+  });
 
  // Global Event: Popstate handling
  window.addEventListener('popstate', (event) => {

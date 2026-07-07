@@ -7,7 +7,7 @@
 import { resolveConfig } from './modules/config.js';
 import { initLoader, startLoading, stopLoading } from './modules/loader.js';
 import { getCache } from './modules/cache.js';
-import { visit, getCurrentVersion } from './modules/navigation.js';
+import { visit, getCurrentVersion, setCurrentVersion } from './modules/navigation.js';
 import { prefetch, initHoverPrefetch, initViewportPrefetch } from './modules/prefetch.js';
 import { submitForm } from './modules/forms.js';
 import { registerLazyDirective } from './modules/lazy.js';
@@ -77,8 +77,8 @@ export class CatchyUIEngine {
   /**
    * Submit a form programmatically via Catchy SPA visitor.
    */
-  submitForm(form) {
-    return submitForm(form, this.visit.bind(this));
+  submitForm(form, submitter = null) {
+    return submitForm(form, this.visit.bind(this), submitter);
   }
 }
 
@@ -108,6 +108,10 @@ function CatchyPlugin(Alpine) {
 
   // Resolve current configuration
   const config = resolveConfig();
+
+  if (config.version) {
+    setCurrentVersion(config.version);
+  }
 
   // Instantiate and boot the OOP SPA engine
   const engine = new CatchyUIEngine(Alpine, config);

@@ -173,10 +173,18 @@ class CatchyServiceProvider extends ServiceProvider
 
             if ($shouldCopy) {
                 $dir = dirname($targetPath);
-                if (! is_dir($dir)) {
-                    mkdir($dir, 0755, true);
+                try {
+                    if (! is_dir($dir)) {
+                        @mkdir($dir, 0755, true);
+                    }
+                    if (is_dir($dir) && (! file_exists($targetPath) || is_writable($targetPath) || is_writable($dir))) {
+                        @copy($sourcePath, $targetPath);
+                    }
+                } catch (\Throwable $e) {
+                    if ($this->app->bound('log')) {
+                        $this->app->make('log')->warning('Catchy: Unable to auto-publish assets due to permissions: '.$e->getMessage());
+                    }
                 }
-                copy($sourcePath, $targetPath);
             }
         }
     }

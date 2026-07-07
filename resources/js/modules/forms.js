@@ -87,14 +87,21 @@ export class CatchyForms {
    *
    * @param {HTMLFormElement} form
    * @param {Function} visitFn - Reference to the visit() function
+   * @param {HTMLElement|null} submitter - The button that triggered the submit event
    */
-  submit(form, visitFn) {
-    const action = form.getAttribute('action') || window.location.href;
+  submit(form, visitFn, submitter = null) {
+    let action = form.getAttribute('action') || window.location.href;
+    if (submitter && submitter.hasAttribute('formaction')) {
+      action = submitter.getAttribute('formaction');
+    }
     const method = (form.getAttribute('method') || 'GET').toUpperCase();
     const url = new URL(action, window.location.href);
 
     if (method === 'GET') {
       const formData = new FormData(form);
+      if (submitter && submitter.name) {
+        formData.append(submitter.name, submitter.value);
+      }
       const params = new URLSearchParams(formData);
 
       for (const [key, value] of params.entries()) {
@@ -104,6 +111,9 @@ export class CatchyForms {
       visitFn(url.toString(), { trigger: form });
     } else {
       const formData = new FormData(form);
+      if (submitter && submitter.name) {
+        formData.append(submitter.name, submitter.value);
+      }
       if (!formData.has('_method') && method !== 'POST') {
         formData.append('_method', method);
       }
@@ -129,4 +139,4 @@ export const formsInstance = new CatchyForms();
 
 // Maintain functional wrapper exports for backward compatibility & easy usage
 export const xhrRequest = (url, options) => formsInstance.request(url, options);
-export const submitForm = (form, visitFn) => formsInstance.submit(form, visitFn);
+export const submitForm = (form, visitFn, submitter) => formsInstance.submit(form, visitFn, submitter);

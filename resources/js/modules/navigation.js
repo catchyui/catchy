@@ -244,6 +244,19 @@ async function fetchFreshContent(url, options, targetId, config, Alpine, trigger
  routerInstance.activeAbortController = null;
  }
 
+ if (signal && signal.aborted) return;
+ if (isRevalidation) {
+   try {
+     const currentUrlObj = new URL(window.location.href);
+     const targetUrlObj = new URL(finalUrl, window.location.href);
+     if (currentUrlObj.pathname !== targetUrlObj.pathname || currentUrlObj.search !== targetUrlObj.search) {
+       return;
+     }
+   } catch (e) {
+     return;
+   }
+ }
+
  // Render fresh updates
  renderResponseData(dataToRender, targetId, config, Alpine, trigger, isRevalidation);
 

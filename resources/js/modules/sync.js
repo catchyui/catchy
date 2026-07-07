@@ -19,7 +19,7 @@ export class CatchySync {
 
       let debounceMs = 0;
       const debounceIndex = modifiers.indexOf('debounce');
-      if (debounceIndex !== -1 && modifiers[debounceIndex + 1]) {
+      if (debounceIndex !== -1) {
         const timeStr = modifiers[debounceIndex + 1];
         debounceMs = parseInt(timeStr) || 300;
       }

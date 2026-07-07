@@ -23,6 +23,7 @@ export class CatchyConfig {
       loadingBarHeight: c.loadingBarHeight || '3px',
       loadingBarColor: c.loadingBarColor || 'linear-gradient(to right, #4f46e5, #06b6d4)',
       viewTransitions: c.viewTransitions || 'fade',
+      version: c.version || '',
     };
   }
 }
