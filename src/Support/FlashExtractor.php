@@ -35,7 +35,7 @@ final class FlashExtractor
 
         if ($session->has('errors')) {
             $errorBag = $session->get('errors');
-            if (method_exists($errorBag, 'getBags')) {
+            if (is_object($errorBag) && method_exists($errorBag, 'getBags')) {
                 $errors = [];
                 foreach ($errorBag->getBags() as $bag) {
                     foreach ($bag->toArray() as $field => $messages) {
@@ -43,10 +43,12 @@ final class FlashExtractor
                     }
                 }
                 $flash['validation_errors'] = $errors;
-            } elseif (method_exists($errorBag, 'getBag')) {
+            } elseif (is_object($errorBag) && method_exists($errorBag, 'getBag')) {
                 $flash['validation_errors'] = $errorBag->getBag('default')->toArray();
-            } elseif (method_exists($errorBag, 'toArray')) {
+            } elseif (is_object($errorBag) && method_exists($errorBag, 'toArray')) {
                 $flash['validation_errors'] = $errorBag->toArray();
+            } elseif (is_array($errorBag)) {
+                $flash['validation_errors'] = $errorBag;
             }
 
             if ($clear) {

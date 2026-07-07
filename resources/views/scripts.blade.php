@@ -8,8 +8,8 @@
     }
 
     // Load transition and modal CSS styles dynamically from their respective files
-    $transitionsCssPath = __DIR__ . '/../css/transitions.css';
-    $modalCssPath = __DIR__ . '/../css/modal.css';
+    $transitionsCssPath = \Catchyui\Catchy\CatchyServiceProvider::getTransitionsCssPath();
+    $modalCssPath = \Catchyui\Catchy\CatchyServiceProvider::getModalCssPath();
 
     $transitionsCss = file_exists($transitionsCssPath) ? (string) file_get_contents($transitionsCssPath) : '';
     $modalCss = file_exists($modalCssPath) ? (string) file_get_contents($modalCssPath) : '';

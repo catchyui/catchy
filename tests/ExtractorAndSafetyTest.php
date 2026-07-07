@@ -256,4 +256,33 @@ class ExtractorAndSafetyTest extends TestCase
 
         $this->assertEmpty(FlashExtractor::extract($request));
     }
+
+    /**
+     * Test FlashExtractor handles raw array errors correctly.
+     */
+    public function test_flash_extractor_handles_raw_array_errors(): void
+    {
+        $session = $this->createStub(Store::class);
+        $session->method('has')->willReturnMap([
+            ['success', false],
+            ['error', false],
+            ['warning', false],
+            ['info', false],
+            ['status', false],
+            ['errors', true],
+        ]);
+        $session->method('get')->with('errors')->willReturn([
+            'email' => ['Invalid email format'],
+        ]);
+
+        $request = new Request;
+        $request->setLaravelSession($session);
+
+        $flash = FlashExtractor::extract($request, false);
+
+        $this->assertArrayHasKey('validation_errors', $flash);
+        $this->assertEquals([
+            'email' => ['Invalid email format'],
+        ], $flash['validation_errors']);
+    }
 }

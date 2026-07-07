@@ -113,6 +113,22 @@ class CatchyServiceProvider extends ServiceProvider
     }
 
     /**
+     * Get the absolute path to the package's transition CSS asset.
+     */
+    public static function getTransitionsCssPath(): string
+    {
+        return __DIR__.'/../resources/css/transitions.css';
+    }
+
+    /**
+     * Get the absolute path to the package's modal CSS asset.
+     */
+    public static function getModalCssPath(): string
+    {
+        return __DIR__.'/../resources/css/modal.css';
+    }
+
+    /**
      * Register console publishing tasks.
      */
     protected function registerPublishing(): void

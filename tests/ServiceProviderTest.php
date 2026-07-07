@@ -280,4 +280,41 @@ class ServiceProviderTest extends TestCase
         $this->assertStringContainsString('id="my-modal"', $htmlModal);
         $this->assertStringContainsString('Test Modal', $htmlModal);
     }
+
+    /**
+     * Test that when the scripts view is published, it can still locate and load the CSS files.
+     */
+    public function test_published_view_can_load_css(): void
+    {
+        $publishedDir = resource_path('views/vendor/catchy');
+        if (! is_dir($publishedDir)) {
+            mkdir($publishedDir, 0755, true);
+        }
+
+        $sourceFile = __DIR__.'/../resources/views/scripts.blade.php';
+        $targetFile = $publishedDir.'/scripts.blade.php';
+
+        copy($sourceFile, $targetFile);
+
+        try {
+            // Render the view to check if it contains the CSS content
+            $html = Blade::render('@catchyScripts');
+
+            // It should contain the content from transitions.css (e.g. 'catchy-content')
+            $this->assertStringContainsString('view-transition-name: catchy-content;', $html);
+            $this->assertStringContainsString('html[data-catchy-transition="fade"]', $html);
+        } finally {
+            if (file_exists($targetFile)) {
+                unlink($targetFile);
+            }
+            // Remove the parent directories if empty
+            if (is_dir($publishedDir)) {
+                rmdir($publishedDir);
+            }
+            $vendorDir = dirname($publishedDir);
+            if (is_dir($vendorDir) && count(scandir($vendorDir)) === 2) {
+                rmdir($vendorDir);
+            }
+        }
+    }
 }
