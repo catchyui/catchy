@@ -1,6 +1,6 @@
 /**
- * Hamzi/Catchy - Alpine.js SPA Plugin v1.5.4
- * (c) 2026 Hamzi
+ * CatchyUI/Catchy - Alpine.js SPA Plugin v1.5.4
+ * (c) 2026 CatchyUI
  * Released under the MIT License.
  */
 (()=>{function ct(){let t=window.CatchyConfig||{};return{containerId:t.containerId||"catchy-app",ignoreAttribute:t.ignoreAttribute||"data-catchy-ignore",prefetch:t.prefetch!==!1,prefetchDelay:t.prefetchDelay||75,cacheTTL:t.cacheTTL||3e4,swr:t.swr!==!1,loadingBar:t.loadingBar!==!1,loadingBarHeight:t.loadingBarHeight||"3px",loadingBarColor:t.loadingBarColor||"linear-gradient(to right, #4f46e5, #06b6d4)",viewTransitions:t.viewTransitions||"fade"}}var C=null,U=null,F=null,P=null,X=null;function rt(t){if(!t.loadingBar)return;let n=document.createElement("style");n.textContent=`

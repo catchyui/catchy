@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Console;
+namespace Catchyui\Catchy\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -27,19 +27,19 @@ class InstallCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Install and configure Hamzi/Catchy Laravel SPA package';
+    protected $description = 'Install and configure CatchyUI/Catchy Laravel SPA package';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        $this->info("\nInstalling Hamzi/Catchy - SPA Package");
+        $this->info("\nInstalling CatchyUI/Catchy - SPA Package");
 
         // 1. Publish Configuration
         $this->comment('Publishing Catchy configuration file...');
         $this->call('vendor:publish', [
-            '--provider' => 'Hamzi\Catchy\CatchyServiceProvider',
+            '--provider' => 'Catchyui\Catchy\CatchyServiceProvider',
             '--tag' => 'catchy-config',
             '--force' => true,
         ]);
@@ -47,7 +47,7 @@ class InstallCommand extends Command
         // 2. Publish Assets
         $this->comment('Publishing compiled JavaScript assets...');
         $this->call('vendor:publish', [
-            '--provider' => 'Hamzi\Catchy\CatchyServiceProvider',
+            '--provider' => 'Catchyui\Catchy\CatchyServiceProvider',
             '--tag' => 'catchy-assets',
             '--force' => true,
         ]);
@@ -56,7 +56,7 @@ class InstallCommand extends Command
         if ($this->confirm('Do you want to publish the Blade views to customize script templates?', false)) {
             $this->comment('Publishing Blade views...');
             $this->call('vendor:publish', [
-                '--provider' => 'Hamzi\Catchy\CatchyServiceProvider',
+                '--provider' => 'Catchyui\Catchy\CatchyServiceProvider',
                 '--tag' => 'catchy-views',
             ]);
         }
@@ -69,7 +69,7 @@ class InstallCommand extends Command
             $this->generateLayout();
         }
 
-        $this->info("\n Hamzi/Catchy has been installed successfully!");
+        $this->info("\n CatchyUI/Catchy has been installed successfully!");
         $this->info('Middleware and script auto-injection are now active. Standard HTML page visits will automatically run as SPA requests.');
 
         $this->comment("\nStandalone Mode vs Vite/NPM Mode:");

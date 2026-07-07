@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Infrastructure\Repositories;
+namespace Catchyui\Catchy\Infrastructure\Repositories;
 
-use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
+use Catchyui\Catchy\Domain\Contracts\VersionRepositoryInterface;
 
 /**
  * Class AssetVersionRepository

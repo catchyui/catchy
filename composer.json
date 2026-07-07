@@ -1,12 +1,12 @@
 {
- "name": "hamzi/catchy",
+ "name": "catchyui/catchy",
  "description": "Convert standard Laravel applications into SPAs using Alpine.js and HTML-over-the-wire.",
  "license": "MIT",
  "type": "library",
  "authors": [
  {
- "name": "Hamzi",
- "email": "hamdyelbatal@hamzi.dev"
+ "name": "CatchyUI",
+ "email": "hamdyelbatal@catchyui.dev"
  }
  ],
  "keywords": [
@@ -26,12 +26,12 @@
  },
  "autoload": {
  "psr-4": {
- "Hamzi\\Catchy\\": "src/"
+ "Catchyui\\Catchy\\": "src/"
  }
  },
  "autoload-dev": {
  "psr-4": {
- "Hamzi\\Catchy\\Tests\\": "tests/"
+ "Catchyui\\Catchy\\Tests\\": "tests/"
  }
  },
  "require-dev": {
@@ -47,7 +47,7 @@
  "extra": {
  "laravel": {
  "providers": [
- "Hamzi\\Catchy\\CatchyServiceProvider"
+ "Catchyui\\Catchy\\CatchyServiceProvider"
  ]
  }
  },

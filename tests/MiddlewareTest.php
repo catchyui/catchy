@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Tests;
+namespace Catchyui\Catchy\Tests;
 
-use Hamzi\Catchy\Http\Middleware\CatchyMiddleware;
+use Catchyui\Catchy\Http\Middleware\CatchyMiddleware;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Domain\ValueObjects;
+namespace Catchyui\Catchy\Domain\ValueObjects;
 
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

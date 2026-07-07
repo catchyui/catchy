@@ -1,9 +1,9 @@
 <?php
 
-use Hamzi\Catchy\Http\Middleware\Pipeline\AppendResponseHeaders;
-use Hamzi\Catchy\Http\Middleware\Pipeline\ExtractResponseContainer;
-use Hamzi\Catchy\Http\Middleware\Pipeline\HandleRedirectResponse;
-use Hamzi\Catchy\Http\Middleware\Pipeline\VerifyAssetVersion;
+use Catchyui\Catchy\Http\Middleware\Pipeline\AppendResponseHeaders;
+use Catchyui\Catchy\Http\Middleware\Pipeline\ExtractResponseContainer;
+use Catchyui\Catchy\Http\Middleware\Pipeline\HandleRedirectResponse;
+use Catchyui\Catchy\Http\Middleware\Pipeline\VerifyAssetVersion;
 
 return [
 

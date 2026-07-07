@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Tests\Browser;
+namespace Catchyui\Catchy\Tests\Browser;
 
 use Laravel\Dusk\Browser;
 

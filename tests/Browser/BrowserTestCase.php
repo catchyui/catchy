@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Tests\Browser;
+namespace Catchyui\Catchy\Tests\Browser;
 
+use Catchyui\Catchy\CatchyServiceProvider;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Hamzi\Catchy\CatchyServiceProvider;
 use Orchestra\Testbench\Dusk\TestCase as OrchestraDuskTestCase;
 
 abstract class BrowserTestCase extends OrchestraDuskTestCase

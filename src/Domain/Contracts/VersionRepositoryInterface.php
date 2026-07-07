@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Domain\Contracts;
+namespace Catchyui\Catchy\Domain\Contracts;
 
 /**
  * Interface VersionRepositoryInterface

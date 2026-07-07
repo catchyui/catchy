@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Tests;
+namespace Catchyui\Catchy\Tests;
 
-use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
-use Hamzi\Catchy\Support\FlashExtractor;
+use Catchyui\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
+use Catchyui\Catchy\Support\FlashExtractor;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
 use Illuminate\Support\MessageBag;

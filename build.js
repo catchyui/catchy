@@ -18,7 +18,7 @@ async function build() {
  minify: isMinify,
  sourcemap: false,
  banner: {
- js: `/**\n * Hamzi/Catchy - Alpine.js SPA Plugin v${require('./package.json').version}\n * (c) ${new Date().getFullYear()} Hamzi\n * Released under the MIT License.\n */`
+ js: `/**\n * CatchyUI/Catchy - Alpine.js SPA Plugin v${require('./package.json').version}\n * (c) ${new Date().getFullYear()} CatchyUI\n * Released under the MIT License.\n */`
  },
  });
 

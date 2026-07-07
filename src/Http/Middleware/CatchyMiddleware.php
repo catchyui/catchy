@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Http\Middleware;
+namespace Catchyui\Catchy\Http\Middleware;
 
+use Catchyui\Catchy\CatchyServiceProvider;
+use Catchyui\Catchy\Domain\ValueObjects\CatchyPipelineData;
 use Closure;
-use Hamzi\Catchy\CatchyServiceProvider;
-use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Support;
+namespace Catchyui\Catchy\Support;
 
 use Illuminate\Http\Request;
 

@@ -1,10 +1,10 @@
 {
- "name": "hamzi-catchy",
+ "name": "catchyui-catchy",
  "version": "1.5.4",
  "description": "Alpine.js SPA plugin for the Laravel Catchy package.",
  "main": "resources/js/catchy.js",
  "module": "resources/js/catchy-modular.js",
- "author": "Hamzi",
+ "author": "CatchyUI",
  "license": "MIT",
  "scripts": {
  "build": "node build.js",

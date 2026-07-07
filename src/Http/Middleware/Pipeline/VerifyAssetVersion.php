@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Http\Middleware\Pipeline;
+namespace Catchyui\Catchy\Http\Middleware\Pipeline;
 
+use Catchyui\Catchy\Domain\Contracts\PipelineStageInterface;
+use Catchyui\Catchy\Domain\Contracts\VersionRepositoryInterface;
+use Catchyui\Catchy\Domain\ValueObjects\CatchyPipelineData;
 use Closure;
-use Hamzi\Catchy\Domain\Contracts\PipelineStageInterface;
-use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
-use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
 
 /**
  * Class VerifyAssetVersion

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Tests;
+namespace Catchyui\Catchy\Tests;
 
-use Hamzi\Catchy\CatchyServiceProvider;
-use Hamzi\Catchy\Console\InstallCommand;
-use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
-use Hamzi\Catchy\Domain\Contracts\VersionRepositoryInterface;
-use Hamzi\Catchy\Http\Middleware\CatchyMiddleware;
-use Hamzi\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
-use Hamzi\Catchy\Infrastructure\Repositories\AssetVersionRepository;
+use Catchyui\Catchy\CatchyServiceProvider;
+use Catchyui\Catchy\Console\InstallCommand;
+use Catchyui\Catchy\Domain\Contracts\ResponseExtractorInterface;
+use Catchyui\Catchy\Domain\Contracts\VersionRepositoryInterface;
+use Catchyui\Catchy\Http\Middleware\CatchyMiddleware;
+use Catchyui\Catchy\Infrastructure\Extractors\HtmlResponseExtractor;
+use Catchyui\Catchy\Infrastructure\Repositories\AssetVersionRepository;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
@@ -99,7 +99,7 @@ class ServiceProviderTest extends TestCase
 
         // Verify that the rendered HTML contains config settings, and inline plugin code
         $this->assertStringContainsString('window.CatchyConfig =', $html);
-        $this->assertStringContainsString('Hamzi/Catchy - Alpine.js SPA Plugin', $html);
+        $this->assertStringContainsString('CatchyUI/Catchy - Alpine.js SPA Plugin', $html);
         $this->assertStringContainsString('CatchyPlugin', $html);
         $this->assertStringContainsString('window.history.pushState', $html);
     }

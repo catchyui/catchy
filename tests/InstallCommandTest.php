@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Tests;
+namespace Catchyui\Catchy\Tests;
 
 use Illuminate\Support\Facades\File;
 

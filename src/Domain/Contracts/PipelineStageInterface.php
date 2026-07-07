@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Domain\Contracts;
+namespace Catchyui\Catchy\Domain\Contracts;
 
+use Catchyui\Catchy\Domain\ValueObjects\CatchyPipelineData;
 use Closure;
-use Hamzi\Catchy\Domain\ValueObjects\CatchyPipelineData;
 
 /**
  * Interface PipelineStageInterface

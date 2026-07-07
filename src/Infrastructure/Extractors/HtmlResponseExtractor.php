@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Infrastructure\Extractors;
+namespace Catchyui\Catchy\Infrastructure\Extractors;
 
+use Catchyui\Catchy\Domain\Contracts\ResponseExtractorInterface;
 use DOMDocument;
 use DOMXPath;
-use Hamzi\Catchy\Domain\Contracts\ResponseExtractorInterface;
 
 /**
  * Class HtmlResponseExtractor

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Hamzi\Catchy\Tests;
+namespace Catchyui\Catchy\Tests;
 
-use Hamzi\Catchy\CatchyServiceProvider;
+use Catchyui\Catchy\CatchyServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;

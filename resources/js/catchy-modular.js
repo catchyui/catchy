@@ -1,5 +1,5 @@
 /**
- * Hamzi/Catchy - Alpine.js SPA Plugin
+ * CatchyUI/Catchy - Alpine.js SPA Plugin
  *
  * HTML-over-the-wire navigation utilizing @alpinejs/morph,
  * built-in viewport loaders, intelligent prefetching, and asset version protection.
